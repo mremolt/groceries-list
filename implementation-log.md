@@ -9,8 +9,8 @@
 |---|---|---|---|
 | M0 design (documents only) | done | f9e82bc | |
 | M0 Project setup | done | b0ecad1 | m0-done |
-| M1 Accounts and app shell | done | (see git log) | m1-done |
-| M2 Lists | not started | | |
+| M1 Accounts and app shell | done | 16e1331 | m1-done |
+| M2 Lists | in progress | | |
 | M3 Items | not started | | |
 | M4 Sharing and joining | not started | | |
 | M5 Synchronisation | not started | | |
@@ -18,7 +18,7 @@
 | M7 Internal test readiness | not started | | |
 
 - **Next action:** M2 Lists (BR-01–05, BR-10–12 lists, FR-LIST-01–05, FR-NAV-02/03/05/06, FR-FB-01 AC1, FR-FB-03). Plan: backend fork (lists/memberships use cases, jpa, REST v1, tests incl. cross-user) and frontend fork (lists feature, drawer entries, dialogs, ⋮ menu, deep links, start screen) in parallel against a contract fixed up front, then extend the real-backend E2E tier, verify both gates, commit `M2 done`, tag.
-- **Work in flight:** none (M1 committed).
+- **Work in flight:** M2 backend and frontend forks running (uncommitted files under backend/, frontend/, docs/; scratch .m2-*-feedback.txt to merge with `merge_fb.py`-style step into baseline-feedback.md and delete).
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
 ## Durations (implementation time per step)
