@@ -1,38 +1,35 @@
-# Personal-data inventory and record of processing: <product>
+# Personal-data inventory and record of processing: Groceries list
 
-Input for the controller's record of processing activities (Art. 30 GDPR). Kept current by the product team in the same pull request as the change (DP-INV-01, DP-INV-03); adopted into the organisation's record by the DPO. Write `TBD (DPO)` where a legal decision is missing; never guess.
-
-Rules: [data-protection.md](../baseline/08-crosscutting-concepts/data-protection/data-protection.md)
+Rules: [data-protection.md](../baseline/08-crosscutting-concepts/data-protection/data-protection.md). Public-release GDPR measures (NFR-PRIV) are deferred ([05 §5](../../requirements/05-implementation-plan.md)); this inventory is still kept current (DP-INV-03).
 
 | | |
 |---|---|
-| Controller | `<organisation, address>` |
-| Our role | `<controller / processor for <customer>>` |
-| DPO contact | `<name or function, e-mail>` |
+| Controller | TBD (DPO) |
+| Our role | controller (TBD, DPO) |
+| DPO contact | TBD (DPO) |
 | Security measures (Art. 32) | [docs/security/requirements.md](../security/requirements.md) |
-| Last reviewed | `<YYYY-MM-DD>` by `<name>` |
+| Last reviewed | 2026-11-23 by implementing agent (internal test release, fictitious data only, DP-ENV-01) |
 
 ## Processing activities
 
-One section per purpose.
-
-### <Activity, e.g. "Customer account management">
+### Account and list management
 
 | Field | Value |
 |---|---|
-| Purpose | `<why the data is processed>` |
-| Legal basis (Art. 6, Art. 9 if special categories) | `TBD (DPO)` |
-| Categories of data subjects | `<customers, employees, …>` |
-| Categories of personal data | `<name, e-mail, …>`; special categories (Art. 9): `<none / which>` |
-| Fields and where they are stored | `<table.column, topic, bucket, index, cache>` (DP-MIN-01) |
-| Recipients (internal and external) | `<roles, systems, processors>` |
-| Transfers outside the EU/EEA | `<none / country, basis>` (DP-PROC-02) |
-| Retention | see [deletion-concept.md](deletion-concept.md), category `<…>` |
-| Data subject rights covered by | `<use cases, e.g. ExportPersonalData, ErasePersonalData>` (DP-DSR-01) |
-| DPIA needed? | `<no / yes, link>` (DP-INV-03) |
+| Purpose | Provide shared grocery lists to registered users |
+| Legal basis | TBD (DPO) (contract performance, Art. 6(1)(b), proposed) |
+| Data subjects | users (testers) |
+| Personal data | e-mail address, display name, IdP subject id, created/last-login timestamps; list names, item texts and memberships (free text typed by users) |
+| Fields and where stored | PostgreSQL `users(id, idp_subject, email, display_name, created_at, last_login_at)`, `memberships(user_id, list_id, joined_at)`, `lists(created_by, name)`, `items(text)`; Keycloak: credentials, e-mail, name, sessions; Spring Session tables: session attributes incl. tokens; Mailpit/mail server: reset mails (e-mail address) |
+| Recipients | operator; Keycloak (processor-internal component); mail server for reset mails |
+| Transfers outside EU/EEA | none planned (local installation) |
+| Retention | [deletion-concept.md](deletion-concept.md) |
+| Data subject rights covered by | `DeleteAccount` use case (M6); copy of data handled manually by support (N3, deferred) |
+| DPIA needed? | no (small, low-risk lists); TBD (DPO) |
 
 ## Processors and external services (DP-PROC-01)
 
-| Service | Data sent | Purpose | DPA (AVV) status | Location of processing | Transfer basis | Fallback if dropped |
+| Service | Data sent | Purpose | DPA status | Location | Transfer basis | Fallback |
 |---|---|---|---|---|---|---|
-| `<hosting provider>` | `<…>` | `<…>` | `<signed YYYY-MM-DD / pending>` | `<EU / country>` | `<n/a / adequacy / SCC>` | `<…>` |
+| Keycloak (self-hosted) | e-mail, name, credentials | authentication | n/a (self-hosted) | same host | n/a | none |
+| SMTP server (Mailpit locally; operator's provider later) | recipient e-mail, reset link | password reset mail | TBD (DPO) before public release | local | n/a | none |

@@ -11,9 +11,9 @@
 
 | Question | Answer | Decided by, date |
 |---|---|---|
-| Accessibility law applies | <yes: EAA/BFSG / yes: BITV 2.0 / no, because …> | <legal contact, YYYY-MM-DD> |
-| Accessibility statement | <URL or "not required"> | |
-| Feedback channel and response time | <address, e.g. 14 days> | |
+| Accessibility law applies | TBD (legal); the product targets WCAG 2.2 AA regardless (A11Y-01). Internal test release, no public access | open |
+| Accessibility statement | not yet; required decision before the public release | |
+| Feedback channel and response time | tester guide (M7) names the channel; response time TBD | |
 
 ## Conformance notes (A11Y-02, A11Y-04)
 
@@ -31,7 +31,7 @@
 |---|---|---|---|
 | NVDA (current) | Chrome (current) | Windows | baseline default |
 
-Mobile assistive technology and real devices: <tested how / not tested, because …>
+Mobile assistive technology and real devices: not tested by the unattended run; listed as manual checks in the implementation log (NFR-A11Y-10 is Should).
 
 ## Journey and screen inventory (A11Y-27)
 
@@ -39,7 +39,11 @@ Mobile assistive technology and real devices: <tested how / not tested, because 
 
 | Journey | Routes | States (dialog open, error, empty, loading, …) | E2E spec tag | Owner |
 |---|---|---|---|---|
-| | | | | |
+| Auth pages (Keycloak) | `/realms/groceries/...` | error, reset sent, expired | `@a11y-auth` | team |
+| App shell and lists | `/`, `/listen/:id` | empty, loading, drawer open, menu open, dialogs | `@a11y-lists` | team |
+| Items | `/listen/:id` | empty, all checked, edit dialog, error snackbar | `@a11y-items` | team |
+| Sharing | `/j/:token`, share dialog | invitation, invalid link | `@a11y-share` | team |
+| Settings | `/einstellungen` | delete-account dialog | `@a11y-settings` | team |
 
 ## Release checklist results (A11Y-24, L6)
 

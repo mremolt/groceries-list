@@ -1,53 +1,72 @@
 # Threat Model
 
-<!-- SEC-TM-01: system-level threat model. Reviewed at least yearly and on every architecture change (DOC-ARC-06).
-     Feature-level threat models go into the pull request (SEC-TM-02).
-     Baseline rules: ../baseline/08-crosscutting-concepts/security/security-requirements.md -->
-
-- **Last review:** <YYYY-MM-DD>, <who>
-- **Next review due:** <YYYY-MM-DD> <!-- checked by the security date check (SEC-CI-08); keep the format -->
+- **Last review:** 2026-11-23, implementing agent (initial)
+- **Next review due:** 2027-02-23
 
 ## 1. What are we working on?
-
-<!-- Data-flow diagram with trust boundaries. Use the containers of docs/architecture/05-building-block-view.md. -->
 
 ```mermaid
 flowchart LR
   subgraph internet[Internet]
     user[Browser]
+    mailc[Share-link recipient]
   end
-  subgraph dmz[Trust boundary: edge]
-    bff[BFF / backend]
+  subgraph edge[Trust boundary: edge]
+    app[Backend + BFF + SPA bundle]
   end
   subgraph internal[Trust boundary: internal network]
-    db[(Database)]
-    idp[Identity provider]
+    db[(PostgreSQL)]
+    kc[Keycloak]
   end
-  user -- HTTPS, session cookie --> bff
-  bff -- SQL --> db
-  bff -- OIDC --> idp
+  user -- HTTPS, session cookie, XSRF header --> app
+  mailc -- share link --> app
+  app -- JDBC --> db
+  app -- OIDC code+PKCE, admin API --> kc
+  user -- HTTPS login pages --> kc
 ```
 
-| Trust boundary | Crossed by | Authentication | Data classes (see requirements.md) |
+| Trust boundary | Crossed by | Authentication | Data classes |
 |---|---|---|---|
-| <Internet → edge> | <HTTPS> | <OIDC session> | <personal, confidential> |
+| Internet → edge | HTTPS | OIDC-based session cookie; share-link lookup unauthenticated | personal, confidential |
+| Edge → database | JDBC, DML role | credentials from mounted files | personal, confidential |
+| Edge → Keycloak | OIDC, admin REST | confidential client (`client_secret` from file) / service account | personal |
+
+Entry points: `/api/v1/**`, `/oauth2/**`, `/login/oauth2/code/**`, `/logout`, back-channel logout endpoint, `/livez`/`/readyz`, static bundle, Keycloak pages.
 
 ## 2. What can go wrong?
 
-<!-- One row per threat. STRIDE or the Top 10:2025 categories help to find them. -->
-
-| # | Threat | Element / boundary | Top 10:2025 | Likelihood | Impact |
+| # | Threat | Element | Top 10:2025 | L | I |
 |---|---|---|---|---|---|
-| T1 | <A user reads another user's orders by changing the id> | <REST API> | A01 | <low/med/high> | <low/med/high> |
+| T1 | A user reads/changes another list by guessing ids | REST API | A01 | med | high |
+| T2 | Guessing or leaking a share token grants membership | `/j/{token}`, logs, Referer | A01, A02 | low | high |
+| T3 | Brute force or enumeration of accounts | Keycloak login/reset/register | A07 | high | med |
+| T4 | CSRF on state-changing requests | BFF | A01 | med | med |
+| T5 | Stored XSS through list/item/display names | SPA | A05 | med | high |
+| T6 | Session theft or fixation | session cookie | A07 | low | high |
+| T7 | Join-link brute force / abuse | `POST /v1/memberships/join`, `/invitations/lookup` | A06 | med | med |
+| T8 | Resource exhaustion (huge lists, many lists, polling storm) | API | A06 | med | med |
+| T9 | Account deletion leaves data or lets someone else delete | delete flow | A01 | low | high |
+| T10 | Secrets or tokens in logs | all | A09 | med | high |
+| T11 | Open redirect after login | BFF success handler | A01 | low | med |
 
 ## 3. What will we do about it?
 
-| Threat | Mitigation | Rule IDs / ASVS | Test (SEC-TM-03) | Status |
+| Threat | Mitigation | Rule IDs / ASVS | Test | Status |
 |---|---|---|---|---|
-| T1 | <Owner check on the `Caller` in the use case> | <SPRING-SEC-16, ASVS V8> | <cross-user test in …> | <done / issue #> |
+| T1 | Membership check in every use case, 404 for non-members | SPRING-SEC-16/36, ASVS V8 | cross-user tests per use case (tag `cross-user`) | per milestone |
+| T2 | 256-bit CSPRNG token, uniform 404, rate limit, `Referrer-Policy: no-referrer`, masked paths | SEC-CRY-05, NFR-SEC-05/09, ADR 0008 | token entropy/shape test, log assertion | M4 |
+| T3 | Keycloak brute-force detection, generic errors | SPRING-SEC-21, ASVS V6/V7 | real-backend E2E against Keycloak | M1 |
+| T4 | `csrf.spa()`, `X-XSRF-TOKEN`, `SameSite=Lax` | SPRING-SEC-24/25, ASVS V3 | web slice tests 403 without CSRF | M1 |
+| T5 | Angular interpolation only, no `innerHTML`, strict nonce CSP | NG-SEC-01..06, NFR-SEC-07 | component test with `<script>` text, CSP E2E | M3 |
+| T6 | HttpOnly Secure cookie, session rotation on login, lifetimes ([ADR 0002](../adr/0002-bff-in-backend-and-keycloak-idp.md)) | SPRING-SEC-24/32/37 | session fixation test | M1 |
+| T7 | Bucket4j per user and IP | SPRING-SEC-21 | 429 test | M4 |
+| T8 | limits BR-12, bounded queries, 304 polling | API-N1-07, SPRING-SEC-15 | limit tests | M2/M3/M5 |
+| T9 | Re-authentication at IdP, single transaction, session invalidation | ADR 0003, DP-DSR-01 | integration test | M6 |
+| T10 | No bodies logged; secret type; log tests | SPRING-LOG-08, SPRING-CFG-11, SPRING-DP-07 | log capture tests | M1/M4 |
+| T11 | Redirect targets allow-listed to internal paths | TS-SEC-03 | unit test | M4 |
 
-Accepted risks go to [exceptions.md](exceptions.md) (SEC-VUL-03).
+Accepted risks: [exceptions.md](exceptions.md). OQ-1 (no e-mail verification) is accepted in the requirements.
 
 ## 4. Did we do a good job?
 
-<!-- What the last review found, what changed since, open questions. -->
+Initial model before code; to be updated at every milestone that adds an entry point.
