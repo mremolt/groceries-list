@@ -31,6 +31,8 @@ flowchart LR
 | Edge → database | JDBC, DML role | credentials from mounted files | personal, confidential |
 | Edge → Keycloak | OIDC, admin REST | confidential client (`client_secret` from file) / service account | personal |
 
+Public entry points of the API (SEC-TM-02, M4): exactly two, `POST /api/v1/invitations/lookup` (answers the list name for a valid token) and `POST /api/v1/invitations` (remembers a valid token in a session). Both take the token in the body, are rate limited per address, keep CSRF protection on, answer a wrong, renewed or malformed token with the same `404 SHARE_LINK_INVALID`, and reveal nothing but the list name. A third, `POST /api/v1/memberships/join`, needs a login. All other API paths need a session.
+
 Entry points: `/api/v1/**`, `/oauth2/**`, `/login/oauth2/code/**`, `/logout`, back-channel logout endpoint, `/livez`/`/readyz`, static bundle, Keycloak pages.
 
 ## 2. What can go wrong?
@@ -59,14 +61,26 @@ Entry points: `/api/v1/**`, `/oauth2/**`, `/login/oauth2/code/**`, `/logout`, ba
 | T4 | `csrf.spa()`, `X-XSRF-TOKEN`, `SameSite=Lax` | SPRING-SEC-24/25, ASVS V3 | web slice tests 403 without CSRF | M1 |
 | T5 | Angular interpolation only, no `innerHTML`, strict nonce CSP | NG-SEC-01..06, NFR-SEC-07 | component test with `<script>` text, CSP E2E | M3 |
 | T6 | HttpOnly SameSite=Lax cookie (`Secure`/`__Host-` outside the local installation), session rotation on login, lifetimes ([ADR 0002](../adr/0002-bff-in-backend-and-keycloak-idp.md)); anonymous API calls create no session | SPRING-SEC-24/32/37 | real tier: pre-login session id rejected after login, cookie flags and 30-day lifetime, other sessions ended after a password reset; backend test: anonymous call creates no session | done in M1 |
-| T7 | Bucket4j per user and IP | SPRING-SEC-21 | 429 test | M4 |
-| T8 | limits BR-12, bounded queries, 304 polling; no server session for anonymous API calls | API-N1-07, SPRING-SEC-15 | limit tests (M2/M3/M5); `MeControllerTest.anAnonymousCallCreatesNoServerSideSession`; `ListRulesConcurrencyIT` (100-list limit under concurrency), `ListSummaryJdbcAdapterIT` (`LIMIT 100`, one statement) | lists done (M2), items done (M3: `ItemRulesConcurrencyIT` 500-item limit under concurrency, `ItemPersistenceAdapterIT` `LIMIT 500`, text limits in `ItemTextTest`, ≤500 ids in `clear-checked`), polling M5 |
+| T7 | Bucket4j: invitation calls per address, join per address and per person | SPRING-SEC-21 | `SharingRateLimitTest` (429, Retry-After, other address/person unaffected) | M4 |
+| T8 | limits BR-12, bounded queries, 304 polling; no server session for anonymous API calls, **one deliberate exception (M4):** `POST /v1/invitations` opens a visitor session, but only for a valid token, at most 30 per minute and address, for 2 hours, purged by the Spring Session cleanup | API-N1-07, SPRING-SEC-15 | limit tests (M2/M3/M5); `MeControllerTest.anAnonymousCallCreatesNoServerSideSession`; `ListRulesConcurrencyIT` (100-list limit under concurrency), `ListSummaryJdbcAdapterIT` (`LIMIT 100`, one statement) | lists done (M2), items done (M3: `ItemRulesConcurrencyIT` 500-item limit under concurrency, `ItemPersistenceAdapterIT` `LIMIT 500`, text limits in `ItemTextTest`, ≤500 ids in `clear-checked`), polling M5 |
 | T9 | Re-authentication at IdP, single transaction, session invalidation | ADR 0003, DP-DSR-01 | integration test | M6 |
 | T10 | No bodies logged; secret type; log tests | SPRING-LOG-08, SPRING-CFG-11, SPRING-DP-07 | log capture tests | M1/M4 |
-| T11 | Redirect targets allow-listed to internal paths | TS-SEC-03 | unit test | M4 |
+| T11 | Redirect targets allow-listed to internal paths; after a login that started at an invitation the redirect is the constant `/j/consume` (no token in any URL) | TS-SEC-03 | `InternalPaths` unit test, `BffLoginFlowTest` | M4 |
 
 Accepted risks: [exceptions.md](exceptions.md). OQ-1 (no e-mail verification) is accepted in the requirements.
 
 ## 4. Did we do a good job?
 
 Initial model before code; to be updated at every milestone that adds an entry point.
+
+## 5. Sharing and joining (M4)
+
+| Risk | Decision | Evidence |
+|---|---|---|
+| Token guessing (T2) | 256 bits from `SecureRandom`; format check in the domain turns any malformed value into the uniform 404 instead of a 400; the database refuses a malformed value (`lists_share_token_format`) and a duplicate (`lists_share_token_key`) | `ShareTokenTest`, `ShareLinkJdbcAdapterIT`, `SharingApiIT.everyWrongTokenGetsTheSameAnswerWhateverItLooksLike` |
+| Token in logs, audit events, errors (T10) | `ShareToken.toString()` is redacted; the token travels only in request bodies and in the link the member copies; audit events carry only the pseudonymous user id (`list.joined`, `share-link.renewed`, `share-link.refused`); the log capture of two whole flows contains no token | `SharingApiIT` (`CapturedOutput`), `ShareTokenTest` |
+| Old link still works after renewal (BR-06) | renewal and join take the same list row lock; the join looks the list up by token under that lock, so a join racing a renewal either happened first or finds nothing | `ShareRulesConcurrencyIT`, `SharingApiIT.joiningWorksOnceAndARenewalKillsTheOldLinkForEverybodyAtOnce` |
+| Member limit raced (BR-12) | lock the list row before counting; two people taking the 50th place at once: exactly one gets in | `ShareRulesConcurrencyIT` (mutation-checked: without the list-row lock it fails) |
+| Anonymous session creation (T8) | only for a valid token, 30 per minute and address, 2 hours, restored to the normal idle time at login | `InvitationControllerTest.aWrongTokenCreatesNoSession`, `SharingRateLimitTest` |
+| Token stored as shown, not hashed | the link must be reproducible for every member; a database read gives the same power as the lists themselves for the people holding it. Accepted; the token is not in any read model, log or export | ADR 0008 |
+

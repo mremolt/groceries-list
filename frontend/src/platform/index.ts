@@ -7,7 +7,7 @@ export { RouteFocus } from './adapter/in/ui/route-focus';
 export { PlatformTranslationLoader } from './adapter/in/ui/translation-loader';
 export { NoopErrorReporting } from './adapter/out/error-reporting/noop-error-reporting';
 export { RuntimeConfigHolder } from './adapter/out/http/runtime-config-loader';
-export { unauthenticatedInterceptor } from './adapter/out/http/unauthenticated-interceptor';
+export { ANONYMOUS_ALLOWED, unauthenticatedInterceptor } from './adapter/out/http/unauthenticated-interceptor';
 export { untilAborted } from './adapter/out/http/until-aborted';
 export { ReportErrorService } from './application/report-error-service';
 export { CLOCK, LOGIN_PATH, PAGE_NAVIGATION, REPORT_ERROR, RUNTIME_CONFIG } from './platform.tokens';

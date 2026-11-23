@@ -3,8 +3,10 @@ import { mock } from 'vitest-mock-extended';
 
 import type { CurrentUser } from '../domain/current-user';
 import { NotAuthenticatedError } from '../domain/session-errors';
+import type { CheckSignedInPort } from '../ports/out/check-signed-in-port';
 import type { LoadCurrentUserPort } from '../ports/out/load-current-user-port';
 import type { LogoutPort } from '../ports/out/logout-port';
+import { CheckSignedInService } from './check-signed-in-service';
 import { LoadCurrentUserService } from './load-current-user-service';
 import { LogoutService } from './logout-service';
 
@@ -34,5 +36,15 @@ describe('LogoutService', () => {
 
     expect(await new LogoutService(port).execute()).toContain('/protocol/openid-connect/logout');
     expect(port.logout.mock.calls).toHaveLength(1);
+  });
+});
+
+describe('CheckSignedInService', () => {
+  it('answers what the port says, passing the abort signal on', async () => {
+    const port = mock<CheckSignedInPort>();
+    const signal = new AbortController().signal;
+    port.isSignedIn.calledWith(signal).mockResolvedValue(false);
+
+    expect(await new CheckSignedInService(port).execute(signal)).toBe(false);
   });
 });

@@ -14,4 +14,6 @@ public interface MembershipPort {
     void remove(UUID listId, UUID userId);
 
     int countMembers(UUID listId);
+
+    boolean isMember(UUID listId, UUID userId);
 }

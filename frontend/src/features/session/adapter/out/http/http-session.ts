@@ -1,9 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable, type Provider } from '@angular/core';
-import { REPORT_ERROR, untilAborted } from '@platform';
+import { ANONYMOUS_ALLOWED, REPORT_ERROR, untilAborted } from '@platform';
 import { TechnicalError } from '@platform/domain';
 
 import type { CurrentUser } from '../../../domain/current-user';
+import { NotAuthenticatedError } from '../../../domain/session-errors';
+import type { CheckSignedInPort } from '../../../ports/out/check-signed-in-port';
 import type { LoadCurrentUserPort } from '../../../ports/out/load-current-user-port';
 import type { LogoutPort } from '../../../ports/out/logout-port';
 import { MeControllerService } from './generated/endpoints/me-controller/me-controller.service';
@@ -16,7 +18,7 @@ import { LogoutResponse, toCurrentUser, toSessionError } from './session-mapper'
  * `HttpClient` call here (the XSRF header comes from the platform HTTP stack, TS-SEC-10).
  */
 @Injectable()
-export class HttpSession implements LoadCurrentUserPort, LogoutPort {
+export class HttpSession implements LoadCurrentUserPort, LogoutPort, CheckSignedInPort {
   private readonly api = inject(MeControllerService);
   private readonly http = inject(HttpClient);
   private readonly reportError = inject(REPORT_ERROR);
@@ -33,6 +35,18 @@ export class HttpSession implements LoadCurrentUserPort, LogoutPort {
       throw this.reported(new TechnicalError('session API answered a malformed profile', { cause: parsed.error }));
     }
     return toCurrentUser(parsed.data);
+  }
+
+  /** `GET /api/v1/me` as a probe: a 401 means "no" here and must not send the page to the login (FR-AUTH-06). */
+  async isSignedIn(signal?: AbortSignal): Promise<boolean> {
+    try {
+      await untilAborted(this.api.getCurrentUser({ context: new HttpContext().set(ANONYMOUS_ALLOWED, true) }), signal);
+      return true;
+    } catch (error) {
+      const mapped = toSessionError(error);
+      if (mapped instanceof NotAuthenticatedError) return false;
+      throw this.reported(mapped);
+    }
   }
 
   async logout(): Promise<string> {

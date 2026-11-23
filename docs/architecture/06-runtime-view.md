@@ -33,8 +33,12 @@ sequenceDiagram
   B->>S: login (6.1)
   S-->>B: 302 /j/consume
   B->>S: POST /v1/memberships/join {} (token from session)
-  S-->>B: {listId}
+  S-->>B: {listId, listName, alreadyMember}
 ```
+
+Built in M4 (frontend): `/j/consume` comes first in `shell.routes.ts` and has the `authenticatedGuard`; `/j/:token` has none, because a visitor must see the invitation. `JoinStore.start` asks `CheckSignedIn` first (the 401 of the probe does not redirect, `ANONYMOUS_ALLOWED`): with a session it joins at once with the token in the request body and opens the list with `replaceUrl`, so the token leaves the address bar and the history; without one it looks the list name up and shows the invitation. „Konto erstellen und beitreten“ and „Anmelden“ first call `POST /v1/invitations`, then navigate the whole page to the login (`?prompt=create` for the sign-up). Invalid, limit and failure answers are pages of the same route; except a retryable failure, they take the secret off the address bar with `Location.replaceState('/')`. The token lives in the store's memory only, never in browser storage or a link. A snackbar behind a modal dialog is hidden from screen readers, so the share dialog repeats „Link kopiert“ and the renewal message in its own `role="status"` line.
+
+Built in M4 (backend). `POST /v1/invitations` validates the token first (a wrong one answers the uniform `404 SHARE_LINK_INVALID` and opens **no** session), then keeps the token in a server-side session that lives 2 hours until the login has finished; the login success handler restores the normal idle time and redirects to `/j/consume` when a token is pending. The sign-up variant is `GET /oauth2/authorization/keycloak?prompt=create`. `JoinList` locks the list row (found by token) before it counts the members (50), then the user's row before it counts their lists (100); `RenewShareLink` locks the same list row, so a join that read the old token waits and then finds nothing. A member opening the link again gets `alreadyMember: true` without any limit check. The remembered token is used once whatever the outcome.
 
 ## 6.3 Polling
 

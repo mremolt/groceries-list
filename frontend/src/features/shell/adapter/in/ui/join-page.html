@@ -1,0 +1,79 @@
+<main class="join">
+  <div class="brand">
+    <span class="logo"><app-icon name="cart" /></span>
+    <span class="brand-name">{{ 'platform.appName' | transloco }}</span>
+  </div>
+  <h1 class="title" [class.visually-hidden]="store.phase() !== 'invitation'">{{ 'shell.join.heading' | transloco }}</h1>
+
+  @switch (store.phase()) {
+    @case ('invitation') {
+      <p class="banner">
+        <app-icon name="link" />
+        <span>{{ 'shell.join.banner' | transloco: { name: store.listName() } }}</span>
+      </p>
+      <button matButton="filled" class="primary" type="button" [disabled]="store.remembering()" (click)="signUp()">
+        {{ 'shell.join.signUp' | transloco }}
+      </button>
+      <div class="existing">
+        <span>{{ 'shell.join.hasAccount' | transloco }}</span>
+        <button matButton type="button" [disabled]="store.remembering()" (click)="signIn()">
+          {{ 'shell.join.signIn' | transloco }}
+        </button>
+      </div>
+    }
+    @case ('invalid') {
+      <app-empty-state
+        icon="link"
+        [heading]="'shell.join.invalid.title' | transloco"
+        [text]="'shell.join.invalid.text' | transloco"
+      >
+        @if (store.signedIn()) {
+          <a matButton="filled" empty-action routerLink="/">{{ 'shell.join.invalid.toLists' | transloco }}</a>
+        } @else {
+          <button matButton="filled" empty-action type="button" (click)="login()">
+            {{ 'shell.join.signIn' | transloco }}
+          </button>
+        }
+      </app-empty-state>
+    }
+    @case ('memberLimit') {
+      <app-empty-state
+        icon="error"
+        [heading]="'shell.join.memberLimit.title' | transloco"
+        [text]="'shell.join.memberLimit.text' | transloco"
+      >
+        <a matButton="filled" empty-action routerLink="/">{{ 'shell.join.invalid.toLists' | transloco }}</a>
+      </app-empty-state>
+    }
+    @case ('listLimit') {
+      <app-empty-state
+        icon="error"
+        [heading]="'shell.join.listLimit.title' | transloco"
+        [text]="'shell.join.listLimit.text' | transloco"
+      >
+        <a matButton="filled" empty-action routerLink="/">{{ 'shell.join.invalid.toLists' | transloco }}</a>
+      </app-empty-state>
+    }
+    @case ('failed') {
+      <app-empty-state
+        icon="error"
+        [heading]="'shell.join.failed.title' | transloco"
+        [text]="'platform.error.generic' | transloco"
+      >
+        <button matButton="filled" empty-action type="button" (click)="retry()">
+          {{ 'shell.join.failed.retry' | transloco }}
+        </button>
+      </app-empty-state>
+    }
+    @case ('joining') {
+      <app-loading-indicator [label]="'shell.join.joining' | transloco" />
+    }
+    @case ('joined') {
+      <app-loading-indicator [label]="'shell.join.joining' | transloco" />
+    }
+    @default {
+      <app-loading-indicator [label]="'shell.join.checking' | transloco" />
+    }
+  }
+</main>
+<app-snackbar-host />

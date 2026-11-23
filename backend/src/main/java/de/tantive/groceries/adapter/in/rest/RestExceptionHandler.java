@@ -6,6 +6,7 @@ import de.tantive.groceries.domain.ConflictException;
 import de.tantive.groceries.domain.DomainValidationException;
 import de.tantive.groceries.domain.ListNotFoundException;
 import de.tantive.groceries.domain.NotFoundException;
+import de.tantive.groceries.domain.ShareLinkInvalidException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -68,6 +69,13 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
             if (authentication != null && authentication.getPrincipal() instanceof AppOidcUser user) {
                 AuditLog.listAccessRefused(user.toCaller().userId());
             }
+        }
+        if (exception instanceof ShareLinkInvalidException) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            AuditLog.shareLinkRefused(
+                    authentication != null && authentication.getPrincipal() instanceof AppOidcUser user
+                            ? user.toCaller().userId()
+                            : null);
         }
         return respond(exception, problem(HttpStatus.NOT_FOUND, exception.code(), exception.getMessage()), request);
     }

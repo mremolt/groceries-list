@@ -23,7 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @SpringBootTest(
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
-            "app.auth.client-secret=test-only"
+            "app.auth.client-secret=test-only",
+            "app.sharing.public-base-url=http://localhost:8080"
         })
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
@@ -49,6 +50,9 @@ class MigrationRolesIT {
             assertThat(statement.execute("select count(*) from lists")).isTrue();
             assertThat(statement.execute("select count(*) from memberships")).isTrue();
             assertThat(statement.execute("select count(*) from items")).isTrue();
+            // the share token column is written by the running service (V7), never by a human (ADR 0008)
+            assertThat(statement.executeUpdate("update lists set share_token = share_token where false"))
+                    .isZero();
             assertThatThrownBy(() -> statement.execute("alter table items add column nope int"))
                     .isInstanceOfSatisfying(
                             SQLException.class, e -> assertThat(e.getSQLState()).isEqualTo(INSUFFICIENT_PRIVILEGE));

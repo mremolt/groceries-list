@@ -65,6 +65,18 @@ keys:
     required: false
     secret: false
     description: Requests per minute and client address to /csp-reports (default 60).
+  - key: app.rate-limits.invitations-per-minute
+    required: false
+    secret: false
+    description: Requests per minute and client address to the public invitation endpoints (default 30).
+  - key: app.rate-limits.join-per-minute
+    required: false
+    secret: false
+    description: Requests per minute to the join endpoint, counted per client address and per person (default 20).
+  - key: app.sharing.public-base-url
+    required: true
+    secret: false
+    description: Origin people reach the app at (https://host); share links are <origin>/j/<token>. No default, because a wrong one puts dead links into messengers.
   - key: app.limits.max-body-size
     required: false
     secret: false

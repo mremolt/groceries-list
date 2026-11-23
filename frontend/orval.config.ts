@@ -38,4 +38,5 @@ export default defineConfig({
   ...feature('session', 'me-controller'),
   ...feature('lists', 'lists'),
   ...feature('items', 'items'),
+  ...feature('sharing', 'sharing'),
 });

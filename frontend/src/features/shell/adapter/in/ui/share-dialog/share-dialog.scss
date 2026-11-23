@@ -1,0 +1,52 @@
+.text {
+  margin-block: 0 var(--app-space-4);
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.link-field {
+  inline-size: 100%;
+}
+
+.link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-2);
+
+  .copy {
+    flex: 1 1 12rem;
+  }
+}
+
+.hint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--app-space-2);
+  margin-block: var(--app-space-4) 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+
+  app-icon {
+    flex: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+  }
+}
+
+.failed {
+  margin-block: 0 var(--app-space-2);
+  color: var(--mat-sys-error);
+}
+
+.actions {
+  justify-content: space-between;
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

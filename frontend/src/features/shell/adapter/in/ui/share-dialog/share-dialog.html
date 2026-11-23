@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>{{ 'shell.share.title' | transloco: { name: data.listName } }}</h2>
+<mat-dialog-content>
+  <p class="text">{{ 'shell.share.text' | transloco }}</p>
+  @switch (state().status) {
+    @case ('ready') {
+      <mat-form-field class="link-field" appearance="outline">
+        <mat-label>{{ 'shell.share.field' | transloco }}</mat-label>
+        <input matInput type="text" readonly [value]="link()" (focus)="selectAll($event)" />
+      </mat-form-field>
+      <div class="link-actions">
+        <button matButton="filled" type="button" class="copy" (click)="copy()">
+          <app-icon name="copy" />
+          {{ 'shell.share.copy' | transloco }}
+        </button>
+        @if (canShare) {
+          <button matButton="tonal" type="button" (click)="shareNatively()">
+            <app-icon name="share" />
+            {{ 'shell.share.webShare' | transloco }}
+          </button>
+        }
+      </div>
+      <p class="hint">
+        <app-icon name="info" /> <span>{{ 'shell.share.hint' | transloco }}</span>
+      </p>
+    }
+    @case ('failed') {
+      <p class="failed" role="alert">{{ 'shell.share.failed' | transloco }}</p>
+      <button matButton type="button" (click)="load()">{{ 'shell.share.retry' | transloco }}</button>
+    }
+    @default {
+      <app-loading-indicator [label]="'shell.share.loading' | transloco" />
+    }
+  }
+  <p class="visually-hidden" role="status">{{ announcement() }}</p>
+</mat-dialog-content>
+<mat-dialog-actions class="actions">
+  <button matButton type="button" [disabled]="state().status !== 'ready' || renewing()" (click)="renew()">
+    {{ 'shell.share.renew' | transloco }}
+  </button>
+  <button matButton type="button" mat-dialog-close>{{ 'shell.share.done' | transloco }}</button>
+</mat-dialog-actions>

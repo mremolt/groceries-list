@@ -53,4 +53,18 @@ class ShoppingListTest {
                     assertThat(e).isInstanceOf(ConflictException.class);
                 });
     }
+
+    @Test
+    void aListMayHaveUpToFiftyMembers() {
+        assertThatCode(() -> ShoppingList.requireRoomForAnotherMember(49)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void theFiftyFirstMemberIsRefusedWithAStableCode() {
+        assertThatThrownBy(() -> ShoppingList.requireRoomForAnotherMember(50))
+                .isInstanceOfSatisfying(MemberLimitReachedException.class, e -> {
+                    assertThat(e.code()).isEqualTo("MEMBER_LIMIT_REACHED");
+                    assertThat(e).isInstanceOf(ConflictException.class);
+                });
+    }
 }

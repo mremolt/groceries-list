@@ -16,6 +16,9 @@ public record ShoppingList(
     /** BR-12: at most 100 lists per user. */
     public static final int MAX_LISTS_PER_USER = 100;
 
+    /** BR-12: at most 50 members per list. */
+    public static final int MAX_MEMBERS = 50;
+
     public ShoppingList {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(name, "name");
@@ -35,6 +38,13 @@ public record ShoppingList(
     public static void requireRoomForAnother(int existingLists) {
         if (existingLists >= MAX_LISTS_PER_USER) {
             throw new ListLimitReachedException();
+        }
+    }
+
+    /** BR-12, checked after the list row was locked, so two people joining the last place cannot both get it. */
+    public static void requireRoomForAnotherMember(int existingMembers) {
+        if (existingMembers >= MAX_MEMBERS) {
+            throw new MemberLimitReachedException();
         }
     }
 }

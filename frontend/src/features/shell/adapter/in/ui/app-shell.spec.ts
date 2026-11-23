@@ -9,6 +9,7 @@ import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
 import { expectNoAxeViolations } from '@testing/axe';
 import { listUseCaseFakes } from '@testing/list-use-cases';
+import { sharingUseCaseFakes } from '@testing/sharing-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
 import { fireEvent, screen, within } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
@@ -40,6 +41,7 @@ async function setup(size: SizeClass = 'compact', url = '/') {
   TestBed.configureTestingModule({
     providers: [
       ...listProviders,
+      ...sharingUseCaseFakes().providers,
       provideRouter(ROUTES),
       Snackbar,
       { provide: WindowSize, useValue: { sizeClass } },

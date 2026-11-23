@@ -12,12 +12,12 @@
 | M1 Accounts and app shell | done | 16e1331 | m1-done |
 | M2 Lists | done | 0eba963 | m2-done |
 | M3 Items | done | 9a65f1a | m3-done |
-| M4 Sharing and joining | not started | | |
+| M4 Sharing and joining | done | PENDING | m4-done |
 | M5 Synchronisation | not started | | |
 | M6 Settings and account | not started | | |
 | M7 Internal test readiness | not started | | |
 
-- **Next action:** M4 Sharing and joining (FR-SHARE-*, FR-AUTH-06, BR-06..08, BR-12 members; read 04 by requirement ID): backend + frontend forks in parallel against a contract fixed up front, then extend the real-backend E2E tier (rebuild image first), verify both gates (frontend e2e Chromium only, see memory), commit `M4 done`, tag.
+- **Next action:** M5 Synchronisation (FR-SYNC-01..05, BR list revision per ADR 0006, NFR-PERF-03; read 04 by requirement ID): backend (changes-since endpoint, N+1 care) + frontend (polling, visibility, live region, list-removed handling) forks in parallel against a contract fixed up front, rebuild image, real tier (incl. two-user sync scenario), gates (Chromium e2e only), commit `M5 done`, tag.
 - **Work in flight:** none.
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
@@ -57,6 +57,16 @@ Manual check (for human review): create, rename, delete and leave lists on a pho
 Deviations: `expectReflowAndTextSpacing` now treats vertical overflow as clipping only for `overflow: hidden/clip` (scrolling shell areas on tall lists), for review. A second Enter while an add is in flight is ignored and the text stays in the field (no queue). One load-related flake seen once in `items.spec.ts` drawer-count test (6/6 alone, 2 full runs green afterwards). Initial-bundle budget warning (951 kB vs 810 kB) predates M3. N+1: items read is one statement (LIMIT 500), drawer count is a sub-select in the one summary statement.
 
 Manual check (for human review): a real shopping trip on a phone with the demo list.
+
+### M4 Sharing and joining (2026-11-23)
+
+| Done when | Status |
+|---|---|
+| FR-SHARE-01..04, FR-AUTH-06, BR-06..08, BR-12 members | Backend: V7 share_token, 4 use cases, public lookup/remember endpoints with Bucket4j limits, join with 50-member lock (mutation-checked), pending token in the server session, redirect to /j/consume. Frontend: share dialog, renew, Web Share where available, join and invitation pages, invalid-link page. Gates: `mvnw verify` green (244 unit, 67 IT); frontend unit 343 green; stubbed Chromium e2e 77 green (twice); real tier 28 green (incl. sharing scenarios and the visitor-cookie check HttpOnly/SameSite=Lax) |
+
+Deviations: the anonymous visitor session created by `POST /api/v1/invitations` is a deliberate exception to "no session for anonymous calls" (threat model T8, 2 h lifetime). A MockMvc assertion on that cookie was replaced by a real-tier check (`e2e/real/invitation-session.spec.ts`). The sign-up variant uses `?prompt=create`. The invitation page shows the list name in plain text (not bold as in the mockup). Frontend fork changed three M3 e2e tests (`.check()`/`.uncheck()` to `.click()` + assertions) because they were unstable under parallel projects. Initial-bundle warning (952 kB) predates M3.
+
+Manual check (for human review): share a link by messenger, join with a second account (new and existing), renew the link and open the old one.
 
 ## Assumptions
 

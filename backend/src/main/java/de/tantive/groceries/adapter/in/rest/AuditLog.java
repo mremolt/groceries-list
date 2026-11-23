@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
  * Security events as structured log events (SPRING-SEC-22). Only a pseudonymous account id and fixed codes are logged:
  * never tokens, e-mail addresses, names, IdP subjects or session ids (SPRING-LOG-08, DP-TEL-01, SEC-AUD-02).
  */
-final class AuditLog {
+public final class AuditLog {
 
     private static final Logger AUDIT = LoggerFactory.getLogger("audit.security");
 
@@ -49,5 +49,30 @@ final class AuditLog {
                 .addKeyValue("resource", "list")
                 .addKeyValue("userId", userId)
                 .log("Security event");
+    }
+
+    /** A person became a member through a share link (BR-06). Never the token (NFR-SEC-05, SEC-AUD-02). */
+    public static void listJoined(UUID userId) {
+        AUDIT.atInfo()
+                .addKeyValue("event", "list.joined")
+                .addKeyValue("userId", userId)
+                .log("Security event");
+    }
+
+    /** A member replaced the share link; the previous one is dead (BR-06). */
+    public static void shareLinkRenewed(UUID userId) {
+        AUDIT.atInfo()
+                .addKeyValue("event", "share-link.renewed")
+                .addKeyValue("userId", userId)
+                .log("Security event");
+    }
+
+    /** An unknown, renewed or malformed token was presented; {@code userId} is null for a visitor without a session. */
+    static void shareLinkRefused(@org.jspecify.annotations.Nullable UUID userId) {
+        var event = AUDIT.atWarn().addKeyValue("event", "share-link.refused");
+        if (userId != null) {
+            event = event.addKeyValue("userId", userId);
+        }
+        event.log("Security event");
     }
 }

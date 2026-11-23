@@ -7,6 +7,7 @@ import { stubConfig } from './fixtures/config';
 import { type ItemsStub, stubItems } from './fixtures/items';
 import { type ListsStub, stubLists } from './fixtures/lists';
 import { stubSession } from './fixtures/session';
+import { type SharingStub, stubSharing } from './fixtures/sharing';
 
 const AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const AAA = ['wcag2aaa']; // axe has no wcag21aaa / wcag22aaa tag
@@ -33,6 +34,8 @@ interface Fixtures {
   listsApi: ListsStub;
   /** Stateful stub of the items API (`/api/v1/lists/:id/items`), consistent with `listsApi`. */
   itemsApi: ItemsStub;
+  /** Stateful stub of the sharing API (share link, invitations, join), consistent with `listsApi`. */
+  sharingApi: SharingStub;
 }
 
 const recordedApiCalls = new WeakMap<Page, string[]>();
@@ -55,6 +58,12 @@ export const test = base.extend<Fixtures>({
   itemsApi: [
     async ({ page, listsApi, initialItems }, use) => {
       await use(await stubItems(page, listsApi.lists, initialItems.items));
+    },
+    { auto: true },
+  ],
+  sharingApi: [
+    async ({ page, listsApi }, use) => {
+      await use(await stubSharing(page, listsApi.lists));
     },
     { auto: true },
   ],

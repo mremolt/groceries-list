@@ -20,7 +20,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 @SpringBootTest(
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
-            "app.auth.client-secret=test"
+            "app.auth.client-secret=test",
+            "app.sharing.public-base-url=http://localhost:8080"
         })
 @Import(TestcontainersConfiguration.class)
 class MembershipJdbcAdapterIT {
@@ -94,5 +95,16 @@ class MembershipJdbcAdapterIT {
                         .query(Long.class)
                         .single())
                 .isEqualTo(1L);
+    }
+
+    @Test
+    void knowsWhoIsMemberOfWhich() {
+        UUID alice = Arrange.user(jdbc);
+        UUID bob = Arrange.user(jdbc);
+        UUID list = Arrange.list(jdbc, alice, "WG", NOW);
+
+        assertThat(memberships.isMember(list, alice)).isTrue();
+        assertThat(memberships.isMember(list, bob)).isFalse();
+        assertThat(memberships.isMember(UUID.randomUUID(), alice)).isFalse();
     }
 }

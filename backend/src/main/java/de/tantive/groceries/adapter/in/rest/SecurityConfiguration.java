@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.header.HeaderWriterFilter;
@@ -46,10 +48,43 @@ class SecurityConfiguration {
     @Bean
     @Order(2)
     SecurityFilterChain apiChain(
-            HttpSecurity http, JsonMapper mapper, RequestLimitsProperties limits, Clock clock, AuthProperties auth)
+            HttpSecurity http,
+            JsonMapper mapper,
+            RequestLimitsProperties limits,
+            RateLimitProperties rateLimits,
+            Clock clock,
+            AuthProperties auth)
             throws Exception {
         return http.securityMatcher(PathPatternRequestMatcher.withDefaults().matcher("/api/**"))
-                .authorizeHttpRequests(rules -> rules.anyRequest().authenticated())
+                // The two invitation calls are the only public API: a visitor without an account looks up the list
+                // name and has the token remembered for the login (FR-AUTH-06). Rate limited per address below.
+                .authorizeHttpRequests(rules -> rules.requestMatchers(
+                                HttpMethod.POST, "/api/v1/invitations", "/api/v1/invitations/lookup")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
+                .addFilterBefore(
+                        new RateLimitFilter(
+                                "invitations",
+                                path -> path.equals("/api/v1/invitations") || path.equals("/api/v1/invitations/lookup"),
+                                rateLimits.invitationsPerMinute(),
+                                mapper),
+                        HeaderWriterFilter.class)
+                .addFilterBefore(
+                        new RateLimitFilter(
+                                "join-address",
+                                path -> path.equals("/api/v1/memberships/join"),
+                                rateLimits.joinPerMinute(),
+                                mapper),
+                        HeaderWriterFilter.class)
+                .addFilterBefore(
+                        new RateLimitFilter(
+                                "join-person",
+                                path -> path.equals("/api/v1/memberships/join"),
+                                rateLimits.joinPerMinute(),
+                                request -> RateLimitFilter.person(request),
+                                mapper),
+                        AuthorizationFilter.class)
                 .addFilterBefore(
                         new AbsoluteSessionLifetimeFilter(clock, auth.sessionAbsoluteLifetime()),
                         SecurityContextHolderFilter.class)

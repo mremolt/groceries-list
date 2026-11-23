@@ -54,4 +54,13 @@ class MembershipJdbcAdapter implements MembershipPort {
                 .query(Integer.class)
                 .single();
     }
+
+    @Override
+    public boolean isMember(UUID listId, UUID userId) {
+        return jdbc.sql("SELECT EXISTS (SELECT 1 FROM memberships WHERE list_id = :list AND user_id = :user)")
+                .param("list", listId)
+                .param("user", userId)
+                .query(Boolean.class)
+                .single();
+    }
 }

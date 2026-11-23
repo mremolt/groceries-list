@@ -1,16 +1,26 @@
 import { inject, type Provider } from '@angular/core';
 
 import { HttpSession, sessionHttpProviders } from './adapter/out/http/http-session';
+import { CheckSignedInService } from './application/check-signed-in-service';
 import { LoadCurrentUserService } from './application/load-current-user-service';
 import { LogoutService } from './application/logout-service';
-import { LOAD_CURRENT_USER, LOAD_CURRENT_USER_PORT, LOGOUT, LOGOUT_PORT } from './session.tokens';
+import {
+  CHECK_SIGNED_IN,
+  CHECK_SIGNED_IN_PORT,
+  LOAD_CURRENT_USER,
+  LOAD_CURRENT_USER_PORT,
+  LOGOUT,
+  LOGOUT_PORT,
+} from './session.tokens';
 
 /** Composition of the session feature (TS-ARCH-09): the adapter is bound to its ports, the use cases are plain classes. */
 const sessionProviders: Provider[] = [
   ...sessionHttpProviders,
   { provide: LOAD_CURRENT_USER_PORT, useExisting: HttpSession },
   { provide: LOGOUT_PORT, useExisting: HttpSession },
+  { provide: CHECK_SIGNED_IN_PORT, useExisting: HttpSession },
   { provide: LOAD_CURRENT_USER, useFactory: () => new LoadCurrentUserService(inject(LOAD_CURRENT_USER_PORT)) },
+  { provide: CHECK_SIGNED_IN, useFactory: () => new CheckSignedInService(inject(CHECK_SIGNED_IN_PORT)) },
   { provide: LOGOUT, useFactory: () => new LogoutService(inject(LOGOUT_PORT)) },
 ];
 

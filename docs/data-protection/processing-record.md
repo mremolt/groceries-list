@@ -20,7 +20,7 @@ Rules: [data-protection.md](../baseline/08-crosscutting-concepts/data-protection
 | Legal basis | TBD (DPO) (contract performance, Art. 6(1)(b), proposed) |
 | Data subjects | users (testers) |
 | Personal data | e-mail address, display name, IdP subject id, created/last-login timestamps; list names, item texts and memberships (free text typed by users) |
-| Fields and where stored | PostgreSQL `users(id, idp_subject, email, display_name, created_at, last_login_at)`, `memberships(user_id, list_id, joined_at)`, `lists(id, name, created_by, created_at, updated_at, revision)` (`created_by` is informational and cleared with the account, `ON DELETE SET NULL`), `items(id, list_id, text, done, created_at, version)` (M3; the text is free text that may name people); Keycloak: credentials, e-mail, name, sessions; Spring Session tables: session attributes incl. tokens; Mailpit/mail server: reset mails (e-mail address) |
+| Fields and where stored | PostgreSQL `users(id, idp_subject, email, display_name, created_at, last_login_at)`, `memberships(user_id, list_id, joined_at)`, `lists.share_token` (secret per list, no personal data), `lists(id, name, created_by, created_at, updated_at, revision)` (`created_by` is informational and cleared with the account, `ON DELETE SET NULL`), `items(id, list_id, text, done, created_at, version)` (M3; the text is free text that may name people); Keycloak: credentials, e-mail, name, sessions; Spring Session tables: session attributes incl. tokens; Mailpit/mail server: reset mails (e-mail address) |
 | Recipients | operator; Keycloak (processor-internal component); mail server for reset mails |
 | Transfers outside EU/EEA | none planned (local installation) |
 | Retention | [deletion-concept.md](deletion-concept.md) |

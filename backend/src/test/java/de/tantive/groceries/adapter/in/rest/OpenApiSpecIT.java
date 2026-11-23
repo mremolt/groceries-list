@@ -23,7 +23,8 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
             "springdoc.api-docs.enabled=true",
             "springdoc.writer-with-order-by-keys=true",
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
-            "app.auth.client-secret=test-only"
+            "app.auth.client-secret=test-only",
+            "app.sharing.public-base-url=http://localhost:8080"
         },
         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc

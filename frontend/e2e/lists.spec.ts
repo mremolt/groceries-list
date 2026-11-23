@@ -210,6 +210,7 @@ test.describe('list commands in the ⋮ menu @responsive @shell @a11y-lists', ()
     const items = page.getByRole('menuitem');
     await expect(items).toHaveText([
       /Liste umbenennen/,
+      /Teilen-Link erneuern/,
       /Liste verlassen/,
       /Liste löschen/,
       /Einstellungen/,
@@ -220,11 +221,11 @@ test.describe('list commands in the ⋮ menu @responsive @shell @a11y-lists', ()
     await page.keyboard.press('ArrowDown');
     await expect(items.nth(1)).toBeFocused();
     await page.keyboard.press('End');
-    await expect(items.nth(4)).toBeFocused();
+    await expect(items.nth(5)).toBeFocused();
     await page.keyboard.press('Home');
     await expect(items.nth(0)).toBeFocused();
     await page.keyboard.press('ArrowUp');
-    await expect(items.nth(4)).toBeFocused();
+    await expect(items.nth(5)).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toBeHidden();
     await expect(button).toBeFocused();

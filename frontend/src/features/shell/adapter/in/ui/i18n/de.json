@@ -22,7 +22,9 @@
     "logout": "Abmelden",
     "rename": "Liste umbenennen",
     "leave": "Liste verlassen",
-    "delete": "Liste löschen"
+    "delete": "Liste löschen",
+    "share": "Liste teilen",
+    "renewLink": "Teilen-Link erneuern"
   },
   "empty": {
     "lists": {
@@ -127,5 +129,55 @@
     "loading": "Artikel werden geladen",
     "failed": "Die Artikel konnten nicht geladen werden.",
     "retry": "Erneut versuchen"
+  },
+  "share": {
+    "title": "„{name}“ teilen",
+    "text": "Jede Person mit diesem Link und einem Konto kann der Liste beitreten und sie bearbeiten.",
+    "field": "Teilen-Link",
+    "copy": "Link kopieren",
+    "webShare": "Teilen …",
+    "hint": "Link an die falsche Person geschickt? Erneuere ihn – der alte Link funktioniert dann nicht mehr.",
+    "renew": "Link erneuern",
+    "done": "Fertig",
+    "loading": "Link wird geladen",
+    "failed": "Der Link konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "renewDialog": {
+      "title": "Teilen-Link erneuern?",
+      "text": "Der bisherige Link funktioniert danach nicht mehr. Wer schon Mitglied ist, bleibt Mitglied.",
+      "confirm": "Erneuern"
+    },
+    "snackbar": {
+      "copied": "Link kopiert",
+      "copyFailed": "Der Link konnte nicht kopiert werden. Markiere ihn und kopiere ihn von Hand.",
+      "renewed": "Neuer Teilen-Link erstellt. Der alte Link funktioniert nicht mehr.",
+      "joined": "Du bist der Liste „{name}“ beigetreten."
+    }
+  },
+  "join": {
+    "heading": "Liste beitreten",
+    "checking": "Link wird geprüft",
+    "joining": "Du trittst der Liste bei",
+    "banner": "Du wurdest zur Liste „{name}“ eingeladen. Erstelle ein Konto oder melde dich an, um beizutreten.",
+    "signUp": "Konto erstellen und beitreten",
+    "hasAccount": "Schon ein Konto?",
+    "signIn": "Anmelden",
+    "invalid": {
+      "title": "Dieser Link funktioniert nicht mehr",
+      "text": "Bitte die Person, die dir den Link geschickt hat, um einen neuen.",
+      "toLists": "Zu meinen Listen"
+    },
+    "memberLimit": {
+      "title": "Beitritt nicht möglich",
+      "text": "Diese Liste hat die maximale Anzahl an Mitgliedern erreicht."
+    },
+    "listLimit": {
+      "title": "Beitritt nicht möglich",
+      "text": "Du bist schon in 100 Listen. Verlasse oder lösche eine Liste, bevor du einer neuen beitrittst."
+    },
+    "failed": {
+      "title": "Das hat nicht geklappt",
+      "retry": "Erneut versuchen"
+    }
   }
 }

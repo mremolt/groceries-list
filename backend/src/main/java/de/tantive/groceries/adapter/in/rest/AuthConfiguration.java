@@ -48,7 +48,7 @@ import org.springframework.web.client.RestClient;
  * from the ID token.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({AuthProperties.class, RateLimitProperties.class})
+@EnableConfigurationProperties({AuthProperties.class, RateLimitProperties.class, SharingProperties.class})
 class AuthConfiguration {
 
     static final String REGISTRATION_ID = "keycloak";

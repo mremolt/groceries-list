@@ -184,3 +184,28 @@ start	duration_s	milestone	category	label	exit
 2026-11-23T15:27:53+01:00	32	M3-frontend	e2e	e2e real	1
 2026-11-23T15:28:39+01:00	25	M3-frontend	e2e	e2e real 2	0
 2026-11-23T15:30:32+01:00	45	M3	build-gate	mvnw verify (final)	0
+2026-11-23T15:44:52+01:00	1	M4-frontend	code	generate:api sharing	0
+2026-11-23T15:48:31+01:00	5	M4-backend	test-run	unit tests (domain, use cases)	1
+2026-11-23T15:48:41+01:00	4	M4-backend	test-run	unit tests (domain, use cases)	1
+2026-11-23T15:48:50+01:00	21	M4-backend	test-run	unit tests (domain, use cases)	1
+2026-11-23T15:49:57+01:00	6	M4-backend	test-run	unit tests + web slices	1
+2026-11-23T15:50:08+01:00	24	M4-backend	test-run	unit tests + web slices	0
+2026-11-23T15:52:18+01:00	5	M4-backend	build-gate	mvnw verify (first full run)	1
+2026-11-23T15:52:33+01:00	6	M4-backend	build-gate	mvnw verify (second full run)	1
+2026-11-23T15:52:44+01:00	9	M4-backend	build-gate	mvnw verify (third full run)	1
+2026-11-23T15:53:03+01:00	31	M4-backend	build-gate	mvnw verify (fourth full run)	1
+2026-11-23T15:53:52+01:00	48	M4-backend	build-gate	mvnw verify (fifth full run)	1
+2026-11-23T15:54:54+01:00	53	M4-backend	build-gate	mvnw verify -Dopenapi.update=true	1
+2026-11-23T15:56:39+01:00	48	M4-backend	build-gate	mvnw verify -Dopenapi.update=true (3)	1
+2026-11-23T15:57:05+01:00	44	M4-frontend	e2e	e2e fast sharing	1
+2026-11-23T15:57:32+01:00	54	M4-backend	build-gate	mvnw verify -Dopenapi.update=true (4)	0
+2026-11-23T15:58:07+01:00	26	M4-frontend	e2e	e2e fast sharing 2	1
+2026-11-23T15:58:42+01:00	13	M4-frontend	e2e	e2e fast sharing 3	0
+2026-11-23T15:58:58+01:00	4	M4-frontend	e2e	e2e chromium stubbed all	1
+2026-11-23T15:59:13+01:00	29	M4-backend	debug	mutation: no list lock in findByTokenLocked	1
+2026-11-23T15:59:06+01:00	106	M4-frontend	e2e	e2e chromium stubbed all	1
+2026-11-23T16:00:05+01:00	69	M4-backend	build-gate	mvnw verify (final, no update flag)	0
+2026-11-23T16:01:12+01:00	278	M4-frontend	e2e	e2e chromium stubbed all 2 (4 workers)	1
+2026-11-23T16:15:42+01:00	77	M4-frontend	e2e	e2e chromium stubbed all 3	0
+2026-11-23T16:18:56+01:00	14	M4	infra	build image	0
+2026-11-23T16:19:40+01:00	47	M4-frontend	e2e	e2e real	0

@@ -3,7 +3,8 @@
     "appName": "Einkaufsliste",
     "title": {
       "lists": "Meine Listen",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "join": "Liste beitreten"
     },
     "snackbar": {
       "close": "Hinweis schließen"

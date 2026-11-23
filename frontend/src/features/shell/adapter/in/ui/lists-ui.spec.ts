@@ -11,6 +11,7 @@ import { Snackbar } from '@shared/ui/snackbar/snackbar';
 import { expectNoAxeViolations } from '@testing/axe';
 import { itemUseCaseFakes } from '@testing/item-use-cases';
 import { BBQ, listUseCaseFakes, WEEK } from '@testing/list-use-cases';
+import { sharingUseCaseFakes } from '@testing/sharing-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
 import { fireEvent, screen, within } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
@@ -51,6 +52,7 @@ async function setup(options: { size?: SizeClass; url?: string; lists?: (typeof 
   const sizeClass = signal<SizeClass>(size);
   const { fakes, providers } = listUseCaseFakes(lists);
   const items = itemUseCaseFakes();
+  const sharing = sharingUseCaseFakes();
   fakes.loadList.execute.mockImplementation((id) => {
     const found = lists.find((list) => list.id === id);
     return found ? Promise.resolve(found) : Promise.reject(new ListNotFoundError());
@@ -63,6 +65,7 @@ async function setup(options: { size?: SizeClass; url?: string; lists?: (typeof 
       Snackbar,
       ...providers,
       ...items.providers,
+      ...sharing.providers,
       { provide: WindowSize, useValue: { sizeClass } },
       { provide: LOGOUT, useValue: mock<LogoutUseCase>() },
       { provide: PAGE_NAVIGATION, useValue: navigation },
@@ -182,7 +185,14 @@ describe('„Weitere Optionen“ menu on a list (FR-NAV-05)', () => {
       within(menu)
         .getAllByRole('menuitem')
         .map((item) => item.textContent.trim()),
-    ).toEqual(['Liste umbenennen', 'Liste verlassen', 'Liste löschen', 'Einstellungen', 'Abmelden']);
+    ).toEqual([
+      'Liste umbenennen',
+      'Teilen-Link erneuern',
+      'Liste verlassen',
+      'Liste löschen',
+      'Einstellungen',
+      'Abmelden',
+    ]);
   });
 
   it('has no list commands outside a list', async () => {

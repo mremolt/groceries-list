@@ -5,6 +5,67 @@ info:
 servers:
 - url: /
 paths:
+  /api/v1/invitations:
+    post:
+      operationId: rememberInvitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShareTokenRequest"
+        required: true
+      responses:
+        "204":
+          description: The link is valid and remembered in the server-side session
+            until the login has finished
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Unknown or renewed link; code SHARE_LINK_INVALID, the same\
+            \ answer for both"
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Too many requests; code RATE_LIMITED
+      summary: Public. Remembers the share token in the session before the login (FR-AUTH-06)
+      tags:
+      - sharing
+  /api/v1/invitations/lookup:
+    post:
+      operationId: lookupInvitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShareTokenRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationResponse"
+          description: "The name of the list behind the link, nothing else"
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Unknown or renewed link; code SHARE_LINK_INVALID, the same\
+            \ answer for both"
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Too many requests; code RATE_LIMITED
+      summary: "Public. The list name for the invitation banner (FR-AUTH-06 AC1, AC4)"
+      tags:
+      - sharing
   /api/v1/lists:
     get:
       operationId: listMyLists
@@ -410,6 +471,72 @@ paths:
       summary: Leave a list; the last member leaving deletes it
       tags:
       - lists
+  /api/v1/lists/{listId}/share-link:
+    get:
+      operationId: getShareLink
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareLinkResponse"
+          description: The current link of the list
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list or no member; code LIST_NOT_FOUND, the same answer\
+            \ for both"
+      summary: The share link of a list (members only)
+      tags:
+      - sharing
+  /api/v1/lists/{listId}/share-link/renew:
+    post:
+      operationId: renewShareLink
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareLinkResponse"
+          description: The new link; the previous one is invalid from now on
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list or no member; code LIST_NOT_FOUND, the same answer\
+            \ for both"
+      summary: Replaces the share link of a list (FR-SHARE-02); memberships stay
+      tags:
+      - sharing
   /api/v1/me:
     get:
       operationId: getCurrentUser
@@ -429,6 +556,50 @@ paths:
       summary: Profile of the logged-in person
       tags:
       - me-controller
+  /api/v1/memberships/join:
+    post:
+      operationId: joinList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinListRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinListResponse"
+          description: "Joined, or already a member (alreadyMember true, no duplicate)"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Unknown or renewed link, or no token at all; code SHARE_LINK_INVALID"
+        "409":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Member limit (50) or list limit (100) reached; code MEMBER_LIMIT_REACHED
+            or LIST_LIMIT_REACHED
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Too many requests; code RATE_LIMITED
+      summary: Joins the list behind a share token (body) or behind the token remembered
+        in the session (empty body)
+      tags:
+      - sharing
 components:
   schemas:
     AddItemRequest:
@@ -487,6 +658,14 @@ components:
       - displayName
       - email
       - id
+    InvitationResponse:
+      type: object
+      properties:
+        listName:
+          type: string
+          maxLength: 80
+      required:
+      - listName
     ItemResponse:
       type: object
       properties:
@@ -520,6 +699,29 @@ components:
           maxItems: 500
       required:
       - items
+    JoinListRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          description: The share token; absent or empty means the one remembered in
+            the session
+          maxLength: 64
+    JoinListResponse:
+      type: object
+      properties:
+        alreadyMember:
+          type: boolean
+        listId:
+          type: string
+          format: uuid
+        listName:
+          type: string
+          maxLength: 80
+      required:
+      - alreadyMember
+      - listId
+      - listName
     ListResponse:
       type: object
       properties:
@@ -590,6 +792,24 @@ components:
           minLength: 1
       required:
       - name
+    ShareLinkResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          description: "The complete link, <public base URL>/j/<token>"
+          maxLength: 2048
+      required:
+      - url
+    ShareTokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          maxLength: 64
+          minLength: 1
+      required:
+      - token
     UpdateItemRequest:
       type: object
       description: At least one of text and done

@@ -67,7 +67,7 @@ test.describe('the sections @responsive @shell @a11y-items', () => {
     listsApi,
   }) => {
     await page.goto(URL);
-    await openSection(page).getByRole('checkbox', { name: 'Vollkornbrot' }).check();
+    await openSection(page).getByRole('checkbox', { name: 'Vollkornbrot' }).click(); // not `check()`: the item moves away
 
     await expect(openSection(page).getByText('3 von 5 erledigt')).toBeVisible();
     await expect(page.getByRole('heading', { level: 2, name: /Noch zu kaufen/ })).toContainText('2');
@@ -189,7 +189,7 @@ test.describe('check and uncheck @responsive @shell @a11y-items', () => {
     await page.goto(URL);
     await openCart(page);
 
-    await cartSection(page).getByRole('checkbox', { name: 'Butter' }).uncheck();
+    await cartSection(page).getByRole('checkbox', { name: 'Butter' }).click(); // not `uncheck()`: the item moves away
 
     await expect(openSection(page).getByRole('checkbox')).toHaveCount(4);
     await expect(openSection(page).getByRole('checkbox').last()).toHaveAccessibleName('Butter');
@@ -204,7 +204,9 @@ test.describe('check and uncheck @responsive @shell @a11y-items', () => {
     await page.goto(URL);
     itemsApi.failNextWrite(500);
 
-    await openSection(page).getByRole('checkbox', { name: 'Vollkornbrot' }).check();
+    // `click()`, not `check()`: `check()` clicks again when the rollback undoes the first click, which would use up
+    // the stubbed failure only once and then succeed
+    await openSection(page).getByRole('checkbox', { name: 'Vollkornbrot' }).click();
 
     await expect(page.getByRole('status')).toContainText('Das hat nicht geklappt. Bitte versuche es noch einmal.');
     await expect(openSection(page).getByRole('checkbox', { name: 'Vollkornbrot' })).not.toBeChecked();

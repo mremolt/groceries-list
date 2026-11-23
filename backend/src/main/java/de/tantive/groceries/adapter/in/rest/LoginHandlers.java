@@ -26,6 +26,9 @@ final class LoginHandlers {
     /** Session attribute for a validated internal path to open after login (set by the join flow, M4). */
     static final String POST_LOGIN_PATH = "app.post-login-path";
 
+    /** The SPA route that joins the list of the token remembered in the session (ADR 0008). */
+    static final String CONSUME_PATH = "/j/consume";
+
     private static final DefaultRedirectStrategy REDIRECT = new DefaultRedirectStrategy();
 
     private LoginHandlers() {}
@@ -40,6 +43,12 @@ final class LoginHandlers {
                 AuditLog.loginSucceeded(user.toCaller().userId());
                 Object requested = session.getAttribute(POST_LOGIN_PATH);
                 session.removeAttribute(POST_LOGIN_PATH);
+                if (PendingInvitation.isPending(session)) {
+                    // FR-AUTH-06 AC3: the join happens at /j/consume with the token from this session, not from a URL
+                    PendingInvitation.restoreIdleTime(session);
+                    REDIRECT.sendRedirect(request, response, CONSUME_PATH);
+                    return;
+                }
                 REDIRECT.sendRedirect(
                         request, response, requested instanceof String path ? InternalPaths.orRoot(path) : "/");
             } else {

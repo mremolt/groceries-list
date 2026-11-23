@@ -1,7 +1,7 @@
-import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import type { ReportErrorUseCase } from '@platform';
-import { REPORT_ERROR } from '@platform';
+import { ANONYMOUS_ALLOWED, REPORT_ERROR } from '@platform';
 import { TechnicalError } from '@platform/domain';
 import { delay, http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -26,15 +26,24 @@ afterAll(() => {
 
 function setup() {
   const reportError = mock<ReportErrorUseCase>();
+  const anonymousAllowed: boolean[] = [];
   TestBed.configureTestingModule({
     providers: [
-      provideHttpClient(withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' })),
+      provideHttpClient(
+        withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
+        withInterceptors([
+          (request, next) => {
+            anonymousAllowed.push(request.context.get(ANONYMOUS_ALLOWED));
+            return next(request);
+          },
+        ]),
+      ),
       MeControllerService,
       HttpSession,
       { provide: REPORT_ERROR, useValue: reportError },
     ],
   });
-  return { adapter: TestBed.inject(HttpSession), reportError };
+  return { adapter: TestBed.inject(HttpSession), reportError, anonymousAllowed };
 }
 
 const USER = { id: '8f0f5b1e-0000-4000-8000-000000000001', displayName: 'Anna Beispiel', email: 'anna@example.test' };
@@ -145,5 +154,30 @@ describe('HttpSession.logout', () => {
     const { adapter } = setup();
 
     await expect(adapter.logout()).rejects.toBeInstanceOf(TechnicalError);
+  });
+});
+
+describe('HttpSession.isSignedIn', () => {
+  it('is true for a profile and marks the request as anonymous-allowed, so a 401 never redirects (FR-AUTH-06)', async () => {
+    server.use(getGetCurrentUserMockHandler(USER));
+    const { adapter, anonymousAllowed } = setup();
+
+    expect(await adapter.isSignedIn()).toBe(true);
+    expect(anonymousAllowed).toEqual([true]);
+  });
+
+  it('is false for a 401', async () => {
+    server.use(http.get('/api/v1/me', () => new HttpResponse(null, { status: 401 })));
+    const { adapter } = setup();
+
+    expect(await adapter.isSignedIn()).toBe(false);
+  });
+
+  it('reports a server failure as a technical error instead of guessing', async () => {
+    server.use(http.get('/api/v1/me', () => new HttpResponse(null, { status: 500 })));
+    const { adapter, reportError } = setup();
+
+    await expect(adapter.isSignedIn()).rejects.toBeInstanceOf(TechnicalError);
+    expect(reportError.report.mock.calls).toHaveLength(1);
   });
 });

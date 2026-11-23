@@ -330,5 +330,149 @@
   "shell.items.retry": {
     "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.retry",
     "maxLength": 30
+  },
+  "shell.menu.share": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.menu.share",
+    "maxLength": 30
+  },
+  "shell.menu.renewLink": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.menu.renewLink",
+    "maxLength": 40
+  },
+  "shell.share.title": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.title",
+    "maxLength": 30
+  },
+  "shell.share.text": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.text",
+    "maxLength": 140
+  },
+  "shell.share.field": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.field",
+    "maxLength": 30
+  },
+  "shell.share.copy": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.copy",
+    "maxLength": 30
+  },
+  "shell.share.webShare": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.webShare",
+    "maxLength": 30
+  },
+  "shell.share.hint": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.hint",
+    "maxLength": 150
+  },
+  "shell.share.renew": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.renew",
+    "maxLength": 30
+  },
+  "shell.share.done": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.done",
+    "maxLength": 30
+  },
+  "shell.share.loading": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.loading",
+    "maxLength": 30
+  },
+  "shell.share.failed": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.failed",
+    "maxLength": 60
+  },
+  "shell.share.retry": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.retry",
+    "maxLength": 30
+  },
+  "shell.share.renewDialog.title": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.renewDialog.title",
+    "maxLength": 40
+  },
+  "shell.share.renewDialog.text": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.renewDialog.text",
+    "maxLength": 140
+  },
+  "shell.share.renewDialog.confirm": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.renewDialog.confirm",
+    "maxLength": 30
+  },
+  "shell.share.snackbar.copied": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.snackbar.copied",
+    "maxLength": 30
+  },
+  "shell.share.snackbar.copyFailed": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.snackbar.copyFailed",
+    "maxLength": 120
+  },
+  "shell.share.snackbar.renewed": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.snackbar.renewed",
+    "maxLength": 100
+  },
+  "shell.share.snackbar.joined": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.share.snackbar.joined",
+    "maxLength": 60
+  },
+  "shell.join.heading": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.heading",
+    "maxLength": 30
+  },
+  "shell.join.checking": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.checking",
+    "maxLength": 30
+  },
+  "shell.join.joining": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.joining",
+    "maxLength": 40
+  },
+  "shell.join.banner": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.banner",
+    "maxLength": 150
+  },
+  "shell.join.signUp": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.signUp",
+    "maxLength": 50
+  },
+  "shell.join.hasAccount": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.hasAccount",
+    "maxLength": 30
+  },
+  "shell.join.signIn": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.signIn",
+    "maxLength": 30
+  },
+  "shell.join.invalid.title": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.invalid.title",
+    "maxLength": 60
+  },
+  "shell.join.invalid.text": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.invalid.text",
+    "maxLength": 100
+  },
+  "shell.join.invalid.toLists": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.invalid.toLists",
+    "maxLength": 30
+  },
+  "shell.join.memberLimit.title": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.memberLimit.title",
+    "maxLength": 40
+  },
+  "shell.join.memberLimit.text": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.memberLimit.text",
+    "maxLength": 100
+  },
+  "shell.join.listLimit.title": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.listLimit.title",
+    "maxLength": 40
+  },
+  "shell.join.listLimit.text": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.listLimit.text",
+    "maxLength": 150
+  },
+  "shell.join.failed.title": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.failed.title",
+    "maxLength": 40
+  },
+  "shell.join.failed.retry": {
+    "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.failed.retry",
+    "maxLength": 30
   }
 }

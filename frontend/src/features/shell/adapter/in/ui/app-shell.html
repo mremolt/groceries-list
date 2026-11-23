@@ -77,6 +77,17 @@
             <app-icon name="menu" />
           </button>
         }
+        @if (onList()) {
+          <button
+            matIconButton
+            type="button"
+            class="share-button"
+            [attr.aria-label]="'shell.menu.share' | transloco"
+            (click)="shareList()"
+          >
+            <app-icon name="share" />
+          </button>
+        }
         <button
           matIconButton
           type="button"
@@ -100,6 +111,10 @@
     <button mat-menu-item type="button" (click)="renameList()">
       <app-icon name="edit" />
       <span>{{ 'shell.menu.rename' | transloco }}</span>
+    </button>
+    <button mat-menu-item type="button" (click)="renewShareLink()">
+      <app-icon name="refresh" />
+      <span>{{ 'shell.menu.renewLink' | transloco }}</span>
     </button>
     <button mat-menu-item type="button" (click)="leaveList()">
       <app-icon name="exit" />

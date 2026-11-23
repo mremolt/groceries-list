@@ -23,6 +23,10 @@ public final class AppSessions {
         return session("sub-bob", People.BOB_ID, "bob@example.test", "Bob Example");
     }
 
+    public static RequestPostProcessor carol() {
+        return session("sub-carol", People.CAROL_ID, "carol@example.test", "Carol Example");
+    }
+
     private static RequestPostProcessor session(String subject, java.util.UUID id, String email, String name) {
         OidcIdToken token = OidcIdToken.withTokenValue("test-token")
                 .subject(subject)

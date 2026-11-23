@@ -159,6 +159,28 @@ class BffLoginFlowTest {
     }
 
     @Test
+    void aLoginThatStartedAtAnInvitationEndsAtTheConsumePageWithTheTokenStillInTheSession() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        var token = de.tantive.groceries.domain.ShareToken.generate();
+        PendingInvitation.remember(session, token);
+        var start =
+                mvc.get().uri("/oauth2/authorization/keycloak").session(session).exchange();
+        IDP.willIssueIdToken("sub-alice", "alice@example.test", "Alice Example", "sid-2", param(start, "nonce"));
+        when(provideUser.provide(any()))
+                .thenReturn(new ProvideUserResult(People.ALICE_ID, "alice@example.test", "Alice Example"));
+
+        var callback = mvc.get()
+                .uri("/login/oauth2/code/keycloak?code=abc&state={state}", param(start, "state"))
+                .session(session)
+                .exchange();
+
+        assertThat(callback).hasStatus(302);
+        assertThat(callback.getResponse().getHeader("Location")).isEqualTo("/j/consume"); // no token in the URL
+        assertThat(PendingInvitation.peek(session)).isEqualTo(token.value());
+        assertThat(session.getMaxInactiveInterval()).isNotEqualTo(2 * 60 * 60); // a person's session again
+    }
+
+    @Test
     void refusesAnIdTokenWithTheWrongNonceAndLogsNoTokenOrAddress() {
         MockHttpSession session = new MockHttpSession();
         var start =

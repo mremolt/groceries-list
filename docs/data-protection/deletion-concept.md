@@ -15,9 +15,9 @@ Rules: [data-protection.md](../baseline/08-crosscutting-concepts/data-protection
 | User account data | `users`, Keycloak user | until account deletion | user deletes account | none | `DeleteAccount` use case, then Keycloak admin API | `DeleteAccountIT` (M6, DP-TEST-01) |
 | Memberships | `memberships` (`ON DELETE CASCADE` from `users` and `lists`, SPRING-DP-03) | until leave/delete | leave, list delete, account delete | none | cascade + last-member rule BR-04 | `MembershipJdbcAdapterIT`, `ListRulesConcurrencyIT` (M2); account deletion M6 |
 | Lists and items | `lists` (`created_by` set to NULL when the creator's account is deleted, the list stays for its members), `items` (M3, `ON DELETE CASCADE` from `lists`) | until deleted by a member or when the last member leaves | member action | none | `DeleteList`, `LeaveList`, `DeleteAccount` | `ListPersistenceAdapterIT`, `MembershipJdbcAdapterIT`, `ListsApiIT` (M2); `ItemPersistenceAdapterIT.deletingTheListDeletesItsItems` (M3); `DeleteAccount` in M6 |
-| Share tokens | `lists.share_token` | replaced on renewal; removed with the list | renewal/list delete | none | with the list | M4 IT |
+| Share tokens | `lists.share_token` (nullable until the first link is shown; not personal data, but a secret that grants membership) | replaced on renewal; removed with the list | renewal/list delete | none | with the list | `SharingApiIT` (old token dead after renewal), `ListsApiIT` (list delete) |
 | Sessions and tokens | `spring_session`, `spring_session_attributes`, `idp_sessions` (rows of dead sessions purged at every login) | idle 30 days sliding, absolute 30 days | login | none | expiry job; end on logout, back-channel logout, account deletion | M1/M6 ITs |
-| Pending join token | server-side session attribute | until consumed or session end | invitation | none | with the session | M4 test |
+| Pending join token | server-side session attribute `app.pending-invitation` (a visitor session of 2 hours until the login finished) | until consumed (used once, whatever the outcome) or session end | invitation | none | with the session | `JoinListControllerTest`, `SharingApiIT` |
 | Reset mails | mail server | operator-defined (Mailpit: in-memory) | send | none | mail server retention | n/a |
 
 ## Erasure on request (Art. 17)

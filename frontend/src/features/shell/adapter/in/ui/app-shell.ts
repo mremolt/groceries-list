@@ -30,6 +30,7 @@ import { filter, map, startWith } from 'rxjs';
 
 import { ListActions } from './list-actions';
 import { ListsStore } from './lists-store';
+import { ShareActions } from './share-actions';
 import { ShellStore } from './shell-store';
 
 interface PageHeading {
@@ -93,6 +94,7 @@ export class AppShell implements OnInit {
   protected readonly store = inject(ShellStore);
   protected readonly lists = inject(ListsStore);
   private readonly actions = inject(ListActions);
+  private readonly shareActions = inject(ShareActions);
   protected readonly windowSize = inject(WindowSize);
 
   protected readonly drawer = viewChild.required(MatSidenav);
@@ -139,6 +141,15 @@ export class AppShell implements OnInit {
   protected newList(): void {
     this.closeIfModal();
     void this.actions.create(() => this.menuButton()?.nativeElement ?? document.querySelector<HTMLElement>('h1'));
+  }
+
+  /** „Liste teilen“ (FR-SHARE-01); focus returns to this button when the dialog closes. */
+  protected shareList(): void {
+    this.shareActions.share();
+  }
+
+  protected renewShareLink(): void {
+    void this.shareActions.renewCurrent(() => this.moreButton());
   }
 
   protected renameList(): void {

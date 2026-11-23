@@ -13,6 +13,8 @@ public final class People {
     public static final UUID ALICE_ID = UUID.fromString("00000000-0000-4000-8000-000000000001");
     public static final UUID BOB_ID = UUID.fromString("00000000-0000-4000-8000-000000000002");
 
+    public static final UUID CAROL_ID = UUID.fromString("00000000-0000-4000-8000-000000000003");
+
     private People() {}
 
     /** An ordinary user: "user A" of the cross-user tests (SPRING-SEC-16). */
@@ -23,6 +25,11 @@ public final class People {
     /** Another ordinary user: "user B" of the cross-user tests. */
     public static Caller bob() {
         return caller(BOB_ID, "sub-bob", "bob@example.test", "Bob Example");
+    }
+
+    /** A third ordinary user: the one who is invited by a share link. */
+    public static Caller carol() {
+        return caller(CAROL_ID, "sub-carol", "carol@example.test", "Carol Example");
     }
 
     private static Caller caller(UUID id, String subject, String email, String name) {

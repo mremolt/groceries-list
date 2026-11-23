@@ -11,9 +11,13 @@ import org.springframework.validation.annotation.Validated;
  *
  * @param loginStartPerMinute requests per minute and address to {@code /oauth2/authorization/*} (creates a session)
  * @param cspReportsPerMinute requests per minute and address to {@code /csp-reports}
+ * @param invitationsPerMinute requests per minute and address to the public invitation endpoints (lookup, remember)
+ * @param joinPerMinute requests per minute to the join endpoint, counted per address and, separately, per person
  */
 @ConfigurationProperties("app.rate-limits")
 @Validated
 record RateLimitProperties(
         @DefaultValue("10") @Positive int loginStartPerMinute,
-        @DefaultValue("60") @Positive int cspReportsPerMinute) {}
+        @DefaultValue("60") @Positive int cspReportsPerMinute,
+        @DefaultValue("30") @Positive int invitationsPerMinute,
+        @DefaultValue("20") @Positive int joinPerMinute) {}

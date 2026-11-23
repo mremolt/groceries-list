@@ -1,11 +1,11 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
 import { LOGIN_PATH, PAGE_NAVIGATION } from '../../../platform.tokens';
 import type { PageNavigation } from '../../../ports/out/page-navigation';
-import { unauthenticatedInterceptor } from './unauthenticated-interceptor';
+import { ANONYMOUS_ALLOWED, unauthenticatedInterceptor } from './unauthenticated-interceptor';
 
 function setup() {
   // NG-TOOL-11: explicit fake, `expect(mock.method)` trips unbound-method
@@ -53,6 +53,18 @@ describe('unauthenticatedInterceptor', () => {
     });
 
     controller.expectOne('/config.json').flush({}, { status: 401, statusText: 'Unauthorized' });
+    await result;
+
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('keeps the page when the caller marked the request as an anonymous-allowed probe (FR-AUTH-06)', async () => {
+    const { assign, http, controller } = setup();
+    const result = new Promise((resolve) => {
+      http.get('/api/v1/me', { context: new HttpContext().set(ANONYMOUS_ALLOWED, true) }).subscribe({ error: resolve });
+    });
+
+    controller.expectOne('/api/v1/me').flush({}, { status: 401, statusText: 'Unauthorized' });
     await result;
 
     expect(assign).not.toHaveBeenCalled();

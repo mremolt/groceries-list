@@ -19,3 +19,14 @@ Links `/j/{token}`; tokens must be ≥ 128 bits CSPRNG, never in logs, never lea
 ## Consequences
 
 The token appears once in the browser address bar (unavoidable for a link) and is removed with `history.replaceState` after the join call.
+
+## Implementation note (M4, backend)
+
+- `lists.share_token` is nullable (migration `V7__share_token.sql`): the first `GET /lists/{id}/share-link` creates it with a set-if-absent update, so two members asking at once end with one token and existing rows need no backfill. A check constraint enforces the format, a partial unique index the uniqueness. The column is read and written only by `ShareLinkJdbcAdapter`; it is not mapped by the list entity.
+- A malformed token (wrong characters or length, empty, missing) is the same `404 SHARE_LINK_INVALID` as an unknown one, never a 400: the answer carries no information about the shape the server expects.
+- `POST /v1/invitations` validates the token before it opens a session. The visitor session lives 2 hours (`PendingInvitation`); the login success handler gives the session its normal idle time back and redirects to the constant `/j/consume`. The sign-up variant is `/oauth2/authorization/keycloak?prompt=create` (the existing `prompt=create` pass-through).
+- `POST /v1/memberships/join` takes the token from the body or, with an empty body, from the session; the session token is removed after the attempt whatever its outcome, so a reload cannot retry a stale one.
+- Renewal and joining do **not** change `lists.revision`: the revision covers what the list shows (name, items, [ADR 0006](0006-sync-by-polling-with-list-revision.md)), and membership changes are not shown. A joined list reaches the other devices of the new member through the drawer poll (FR-SYNC-03).
+- Rate limits: invitation calls per address, join per address and per person (SPRING-SEC-21). Two `RateLimitFilter` instances on one request need distinct `OncePerRequestFilter` markers (`getAlreadyFilteredAttributeName`), otherwise the second is skipped without notice.
+- The public link base is `app.sharing.public-base-url` (required, no default).
+

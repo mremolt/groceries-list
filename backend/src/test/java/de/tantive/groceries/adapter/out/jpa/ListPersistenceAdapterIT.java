@@ -22,7 +22,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 @SpringBootTest(
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
-            "app.auth.client-secret=test"
+            "app.auth.client-secret=test",
+            "app.sharing.public-base-url=http://localhost:8080"
         })
 @Import(TestcontainersConfiguration.class)
 class ListPersistenceAdapterIT {

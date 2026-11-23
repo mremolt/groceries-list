@@ -34,6 +34,10 @@ services:
       APP_FRONTEND_ENVIRONMENT: local-compose
       # The E2E tier starts many logins from one address; the production default (10 per minute) would answer 429 (SPRING-SEC-21).
       APP_RATE_LIMITS_LOGIN_START_PER_MINUTE: "120"
+      APP_RATE_LIMITS_INVITATIONS_PER_MINUTE: "300"
+      APP_RATE_LIMITS_JOIN_PER_MINUTE: "300"
+      # Share links of this installation: <origin>/j/<token> (the app serves the SPA itself here).
+      APP_SHARING_PUBLIC_BASE_URL: http://localhost:8080
     ports:
       - "127.0.0.1:8080:8080"
     stop_grace_period: 60s   # above the shutdown budget (SPRING-OBS-04, REL-RUN-06)

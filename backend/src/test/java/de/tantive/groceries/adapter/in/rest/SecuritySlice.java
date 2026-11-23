@@ -28,6 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
-            "app.auth.client-secret=test-only"
+            "app.auth.client-secret=test-only",
+            "app.sharing.public-base-url=http://localhost:8080"
         })
 public @interface SecuritySlice {}

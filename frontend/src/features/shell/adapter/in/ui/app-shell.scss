@@ -109,6 +109,15 @@
   .more-button {
     margin-inline-start: auto;
   }
+
+  // share and menu sit together at the end (FR-SHARE-01, mockup Dlg-Teilen)
+  .share-button {
+    margin-inline-start: auto;
+
+    + .more-button {
+      margin-inline-start: 0;
+    }
+  }
 }
 
 .page-title {

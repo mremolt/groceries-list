@@ -11,6 +11,10 @@
     "description": "Document title of the settings page (route title)",
     "maxLength": 40
   },
+  "platform.title.join": {
+    "description": "Document title of the join-by-link page (route title, FR-SHARE-03)",
+    "maxLength": 40
+  },
   "platform.snackbar.close": {
     "description": "Accessible name of the close button of a snackbar (FR-FB-02)",
     "maxLength": 30

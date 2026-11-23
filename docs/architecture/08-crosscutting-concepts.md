@@ -47,7 +47,8 @@ RFC 9457 problem details with stable codes. Validation errors are always `400` w
 | Endpoint | Limit | Where |
 |---|---|---|
 | Keycloak login/registration/reset | brute-force detection, 5/15 min | Keycloak realm |
-| `POST /v1/memberships/join`, `POST /v1/invitations/lookup`, `POST /v1/invitations` | per user/IP buckets (to be fixed in M4) | Bucket4j filter in the app |
+| `POST /v1/invitations/lookup`, `POST /v1/invitations` (public) | 30 per minute and client address (`app.rate-limits.invitations-per-minute`) | `RateLimitFilter` (Bucket4j) in the API chain |
+| `POST /v1/memberships/join` | 20 per minute and client address **and** 20 per minute and person (`app.rate-limits.join-per-minute`; two filters, each with its own request marker) | `RateLimitFilter` in the API chain |
 | `/oauth2/authorization/*` (creates a session) | per IP | Bucket4j filter in the app (M1) |
 
 ## UI building blocks (M1)
