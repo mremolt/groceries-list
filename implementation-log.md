@@ -10,7 +10,7 @@
 | M0 design (documents only) | done | f9e82bc | |
 | M0 Project setup | done | b0ecad1 | m0-done |
 | M1 Accounts and app shell | done | 16e1331 | m1-done |
-| M2 Lists | done | PENDING | m2-done |
+| M2 Lists | done | 0eba963 | m2-done |
 | M3 Items | not started | | |
 | M4 Sharing and joining | not started | | |
 | M5 Synchronisation | not started | | |
