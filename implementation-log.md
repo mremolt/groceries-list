@@ -15,7 +15,7 @@
 | M4 Sharing and joining | done | 90fc5a7 | m4-done |
 | M5 Synchronisation | done | ae98bc7 | m5-done |
 | M6 Settings and account | done | da1d286 | m6-done |
-| M7 Internal test readiness | done | PENDING | m7-done |
+| M7 Internal test readiness | done | 531c0f6 | m7-done |
 
 - **Next action:** none open. All milestones done. Human review (kickoff 1.4): see M7 entry (LCP just over target in emulation, no screen-reader or real-device pass, Firefox/WebKit e2e skipped). Follow-up requested by the user: add eslint-plugin-vitest and eslint-plugin-playwright (recommended rulesets) to the frontend ESLint config, autofix, then fix the remaining findings.
 - **Work in flight:** none.
