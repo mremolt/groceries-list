@@ -114,114 +114,197 @@ async function scaleText(page: Page): Promise<void> {
   });
 }
 
-interface Screen {
+async function expandCartCardIfFolded(page: Page): Promise<void> {
+  const toggle = page.getByRole('button', { name: /^Im Wagen/ });
+  const folded = (await toggle.count()) > 0 && (await toggle.getAttribute('aria-expanded')) === 'false';
+  if (folded) await toggle.click();
+}
+
+async function openModalDrawerIfNeeded(page: Page): Promise<void> {
+  if ((page.viewportSize()?.width ?? 1280) < 840) await page.getByRole('button', { name: 'Navigation öffnen' }).click();
+}
+
+interface Context {
   page: Page;
-  expectErrors: (pattern: RegExp) => void;
   sharingApi: { tokenOf: (listId: string) => string };
-  /** Ends the test: the checks of the run (normal, or at 200 % text size). `tabStops` 0 skips the focus walk. */
-  check: (label: string, tabStops?: number) => Promise<void>;
+}
+
+interface Screen {
+  title: string;
+  /** Opens the screen: navigation and clicks only; the assertions live in the test of `screen`. */
+  open: (context: Context) => Promise<void>;
+  /** The element that proves the screen is up, and how many of it there are. */
+  ready: (page: Page) => Locator;
+  count?: number;
+  /** Label of the axe run, and the Tab stops of the focus walk (0 skips it). */
+  label: string;
+  tabStops?: number;
+  /** Console errors the stubbed server provokes on purpose (404/401 reads, start-up failure). */
+  errors?: RegExp;
+}
+
+/** Phone-sized windows skip the 200 % run: 200 % rem scaling there (narrow, or a landscape phone 390 px tall) is stricter than
+ * NFR-A11Y-06, which names 320 px and 200 % text as separate conditions; 320 px is covered by stubbed-reflow. */
+function skipsScaledRun(page: Page): boolean {
+  const { width = 0, height = 0 } = page.viewportSize() ?? {};
+  return width < 768 || height < 500;
+}
+
+/** Matches no console message: a screen without expected errors. */
+const NO_EXPECTED_ERRORS = /^never expected$/u;
+
+async function nothing(): Promise<void> {
+  // the normal run changes nothing before the app starts
 }
 
 /** One screen, two runs: as it is, and with the reader's text size and spacing. */
-function screen(title: string, body: (context: Screen) => Promise<void>): void {
-  for (const scaled of [false, true]) {
-    test(
-      scaled ? `${title} at 200 % text size` : title,
-      async ({ page, expectErrors, sharingApi, expectAccessible, expectReflowAndTextSpacing }) => {
-        const { width = 0, height = 0 } = page.viewportSize() ?? {};
-        // skipped on phone-sized windows: 200 % rem scaling there (narrow, or a landscape phone 390 px tall) is stricter than
-        // NFR-A11Y-06, which names 320 px and 200 % text as separate conditions; 320 px is covered by stubbed-reflow
-        test.skip(scaled && (width < 768 || height < 500), 'text size is checked from 768 x 500 px up');
-        if (scaled) await scaleText(page);
-        const check = scaled
-          ? (): Promise<void> => expectReflowAndTextSpacing()
-          : (label: string, tabStops?: number): Promise<void> => expectScreen(page, label, expectAccessible, tabStops);
-        await body({ page, expectErrors, sharingApi, check });
-      },
-    );
+function screen(definition: Screen): void {
+  const { title, open, ready, label, tabStops, errors, count = 1 } = definition;
+  const runs = [
+    {
+      name: title,
+      scaled: false,
+      prepare: nothing,
+      check: (page: Page, expectAccessible: (label: string) => Promise<void>): Promise<void> =>
+        expectScreen(page, label, expectAccessible, tabStops),
+    },
+    {
+      name: `${title} at 200 % text size`,
+      scaled: true,
+      prepare: scaleText,
+      check: (_page: Page, _expectAccessible: unknown, reflow: () => Promise<void>): Promise<void> => reflow(),
+    },
+  ];
+  for (const run of runs) {
+    test(run.name, async ({ page, expectErrors, sharingApi, expectAccessible, expectReflowAndTextSpacing }) => {
+      // eslint-disable-next-line playwright/no-skipped-test -- by design: the 200 % run starts at 768 x 500 px (see skipsScaledRun)
+      test.skip(run.scaled && skipsScaledRun(page), 'text size is checked from 768 x 500 px up');
+      expectErrors(errors ?? NO_EXPECTED_ERRORS);
+      await run.prepare(page);
+      await open({ page, sharingApi });
+      await expect(ready(page).first()).toBeVisible();
+      await expect(ready(page)).toHaveCount(count);
+      await run.check(page, expectAccessible, () => expectReflowAndTextSpacing());
+    });
   }
 }
 
 const openSection = (page: Page): Locator => page.getByRole('region', { name: 'Noch zu kaufen' });
+const dialogNamed =
+  (name: string) =>
+  (page: Page): Locator =>
+    page.getByRole('dialog', { name });
+const menu = async (page: Page, item?: string): Promise<void> => {
+  await page.getByRole('button', { name: 'Weitere Optionen' }).click();
+  if (item !== undefined) await page.getByRole('menuitem', { name: item }).click();
+};
 
 test.describe('list screens @responsive @theme @shell @a11y-matrix', () => {
   test.use({ initialLists: { lists: [SHOP, BBQ] }, initialItems: SHOP_ITEMS });
 
-  screen('list with items', async ({ page, check }) => {
-    await page.goto(URL);
-    await expect(openSection(page).getByRole('checkbox')).toHaveCount(3);
-    await check('list with items');
+  screen({
+    title: 'list with items',
+    open: ({ page }) => page.goto(URL).then(nothing),
+    ready: (page) => openSection(page).getByRole('checkbox'),
+    count: 3,
+    label: 'list with items',
   });
 
-  screen('edit item dialog', async ({ page, check }) => {
-    await page.goto(URL);
-    await page.getByRole('button', { name: '„Vollkornbrot“ bearbeiten' }).click();
-    await expect(page.getByRole('dialog', { name: 'Artikel bearbeiten' })).toBeVisible();
-    await check('edit item dialog', 6);
+  screen({
+    title: 'edit item dialog',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await page.getByRole('button', { name: '„Vollkornbrot“ bearbeiten' }).click();
+    },
+    ready: dialogNamed('Artikel bearbeiten'),
+    label: 'edit item dialog',
+    tabStops: 6,
   });
 
-  screen('clear checked dialog', async ({ page, check }) => {
-    await page.goto(URL);
-    await expect(page.getByRole('region', { name: 'Noch zu kaufen' })).toBeVisible(); // the cards appear with the items
-    const toggle = page.getByRole('button', { name: /^Im Wagen/ });
-    if ((await toggle.count()) > 0 && (await toggle.getAttribute('aria-expanded')) === 'false') await toggle.click();
-    await page.getByRole('button', { name: 'Erledigte entfernen' }).click();
-    await expect(page.getByRole('dialog', { name: 'Erledigte entfernen?' })).toBeVisible();
-    await check('clear checked dialog', 6);
+  screen({
+    title: 'clear checked dialog',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await openSection(page).waitFor(); // the cards appear with the items
+      await expandCartCardIfFolded(page);
+      await page.getByRole('button', { name: 'Erledigte entfernen' }).click();
+    },
+    ready: dialogNamed('Erledigte entfernen?'),
+    label: 'clear checked dialog',
+    tabStops: 6,
   });
 
-  screen('list menu', async ({ page, check }) => {
-    await page.goto(URL);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await expect(page.getByRole('menu')).toBeVisible();
-    await check('list menu', 0);
+  screen({
+    title: 'list menu',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await menu(page);
+    },
+    ready: (page) => page.getByRole('menu'),
+    label: 'list menu',
+    tabStops: 0,
   });
 
-  screen('rename dialog', async ({ page, check }) => {
-    await page.goto(URL);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste umbenennen' }).click();
-    await expect(page.getByRole('dialog', { name: 'Liste umbenennen' })).toBeVisible();
-    await check('rename dialog', 6);
+  screen({
+    title: 'rename dialog',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await menu(page, 'Liste umbenennen');
+    },
+    ready: dialogNamed('Liste umbenennen'),
+    label: 'rename dialog',
+    tabStops: 6,
   });
 
-  screen('delete list dialog', async ({ page, check }) => {
-    await page.goto(URL);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste löschen' }).click();
-    await expect(page.getByRole('dialog')).toBeVisible();
-    await check('delete list dialog', 6);
+  screen({
+    title: 'delete list dialog',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await menu(page, 'Liste löschen');
+    },
+    ready: (page) => page.getByRole('dialog'),
+    label: 'delete list dialog',
+    tabStops: 6,
   });
 
-  screen('share dialog', async ({ page, check }) => {
-    await page.goto(URL);
-    await page.getByRole('button', { name: 'Liste teilen' }).click();
-    await expect(page.getByRole('dialog', { name: `„${SHOP.name}“ teilen` })).toBeVisible();
-    await check('share dialog', 6);
+  screen({
+    title: 'share dialog',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await page.getByRole('button', { name: 'Liste teilen' }).click();
+    },
+    ready: dialogNamed(`„${SHOP.name}“ teilen`),
+    label: 'share dialog',
+    tabStops: 6,
   });
 
-  screen('renew link confirmation', async ({ page, check }) => {
-    await page.goto(URL);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Teilen-Link erneuern' }).click();
-    await expect(page.getByRole('dialog', { name: 'Teilen-Link erneuern?' })).toBeVisible();
-    await check('renew confirmation', 6);
+  screen({
+    title: 'renew link confirmation',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await menu(page, 'Teilen-Link erneuern');
+    },
+    ready: dialogNamed('Teilen-Link erneuern?'),
+    label: 'renew confirmation',
+    tabStops: 6,
   });
 
-  screen('modal or permanent drawer', async ({ page, check }) => {
-    await page.goto(URL);
-    if ((page.viewportSize()?.width ?? 1280) < 840)
-      await page.getByRole('button', { name: 'Navigation öffnen' }).click();
-    await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toBeVisible();
-    await check('drawer', 8);
+  screen({
+    title: 'modal or permanent drawer',
+    open: async ({ page }) => {
+      await page.goto(URL);
+      await openModalDrawerIfNeeded(page);
+    },
+    ready: (page) => page.getByRole('navigation', { name: 'Hauptnavigation' }),
+    label: 'drawer',
+    tabStops: 8,
   });
 
   test('reduced motion: opening a dialog starts no running animation of noticeable length (NFR-A11Y-09)', async ({
     page,
   }) => {
     await page.goto(URL);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste umbenennen' }).click();
+    await menu(page, 'Liste umbenennen');
     await expect(page.getByRole('dialog', { name: 'Liste umbenennen' })).toBeVisible();
 
     const longAnimations = await page.evaluate(() =>
@@ -238,51 +321,66 @@ test.describe('list screens @responsive @theme @shell @a11y-matrix', () => {
 });
 
 test.describe('empty and not-found screens @responsive @theme @shell @a11y-matrix', () => {
-  screen('empty state and create list dialog', async ({ page, check }) => {
-    await page.goto('/');
-    await expect(page.getByRole('heading', { level: 2, name: 'Noch keine Listen' })).toBeVisible();
-    await check('empty state');
+  screen({
+    title: 'empty state',
+    open: ({ page }) => page.goto('/').then(nothing),
+    ready: (page) => page.getByRole('heading', { level: 2, name: 'Noch keine Listen' }),
+    label: 'empty state',
   });
 
-  screen('create list dialog', async ({ page, check }) => {
-    await page.goto('/');
-    await page.getByRole('main').getByRole('button', { name: 'Neue Liste' }).click();
-    await expect(page.getByRole('dialog', { name: 'Neue Liste' })).toBeVisible();
-    await check('create list dialog', 6);
+  screen({
+    title: 'create list dialog',
+    open: async ({ page }) => {
+      await page.goto('/');
+      await page.getByRole('main').getByRole('button', { name: 'Neue Liste' }).click();
+    },
+    ready: dialogNamed('Neue Liste'),
+    label: 'create list dialog',
+    tabStops: 6,
   });
 
   test.describe('with lists', () => {
     test.use({ initialLists: { lists: [WEEK] } });
 
-    screen('list that does not exist', async ({ page, expectErrors, check }) => {
-      expectErrors(/status of 404/); // the stubbed 404 of the list read
-      await page.goto('/listen/00000000-0000-4000-8000-00000000dead');
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      await check('list not found');
+    screen({
+      title: 'list that does not exist',
+      open: ({ page }) => page.goto('/listen/00000000-0000-4000-8000-00000000dead').then(nothing),
+      ready: (page) => page.getByRole('heading', { level: 1 }),
+      label: 'list not found',
+      errors: /status of 404/, // the stubbed 404 of the list read
     });
   });
 
-  screen('start-up failure message', async ({ page, expectErrors, check }) => {
-    expectErrors(/Bootstrap failed/);
-    await page.route('**/config.json', (route) => route.fulfill({ json: { environment: '' } }));
-    await page.goto('/');
-    await expect(page.getByRole('alert')).toContainText('konnte nicht gestartet werden');
-    await check('start-up failure', 0);
+  screen({
+    title: 'start-up failure message',
+    open: async ({ page }) => {
+      await page.route('**/config.json', (route) => route.fulfill({ json: { environment: '' } }));
+      await page.goto('/');
+    },
+    ready: (page) => page.getByRole('alert').filter({ hasText: 'konnte nicht gestartet werden' }),
+    label: 'start-up failure',
+    tabStops: 0,
+    errors: /Bootstrap failed/,
   });
 });
 
 test.describe('settings and account @responsive @theme @shell @a11y-matrix', () => {
-  screen('settings page', async ({ page, check }) => {
-    await page.goto('/einstellungen');
-    await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible();
-    await check('settings page');
+  screen({
+    title: 'settings page',
+    open: ({ page }) => page.goto('/einstellungen').then(nothing),
+    ready: (page) => page.getByRole('heading', { level: 1, name: 'Einstellungen' }),
+    label: 'settings page',
   });
 
-  screen('delete account dialog', async ({ page, check }) => {
-    await page.goto('/einstellungen');
-    await page.getByRole('button', { name: 'Konto löschen' }).click();
-    await expect(page.getByRole('dialog', { name: 'Konto löschen?' })).toBeVisible();
-    await check('delete account dialog', 6);
+  screen({
+    title: 'delete account dialog',
+    open: async ({ page }) => {
+      await page.goto('/einstellungen');
+      await page.getByRole('button', { name: 'Konto löschen' }).click();
+    },
+    ready: dialogNamed('Konto löschen?'),
+    label: 'delete account dialog',
+    tabStops: 6,
   });
 });
 
@@ -290,18 +388,22 @@ test.describe('join pages @responsive @theme @shell @a11y-matrix', () => {
   test.describe('signed out', () => {
     test.use({ session: { signedIn: false }, initialLists: { lists: [BBQ] } });
 
-    screen('invitation page', async ({ page, sharingApi, expectErrors, check }) => {
-      expectErrors(/status of 401/);
-      await page.goto(`/j/${sharingApi.tokenOf(BBQ.id)}`);
-      await expect(page.getByRole('heading', { level: 1, name: 'Liste beitreten' })).toBeVisible();
-      await check('invitation page', 6);
+    screen({
+      title: 'invitation page',
+      open: ({ page, sharingApi }) => page.goto(`/j/${sharingApi.tokenOf(BBQ.id)}`).then(nothing),
+      ready: (page) => page.getByRole('heading', { level: 1, name: 'Liste beitreten' }),
+      label: 'invitation page',
+      tabStops: 6,
+      errors: /status of 401/,
     });
 
-    screen('invalid link page', async ({ page, expectErrors, check }) => {
-      expectErrors(/status of 401|status of 404/);
-      await page.goto('/j/' + 'x'.repeat(43));
-      await expect(page.getByRole('heading', { level: 2, name: 'Dieser Link funktioniert nicht mehr' })).toBeVisible();
-      await check('invalid link (signed out)', 6);
+    screen({
+      title: 'invalid link page',
+      open: ({ page }) => page.goto('/j/' + 'x'.repeat(43)).then(nothing),
+      ready: (page) => page.getByRole('heading', { level: 2, name: 'Dieser Link funktioniert nicht mehr' }),
+      label: 'invalid link (signed out)',
+      tabStops: 6,
+      errors: /status of 401|status of 404/,
     });
   });
 });

@@ -1,12 +1,14 @@
 import eslint from '@eslint/js';
 import comments from '@eslint-community/eslint-plugin-eslint-comments/configs';
 import ngrx from '@ngrx/eslint-plugin';
+import vitest from '@vitest/eslint-plugin';
 import angular from 'angular-eslint';
 import type { Linter } from 'eslint';
 import { defineConfig } from 'eslint/config';
 import prettier from 'eslint-config-prettier/flat';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import { importX } from 'eslint-plugin-import-x';
+import playwright from 'eslint-plugin-playwright';
 import security from 'eslint-plugin-security';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import { configs as sonarConfigs } from 'eslint-plugin-sonarjs';
@@ -148,6 +150,14 @@ export default defineConfig(
     files: ['**/*.spec.ts', 'src/testing/**/*.ts'],
     rules: { '@angular-eslint/component-max-inline-declarations': 'off' }, // NG-ARCH-21: test hosts
   },
+  // Recommended rulesets of the test frameworks (TS-TOOL-05: a rule is error or off).
+  { ...warnAsError(vitest.configs.recommended), files: ['src/**/*.spec.ts'] },
+  {
+    files: ['src/**/*.spec.ts'],
+    // src/testing/axe.ts asserts inside the helper: every component test scans with axe
+    rules: { 'vitest/expect-expect': ['error', { assertFunctionNames: ['expect', 'expectNoAxeViolations'] }] },
+  },
+  { ...warnAsError(playwright.configs['flat/recommended']), files: ['e2e/**/*.ts'] },
   {
     files: ['**/*.spec.ts', '**/*.test.ts', 'e2e/**/*.ts', 'src/testing/**/*.ts', 'test/**/*.ts'],
     rules: {

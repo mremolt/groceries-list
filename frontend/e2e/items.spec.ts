@@ -370,21 +370,32 @@ test.describe('empty states and „Im Wagen“ @responsive @shell @a11y-items', 
     await expectAccessible('empty list');
   });
 
-  test('„Im Wagen“ is folded on compact and a column on medium and expanded (FR-ITEM-06 AC1)', async ({ page }) => {
-    await page.goto(URL);
-    const compact = (page.viewportSize()?.width ?? 1280) < 600;
-    const toggle = page.getByRole('button', { name: /^Im Wagen/ });
+  test.describe('„Im Wagen“ (FR-ITEM-06 AC1)', () => {
+    test.describe('on a compact window', () => {
+      test.use({ viewport: { width: 390, height: 844 } });
 
-    if (compact) {
-      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-      await expect(page.getByText('Noch nichts abgehakt.')).toBeHidden();
-      await toggle.click();
-      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-      await expect(page.getByText('Noch nichts abgehakt.')).toBeVisible();
-    } else {
-      await expect(toggle).toHaveCount(0);
-      await expect(page.getByText('Noch nichts abgehakt.')).toBeVisible();
-    }
+      test('is a folded card that opens with its toggle', async ({ page }) => {
+        await page.goto(URL);
+        const toggle = page.getByRole('button', { name: /^Im Wagen/ });
+
+        await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        await expect(page.getByText('Noch nichts abgehakt.')).toBeHidden();
+        await toggle.click();
+        await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+        await expect(page.getByText('Noch nichts abgehakt.')).toBeVisible();
+      });
+    });
+
+    test.describe('on a medium or expanded window', () => {
+      test.use({ viewport: { width: 1280, height: 800 } });
+
+      test('is a column without a toggle', async ({ page }) => {
+        await page.goto(URL);
+
+        await expect(page.getByRole('button', { name: /^Im Wagen/ })).toHaveCount(0);
+        await expect(page.getByText('Noch nichts abgehakt.')).toBeVisible();
+      });
+    });
   });
 });
 

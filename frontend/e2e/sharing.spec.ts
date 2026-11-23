@@ -309,13 +309,12 @@ test.describe('join without a session @responsive @shell @a11y-sharing', () => {
     const invalid = page.getByRole('heading', { level: 2, name: 'Dieser Link funktioniert nicht mehr' });
     await page.goto(`/j/${renewed}`);
     await expect(invalid).toBeVisible();
-    const renewedText = await page.getByRole('main').innerText();
+    const renewedText = await page.getByRole('main').innerText(); // snapshot of the renewed-link page
     await page.goto('/j/unknown-token-0123456789');
     await expect(invalid).toBeVisible();
-    const unknownText = await page.getByRole('main').innerText();
 
-    expect(renewedText).toBe(unknownText);
-    expect(unknownText).not.toContain(BBQ.name);
+    await expect(page.getByRole('main')).toHaveText(renewedText, { useInnerText: true }); // the unknown-link page says exactly the same
+    await expect(page.getByRole('main')).not.toContainText(BBQ.name);
     await expectAccessible('invalid link (signed out)');
     await page.getByRole('button', { name: 'Anmelden' }).click();
     await expect(page).toHaveURL(/\/oauth2\/authorization\/keycloak$/);

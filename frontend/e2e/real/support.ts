@@ -111,3 +111,19 @@ export async function expectNoAxeViolations(page: Page, label: string): Promise<
   expect(ran, `${label}: axe rule target-size must have run`).toBe(true);
   expect(results.violations, label).toEqual([]);
 }
+
+/**
+ * Logs in with a wrong password until the identity provider shows the lockout text, at most `maxAttempts` times.
+ * Returns the attempt that was answered with the lockout, or 0 when none was (FR-AUTH-02 AC4).
+ */
+export async function failLoginUntilLockout(page: Page, user: TestUser, maxAttempts = 6): Promise<number> {
+  const generic = page.getByText('E-Mail-Adresse oder Passwort ist falsch.');
+  const lockout = page.getByText('Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.');
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    await loginThroughUi(page, user, `Falsch-Passwort-${String(attempt)}x`);
+    await expect(generic.or(lockout)).toBeVisible();
+    if (await lockout.isVisible()) return attempt;
+    await page.goto('/');
+  }
+  return 0;
+}

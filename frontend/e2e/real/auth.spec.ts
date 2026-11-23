@@ -4,6 +4,7 @@ import {
   APP,
   expectNoAxeViolations,
   expectSignedInShell,
+  failLoginUntilLockout,
   loginThroughUi,
   logoutThroughMenu,
   mailTextTo,
@@ -99,15 +100,8 @@ test.describe('@real accounts', () => {
     await registerThroughUi(page, user);
     await logoutThroughMenu(page);
 
-    const generic = page.getByText('E-Mail-Adresse oder Passwort ist falsch.');
     const lockout = page.getByText('Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.');
-    let lockedAfter = 0;
-    for (let attempt = 1; attempt <= 6 && lockedAfter === 0; attempt += 1) {
-      await loginThroughUi(page, user, `Falsch-Passwort-${String(attempt)}x`);
-      await expect(generic.or(lockout)).toBeVisible();
-      if (await lockout.isVisible()) lockedAfter = attempt;
-      else await page.goto('/');
-    }
+    const lockedAfter = await failLoginUntilLockout(page, user);
 
     // Brute-force detection (5 failures / 15 min) and its quick-login check (failures less than a second apart lock after
     // two): an automated run is stopped at the latest by the 6th failure, never earlier than the 2nd (TS-TEST-35: the

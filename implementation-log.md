@@ -17,7 +17,7 @@
 | M6 Settings and account | done | da1d286 | m6-done |
 | M7 Internal test readiness | done | 531c0f6 | m7-done |
 
-- **Next action:** none open. All milestones done. Human review (kickoff 1.4): see M7 entry (LCP just over target in emulation, no screen-reader or real-device pass, Firefox/WebKit e2e skipped). Follow-up requested by the user: add eslint-plugin-vitest and eslint-plugin-playwright (recommended rulesets) to the frontend ESLint config, autofix, then fix the remaining findings.
+- **Next action:** none open. All milestones done. Human review (kickoff 1.4): see M7 entry (LCP just over target in emulation, no screen-reader or real-device pass, Firefox/WebKit e2e skipped). Follow-up done: `@vitest/eslint-plugin` and `eslint-plugin-playwright` recommended rulesets are in the frontend ESLint config (see "Test linting" below).
 - **Work in flight:** none.
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
@@ -101,6 +101,10 @@ Gates: `mvnw verify` green; frontend unit 464 green; stubbed Chromium e2e 134 pa
 Not verified here (human review): Firefox, Safari/WebKit, Edge, previous browser versions and real devices (Firefox/WebKit e2e skipped on the user's instruction); screen-reader pass NFR-A11Y-10 (NVDA, VoiceOver, TalkBack); a real mid-range phone for NFR-PERF-01; the 200 % text-size check starts at 768x500 (stricter than NFR-A11Y-06, 320 px covered by `stubbed-reflow`). Deferred by 05 §5: NFR-PRIV, FR-SET-05, NFR-OPS, backups.
 
 Manual check (for human review): performance on a mid-range phone over 4G; keyboard-only walkthrough; one screen-reader pass; tester guide dry run with the two seed accounts.
+
+### Test linting (post-M7, requested by the user)
+
+`@vitest/eslint-plugin` 1.6.28 (the package of vitest-dev/eslint-plugin-vitest) for `src/**/*.spec.ts` and `eslint-plugin-playwright` 2.12.2 (`flat/recommended`) for `e2e/**/*.ts`, both pinned and with warnings turned into errors (TS-TOOL-05). Autofix first, then by hand: 50 findings. One autofix (`prefer-web-first-assertions` in `e2e/sharing.spec.ts`) turned a snapshot comparison into a self-comparison and was reverted and rewritten as `toHaveText(renewedText, { useInnerText: true })` against the saved text. Hand fixes: `a11y-matrix.spec.ts` restructured so each screen is data (open, ready locator) and one `test()` holds the assertions; the conditional compact/wide test in `items.spec.ts` split into two viewport-fixed tests; the lockout loop in `real/auth.spec.ts` moved to `failLoginUntilLockout` in `real/support.ts`. Config: `vitest/expect-expect` knows the assertion helper `expectNoAxeViolations` (`assertFunctionNames`), and one line-level `eslint-disable` with description for the intended conditional skip of the 200 % run on phone-sized windows. Verification: lint, typecheck, format, check:arch, check:unused, build, 464 unit tests; 644 passed / 34 skipped (by design) across the 7 Chromium stubbed projects. The real tier was not re-run for this change; the only real-tier edit is the extracted lockout helper (type-checked and linted).
 
 ## Assumptions
 
