@@ -23,6 +23,8 @@
 
 ## Durations (implementation time per step)
 
+Part-level timing (who/what took how long, by category): `implementation-timing.tsv` (appended by `tools/timed.sh` around every gate, build, test and infra command, and by hand for reading/coding parts). Summary: `sh tools/timing-report.sh` (by category, by milestone, 15 largest parts). The table below is the coarse per-step view.
+
 Wall-clock timestamps taken with `date -Is` at step start and end. Durations are elapsed time including tool and build time.
 
 | Step | Start | End | Duration |
