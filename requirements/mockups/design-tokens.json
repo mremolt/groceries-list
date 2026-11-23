@@ -1,0 +1,129 @@
+{
+  "$description": "Design tokens for the groceries list app (concept C, Material Design 3). Values are taken 1:1 from the final mockups in ./source. Colour roles follow the M3 naming; 'pageBg' and 'card' are app-specific aliases.",
+  "$version": "1.0",
+  "color": {
+    "light": {
+      "primary": "#415F91",
+      "onPrimary": "#FFFFFF",
+      "primaryContainer": "#D6E3FF",
+      "onPrimaryContainer": "#284777",
+      "secondaryContainer": "#DAE2F9",
+      "onSecondaryContainer": "#3E4759",
+      "surface": "#F9F9FF",
+      "onSurface": "#191C20",
+      "onSurfaceVariant": "#44474E",
+      "outline": "#74777F",
+      "outlineVariant": "#C4C6D0",
+      "surfaceContainerLowest": "#FFFFFF",
+      "surfaceContainerLow": "#F3F3FA",
+      "surfaceContainer": "#EDEDF4",
+      "surfaceContainerHigh": "#E7E8EE",
+      "surfaceContainerHighest": "#E2E2E9",
+      "error": "#BA1A1A",
+      "inverseSurface": "#2E3036",
+      "inverseOnSurface": "#F0F0F7",
+      "scrim": "rgba(0, 0, 0, 0.32)",
+      "pageBg": "#EDEDF4",
+      "card": "#FFFFFF"
+    },
+    "dark": {
+      "primary": "#AAC7FF",
+      "onPrimary": "#0A305F",
+      "primaryContainer": "#284777",
+      "onPrimaryContainer": "#D6E3FF",
+      "secondaryContainer": "#3E4759",
+      "onSecondaryContainer": "#DAE2F9",
+      "surface": "#111318",
+      "onSurface": "#E2E2E9",
+      "onSurfaceVariant": "#C4C6D0",
+      "outline": "#8E9099",
+      "outlineVariant": "#44474E",
+      "surfaceContainerLowest": "#0C0E13",
+      "surfaceContainerLow": "#191C20",
+      "surfaceContainer": "#1D2024",
+      "surfaceContainerHigh": "#282A2F",
+      "surfaceContainerHighest": "#33353A",
+      "error": "#FFB4AB",
+      "inverseSurface": "#E2E2E9",
+      "inverseOnSurface": "#2E3036",
+      "scrim": "rgba(0, 0, 0, 0.32)",
+      "pageBg": "#111318",
+      "card": "#1D2024"
+    },
+    "$usage": {
+      "pageBg": "Background of the app shell and the area around cards",
+      "card": "Background of content cards and the login card; also the background behind floating text-field labels inside cards",
+      "surfaceContainerLow": "Navigation drawer",
+      "surfaceContainer": "Menus",
+      "surfaceContainerHigh": "Dialogs",
+      "secondaryContainer": "Active navigation item, count badges, selected segmented button, info banner, progress track",
+      "outlineVariant": "Card borders and dividers (decorative)",
+      "outline": "Text field and outlined button borders (must stay >= 3:1)",
+      "error": "Destructive actions and error messages",
+      "inverseSurface": "Snackbars"
+    }
+  },
+  "typography": {
+    "fontFamily": "Roboto, system-ui, sans-serif",
+    "roles": {
+      "headlineMedium": { "size": "28px", "lineHeight": "36px", "weight": 400, "use": "Page title on expanded (desktop)" },
+      "headlineSmall": { "size": "24px", "lineHeight": "32px", "weight": 400, "use": "Page title on compact/medium, dialog titles, auth headings" },
+      "titleLarge": { "size": "22px", "lineHeight": "28px", "weight": 400, "use": "App name on auth screens" },
+      "titleMedium": { "size": "16px", "lineHeight": "24px", "weight": 500, "letterSpacing": "0.15px", "use": "Card headers" },
+      "titleSmall": { "size": "14px", "lineHeight": "20px", "weight": 500, "letterSpacing": "0.1px", "use": "Drawer section heading" },
+      "bodyLarge": { "size": "16px", "lineHeight": "24px", "weight": 400, "letterSpacing": "0.5px", "use": "List items, text field input" },
+      "bodyMedium": { "size": "14px", "lineHeight": "20px", "weight": 400, "letterSpacing": "0.25px", "use": "Secondary text, dialog body, progress text" },
+      "bodySmall": { "size": "12px", "lineHeight": "16px", "weight": 400, "letterSpacing": "0.4px", "use": "Field labels, supporting/error text" },
+      "labelLarge": { "size": "14px", "lineHeight": "20px", "weight": 500, "letterSpacing": "0.1px", "use": "Buttons, drawer items, menu items" },
+      "labelMedium": { "size": "12px", "lineHeight": "16px", "weight": 500, "use": "Count badges" }
+    }
+  },
+  "shape": {
+    "extraSmall": "4px",
+    "small": "8px",
+    "medium": "12px",
+    "large": "16px",
+    "extraLarge": "28px",
+    "full": "999px",
+    "$usage": {
+      "extraSmall": "Text fields, menus, snackbars",
+      "medium": "Cards",
+      "large": "Extended FAB, modal drawer trailing corners, auth card",
+      "extraLarge": "Dialogs",
+      "full": "Buttons, icon buttons, drawer items, badges"
+    }
+  },
+  "elevation": {
+    "level1": "0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)",
+    "level2": "0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15)",
+    "level3": "0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15)",
+    "$usage": {
+      "level1": "Extended FAB, modal drawer",
+      "level2": "Menus",
+      "level3": "Dialogs, snackbars"
+    }
+  },
+  "layout": {
+    "windowSizeClasses": {
+      "compact": { "maxWidth": "599px", "navigation": "modal drawer", "contentColumns": 1, "contentPadding": "12px" },
+      "medium": { "minWidth": "600px", "maxWidth": "839px", "navigation": "modal drawer", "contentColumns": "3fr / 2fr", "contentMaxWidth": "840px", "contentPadding": "24px" },
+      "expanded": { "minWidth": "840px", "navigation": "permanent drawer (360px)", "contentColumns": "3fr / 2fr", "contentMaxWidth": "1040px", "contentPadding": "24px" }
+    },
+    "settingsMaxWidth": "720px",
+    "authCardMaxWidth": "448px",
+    "gap": "16px"
+  },
+  "components": {
+    "topAppBar": { "iconRowHeight": "56px", "iconButton": "48px" },
+    "navigationDrawer": { "width": "360px", "itemHeight": "56px", "itemRadius": "28px" },
+    "listItem": { "minHeight": "56px", "checkboxBox": "18px", "checkboxTarget": "48px", "divider": "1px outlineVariant, full width inside the card" },
+    "textField": { "variant": "outlined", "height": "56px", "border": "1px outline (2px primary when focused, 2px error when invalid)", "labelAlwaysFloating": true },
+    "buttons": { "filled": "40px high (48px on auth screens)", "iconButtonFilledCompact": "48px, used for 'Hinzufügen' on compact", "text": "40px high" },
+    "badge": { "height": "24px", "minWidth": "24px" },
+    "progress": { "height": "4px", "gap": "4px" },
+    "menu": { "width": "256px", "itemHeight": "48px" },
+    "dialog": { "minWidth": "280px", "maxWidth": "400px (share: 480px)", "padding": "24px" },
+    "snackbar": { "minHeight": "48px", "minWidthExpanded": "344px", "maxWidth": "560px", "dismiss": "stays until closed (WCAG 2.2.1)" },
+    "focusRing": { "width": "3px", "color": "secondary role (not in mockups, define in implementation)", "offset": "2px" }
+  }
+}

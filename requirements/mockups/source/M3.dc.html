@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Konzept C – Material 3</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="height: {{rootH}}; width: 100%; display: flex; position: relative; overflow: hidden; box-sizing: border-box; font-family: Roboto, system-ui, sans-serif; background: {{c.pageBg}}; color: {{c.onSurface}}; color-scheme: {{theme}}">
+
+  <sc-if value="{{expanded}}" hint-placeholder-val="{{ true }}">
+    <nav aria-label="Navigation" style="width: 360px; flex-shrink: 0; height: 100%; box-sizing: border-box; padding: 12px; display: flex; flex-direction: column; overflow-y: auto; background: {{c.surfaceContainerLow}}; border-right: 1px solid {{c.outlineVariant}}">
+      <div style="padding: 8px 4px 12px">
+        <button type="button" onClick="{{askNewList}}" style="height: 56px; display: inline-flex; align-items: center; gap: 12px; padding: 0 20px 0 16px; border: 0; border-radius: 16px; background: {{c.primaryContainer}}; color: {{c.onPrimaryContainer}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; box-shadow: {{elev1}}; cursor: pointer">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+          Neue Liste
+        </button>
+      </div>
+      <h2 style="margin: 0; padding: 16px 16px 12px; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; color: {{c.onSurfaceVariant}}">Meine Listen</h2>
+      <sc-if value="{{noLists}}" hint-placeholder-val="{{ false }}">
+        <p style="margin: 0; padding: 8px 16px 16px; font-size: 14px; line-height: 20px; color: {{c.onSurfaceVariant}}">Noch keine Listen.</p>
+      </sc-if>
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+        <sc-for list="{{lists}}" as="l" hint-placeholder-count="3">
+          <li>
+            <button type="button" onClick="{{l.pick}}" aria-current="{{l.current}}" aria-label="{{l.label}}" style="width: 100%; height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 24px 0 16px; border: 0; border-radius: 28px; background: {{l.bg}}; color: {{l.fg}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.830 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"></path></svg>
+              <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{l.name}}</span>
+              <span>{{l.openCount}}</span>
+            </button>
+          </li>
+        </sc-for>
+      </ul>
+      <div aria-hidden="true" style="height: 1px; margin: 8px 16px; background: {{c.outlineVariant}}"></div>
+      <button type="button" onClick="{{goSettings}}" aria-current="{{settingsCurrent}}" style="width: 100%; height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 24px 0 16px; border: 0; border-radius: 28px; background: {{settingsBg}}; color: {{settingsFg}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
+        Einstellungen
+      </button>
+    </nav>
+  </sc-if>
+
+  <div style="flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; position: relative">
+    <header style="flex-shrink: 0; padding: 8px 4px 0; background: {{c.pageBg}}">
+      <div style="height: 56px; display: flex; align-items: center">
+        <sc-if value="{{notExpanded}}" hint-placeholder-val="{{ false }}">
+          <button type="button" aria-label="Navigation öffnen" aria-expanded="{{drawerExpanded}}" onClick="{{openDrawer}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurface}}; cursor: pointer">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+          </button>
+        </sc-if>
+        <div style="flex: 1"></div>
+        <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+          <button type="button" aria-label="Liste teilen" onClick="{{openShare}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"></path></svg>
+          </button>
+        </sc-if>
+        <button type="button" aria-label="{{themeLabel}}" onClick="{{toggleTheme}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+          <sc-if value="{{isDark}}" hint-placeholder-val="{{ false }}">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"></path></svg>
+          </sc-if>
+          <sc-if value="{{isLight}}" hint-placeholder-val="{{ true }}">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"></path></svg>
+          </sc-if>
+        </button>
+        <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+          <button type="button" aria-label="Weitere Optionen" aria-expanded="{{menuExpanded}}" onClick="{{toggleMenu}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: {{menuBtnBg}}; color: {{c.onSurfaceVariant}}; cursor: pointer">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+          </button>
+        </sc-if>
+      </div>
+      <h1 style="margin: 0; padding: {{h1Pad}}; font-size: {{h1Size}}; line-height: {{h1Line}}; font-weight: 400; color: {{c.onSurface}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{pageTitle}}</h1>
+    </header>
+
+    <div style="flex: 1; overflow-y: auto">
+
+      <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+        <div style="max-width: {{maxW}}; box-sizing: border-box; padding: {{bodyPad}}; display: flex; flex-direction: column; gap: 16px">
+          <section aria-labelledby="add-h" style="box-sizing: border-box; padding: 16px; border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}">
+            <h2 id="add-h" style="margin: 0 0 20px; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; color: {{c.onSurface}}">Artikel hinzufügen</h2>
+            <form onSubmit="{{onAdd}}" style="display: flex; align-items: center; gap: 12px">
+              <div style="position: relative; flex: 1; min-width: 0">
+                <label for="add-m3" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{c.card}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Was fehlt?</label>
+                <input id="add-m3" type="text" autocomplete="off" value="{{draft}}" onChange="{{onDraft}}" placeholder="{{addPlaceholder}}" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+              </div>
+              <sc-if value="{{notCompact}}" hint-placeholder-val="{{ true }}">
+                <button type="submit" style="height: 40px; flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; padding: 0 24px 0 16px; border: 0; border-radius: 20px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">
+                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+                  Hinzufügen
+                </button>
+              </sc-if>
+              <sc-if value="{{compact}}" hint-placeholder-val="{{ false }}">
+                <button type="submit" aria-label="Hinzufügen" style="width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: {{c.primary}}; color: {{c.onPrimary}}; cursor: pointer">
+                  <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+                </button>
+              </sc-if>
+            </form>
+          </section>
+
+          <div style="display: grid; grid-template-columns: {{gridCols}}; gap: 16px; align-items: start">
+            <section aria-labelledby="open-m3" style="border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}; overflow: hidden">
+              <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 14px; border-bottom: 1px solid {{c.outlineVariant}}">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+                  <div style="display: flex; align-items: center; gap: 8px">
+                    <h2 id="open-m3" style="margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; color: {{c.onSurface}}">Noch zu kaufen</h2>
+                    <span aria-hidden="true" style="min-width: 24px; height: 24px; box-sizing: border-box; padding: 0 8px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; background: {{c.secondaryContainer}}; color: {{c.onSecondaryContainer}}; font-size: 12px; line-height: 16px; font-weight: 500">{{openCount}}</span>
+                  </div>
+                  <sc-if value="{{hasItems}}" hint-placeholder-val="{{ true }}">
+                    <p style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}"><strong style="font-weight: 500; color: {{c.onSurface}}">{{doneCount}} von {{total}}</strong> erledigt</p>
+                  </sc-if>
+                </div>
+                <sc-if value="{{hasItems}}" hint-placeholder-val="{{ true }}">
+                  <div aria-hidden="true" style="height: 4px; display: flex; gap: 4px">
+                    <div style="width: {{pct}}; border-radius: 2px; background: {{c.primary}}"></div>
+                    <div style="flex: 1; border-radius: 2px; background: {{c.secondaryContainer}}"></div>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{emptyList}}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 24px; text-align: center">
+                  <span aria-hidden="true" style="width: 64px; height: 64px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: {{c.secondaryContainer}}; color: {{c.onSecondaryContainer}}">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                  </span>
+                  <p style="margin: 8px 0 0; font-size: 16px; line-height: 24px; font-weight: 500; color: {{c.onSurface}}">Diese Liste ist noch leer</p>
+                  <p style="margin: 0; font-size: 14px; line-height: 20px; color: {{c.onSurfaceVariant}}">Füge oben den ersten Artikel hinzu. Alle Mitglieder sehen ihn sofort.</p>
+                </div>
+              </sc-if>
+              <sc-if value="{{allDone}}" hint-placeholder-val="{{ false }}">
+                <p style="margin: 0; padding: 20px 16px; font-size: 16px; line-height: 24px; color: {{c.onSurfaceVariant}}">Alles im Wagen.</p>
+              </sc-if>
+              <ul style="list-style: none; margin: 0; padding: 0">
+                <sc-for list="{{openItems}}" as="it" hint-placeholder-count="7">
+                  <li style="display: flex; align-items: center; border-top: {{it.sep}}">
+                    <label style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; min-height: 56px; padding-left: 4px; cursor: pointer">
+                      <span style="position: relative; width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center">
+                        <input type="checkbox" checked="{{it.done}}" onChange="{{it.toggle}}" style="appearance: none; -webkit-appearance: none; margin: 0; width: 18px; height: 18px; box-sizing: border-box; border-radius: 2px; border: 2px solid {{it.boxBorder}}; background: {{it.boxBg}}; cursor: pointer">
+                      </span>
+                      <span style="font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: {{c.onSurface}}">{{it.text}}</span>
+                    </label>
+                    <button type="button" aria-label="{{it.editLabel}}" onClick="{{it.edit}}" style="width: 48px; height: 48px; flex-shrink: 0; margin-right: 4px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+                      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
+                    </button>
+                  </li>
+                </sc-for>
+              </ul>
+            </section>
+
+            <sc-if value="{{notCompact}}" hint-placeholder-val="{{ true }}">
+              <section aria-labelledby="done-m3" style="border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}; overflow: hidden">
+                <div style="display: flex; align-items: center; gap: 8px; min-height: 56px; box-sizing: border-box; padding: 0 16px; border-bottom: 1px solid {{c.outlineVariant}}">
+                  <h2 id="done-m3" style="margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; color: {{c.onSurface}}">Im Wagen</h2>
+                  <span aria-hidden="true" style="min-width: 24px; height: 24px; box-sizing: border-box; padding: 0 8px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; background: {{c.secondaryContainer}}; color: {{c.onSecondaryContainer}}; font-size: 12px; line-height: 16px; font-weight: 500">{{doneCount}}</span>
+                </div>
+                <sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}">
+                  <p style="margin: 0; padding: 20px 16px; font-size: 14px; line-height: 20px; color: {{c.onSurfaceVariant}}">Noch nichts abgehakt.</p>
+                </sc-if>
+                <ul style="list-style: none; margin: 0; padding: 0">
+                  <sc-for list="{{doneItems}}" as="it" hint-placeholder-count="2">
+                    <li style="display: flex; align-items: center; border-top: {{it.sep}}">
+                      <label style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; min-height: 56px; padding-left: 4px; cursor: pointer">
+                        <span style="position: relative; width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center">
+                          <input type="checkbox" checked="{{it.done}}" onChange="{{it.toggle}}" style="appearance: none; -webkit-appearance: none; margin: 0; width: 18px; height: 18px; box-sizing: border-box; border-radius: 2px; border: 2px solid {{it.boxBorder}}; background: {{it.boxBg}}; cursor: pointer">
+                          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="{{c.onPrimary}}" style="position: absolute; left: 17px; top: 17px; pointer-events: none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
+                        </span>
+                        <span style="font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: {{c.onSurfaceVariant}}; text-decoration: line-through">{{it.text}}</span>
+                      </label>
+                    </li>
+                  </sc-for>
+                </ul>
+                <sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid {{c.outlineVariant}}">
+                    <button type="button" onClick="{{askClear}}" style="height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">
+                      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                      Erledigte entfernen
+                    </button>
+                  </div>
+                </sc-if>
+              </section>
+            </sc-if>
+
+            <sc-if value="{{compact}}" hint-placeholder-val="{{ false }}">
+              <section aria-labelledby="done-m3c" style="border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}; overflow: hidden">
+                <h2 id="done-m3c" style="margin: 0; font-size: inherit">
+                  <button type="button" aria-expanded="{{doneExpanded}}" onClick="{{toggleDone}}" style="width: 100%; height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 16px; border: 0; background: transparent; color: {{c.onSurface}}; font: inherit; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; text-align: left; cursor: pointer">
+                    Im Wagen
+                    <span aria-hidden="true" style="min-width: 24px; height: 24px; box-sizing: border-box; padding: 0 8px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; background: {{c.secondaryContainer}}; color: {{c.onSecondaryContainer}}; font-size: 12px; line-height: 16px; font-weight: 500">{{doneCount}}</span>
+                    <span style="flex: 1"></span>
+                    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="transform: {{chevronRot}}; color: {{c.onSurfaceVariant}}"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>
+                  </button>
+                </h2>
+                <sc-if value="{{doneOpen}}" hint-placeholder-val="{{ false }}">
+                  <sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}">
+                    <p style="margin: 0; padding: 16px; border-top: 1px solid {{c.outlineVariant}}; font-size: 14px; line-height: 20px; color: {{c.onSurfaceVariant}}">Noch nichts abgehakt.</p>
+                  </sc-if>
+                  <sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+                    <ul style="list-style: none; margin: 0; padding: 0; border-top: 1px solid {{c.outlineVariant}}">
+                      <sc-for list="{{doneItems}}" as="it" hint-placeholder-count="2">
+                        <li style="display: flex; align-items: center; border-top: {{it.sep}}">
+                          <label style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; min-height: 56px; padding-left: 4px; cursor: pointer">
+                            <span style="position: relative; width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center">
+                              <input type="checkbox" checked="{{it.done}}" onChange="{{it.toggle}}" style="appearance: none; -webkit-appearance: none; margin: 0; width: 18px; height: 18px; box-sizing: border-box; border-radius: 2px; border: 2px solid {{it.boxBorder}}; background: {{it.boxBg}}; cursor: pointer">
+                              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="{{c.onPrimary}}" style="position: absolute; left: 17px; top: 17px; pointer-events: none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
+                            </span>
+                            <span style="font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: {{c.onSurfaceVariant}}; text-decoration: line-through">{{it.text}}</span>
+                          </label>
+                        </li>
+                      </sc-for>
+                    </ul>
+                    <div style="display: flex; justify-content: flex-end; padding: 8px 12px; border-top: 1px solid {{c.outlineVariant}}">
+                      <button type="button" onClick="{{askClear}}" style="height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">
+                        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                        Erledigte entfernen
+                      </button>
+                    </div>
+                  </sc-if>
+                </sc-if>
+              </section>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showNoLists}}" hint-placeholder-val="{{ false }}">
+        <div style="box-sizing: border-box; min-height: 100%; display: flex; align-items: flex-start; justify-content: center; padding: {{bodyPad}}">
+          <section aria-labelledby="nolists-h" style="width: 100%; max-width: 480px; box-sizing: border-box; margin-top: 24px; padding: 40px 24px; border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+            <span aria-hidden="true" style="width: 96px; height: 96px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: {{c.primaryContainer}}; color: {{c.onPrimaryContainer}}">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </span>
+            <h2 id="nolists-h" style="margin: 12px 0 0; font-size: 24px; line-height: 32px; font-weight: 400; color: {{c.onSurface}}">Noch keine Listen</h2>
+            <p style="margin: 0; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; color: {{c.onSurfaceVariant}}">Lege deine erste Einkaufsliste an und teile sie mit Familie, Partner oder WG.</p>
+            <button type="button" onClick="{{askNewList}}" style="margin-top: 8px; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 24px 0 16px; border: 0; border-radius: 20px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+              Neue Liste
+            </button>
+            <p style="margin: 16px 0 0; padding-top: 16px; border-top: 1px solid {{c.outlineVariant}}; font-size: 14px; line-height: 20px; color: {{c.onSurfaceVariant}}">Du hast einen Teilen-Link bekommen? Öffne ihn einfach – die Liste erscheint dann hier.</p>
+          </section>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isSettings}}" hint-placeholder-val="{{ false }}">
+        <div style="max-width: 720px; box-sizing: border-box; padding: {{bodyPad}}; display: flex; flex-direction: column; gap: 16px">
+          <section aria-labelledby="set-profile" style="border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}; overflow: hidden">
+            <h2 id="set-profile" style="margin: 0; padding: 16px; border-bottom: 1px solid {{c.outlineVariant}}; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px">Profil</h2>
+            <form onSubmit="{{saveProfile}}" style="padding: 24px 16px 16px; display: flex; flex-direction: column; gap: 4px">
+              <div style="position: relative">
+                <label for="set-name" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{c.card}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Anzeigename</label>
+                <input id="set-name" type="text" autocomplete="nickname" value="{{profileName}}" onChange="{{onProfileName}}" aria-describedby="set-name-help" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+              </div>
+              <p id="set-name-help" style="margin: 0; padding: 0 16px; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">So wirst du in der App angezeigt.</p>
+              <div style="display: flex; justify-content: flex-end; padding-top: 12px">
+                <button type="submit" style="height: 40px; padding: 0 24px; border: 0; border-radius: 20px; background: {{c.secondaryContainer}}; color: {{c.onSecondaryContainer}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Speichern</button>
+              </div>
+            </form>
+          </section>
+
+          <section aria-labelledby="set-look" style="border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}; overflow: hidden">
+            <h2 id="set-look" style="margin: 0; padding: 16px; border-bottom: 1px solid {{c.outlineVariant}}; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px">Darstellung</h2>
+            <fieldset style="margin: 0; padding: 16px; border: 0; min-width: 0">
+              <legend style="padding: 0 0 12px; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">Design</legend>
+              <div style="display: flex">
+                <sc-for list="{{themeOptions}}" as="o" hint-placeholder-count="3">
+                  <button type="button" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}" style="flex: 1; min-width: 0; height: 40px; margin-left: {{o.ml}}; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; border: 1px solid {{c.outline}}; border-radius: {{o.radius}}; background: {{o.bg}}; color: {{o.fg}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">
+                    <sc-if value="{{o.sel}}" hint-placeholder-val="{{ false }}">
+                      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
+                    </sc-if>
+                    {{o.label}}
+                  </button>
+                </sc-for>
+              </div>
+              <p style="margin: 12px 0 0; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">„System“ folgt der Einstellung deines Geräts.</p>
+            </fieldset>
+          </section>
+
+          <section aria-labelledby="set-account" style="border-radius: 12px; border: 1px solid {{c.outlineVariant}}; background: {{c.card}}; overflow: hidden">
+            <h2 id="set-account" style="margin: 0; padding: 16px; border-bottom: 1px solid {{c.outlineVariant}}; font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px">Konto</h2>
+            <ul style="list-style: none; margin: 0; padding: 0">
+              <li style="display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 8px 16px; box-sizing: border-box">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.onSurfaceVariant}}"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path></svg>
+                <div>
+                  <p style="margin: 0; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">E-Mail-Adresse</p>
+                  <p style="margin: 0; font-size: 16px; line-height: 24px; letter-spacing: 0.5px">mara@beispiel.de</p>
+                </div>
+              </li>
+              <li style="border-top: 1px solid {{c.outlineVariant}}">
+                <button type="button" style="width: 100%; min-height: 56px; display: flex; align-items: center; gap: 16px; padding: 0 16px; border: 0; background: transparent; color: {{c.onSurface}}; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; text-align: left; cursor: pointer">
+                  <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.onSurfaceVariant}}"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+                  Abmelden
+                </button>
+              </li>
+              <li style="border-top: 1px solid {{c.outlineVariant}}">
+                <button type="button" onClick="{{askDeleteAccount}}" style="width: 100%; min-height: 56px; display: flex; align-items: center; gap: 16px; padding: 0 16px; border: 0; background: transparent; color: {{c.error}}; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; text-align: left; cursor: pointer">
+                  <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                  Konto löschen
+                </button>
+              </li>
+            </ul>
+          </section>
+
+          <div style="padding: 0 4px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">
+            <p style="margin: 0">Eine Kopie deiner gespeicherten Daten kannst du jederzeit beim Support anfordern: <a href="mailto:support@beispiel.de" style="color: {{c.primary}}">support@beispiel.de</a></p>
+            <p style="margin: 0"><a href="#impressum" style="color: {{c.primary}}">Impressum</a> · <a href="#datenschutz" style="color: {{c.primary}}">Datenschutz</a></p>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{menuOpen}}" hint-placeholder-val="{{ false }}">
+      <button type="button" tabindex="-1" aria-hidden="true" onClick="{{closeMenu}}" style="position: absolute; inset: 0; z-index: 9; border: 0; padding: 0; background: transparent; cursor: default"></button>
+      <div style="position: absolute; z-index: 10; top: 60px; right: 12px; width: 256px; max-width: calc(100% - 24px); box-sizing: border-box; padding: 8px 0; border-radius: 4px; background: {{c.surfaceContainer}}; box-shadow: {{elev2}}">
+        <ul aria-label="Weitere Optionen" style="list-style: none; margin: 0; padding: 0">
+          <li>
+            <button type="button" onClick="{{askRename}}" style="width: 100%; height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: {{c.onSurface}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.onSurfaceVariant}}"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
+              Liste umbenennen
+            </button>
+          </li>
+          <li>
+            <button type="button" onClick="{{askRenew}}" style="width: 100%; height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: {{c.onSurface}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.onSurfaceVariant}}"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg>
+              Teilen-Link erneuern
+            </button>
+          </li>
+          <li>
+            <button type="button" onClick="{{askLeave}}" style="width: 100%; height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: {{c.onSurface}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.onSurfaceVariant}}"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.58zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path></svg>
+              Liste verlassen
+            </button>
+          </li>
+          <li>
+            <button type="button" onClick="{{askDelete}}" style="width: 100%; height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: {{c.error}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+              Liste löschen
+            </button>
+          </li>
+        </ul>
+        <div aria-hidden="true" style="height: 1px; margin: 8px 0; background: {{c.outlineVariant}}"></div>
+        <ul aria-label="Konto" style="list-style: none; margin: 0; padding: 0">
+          <li>
+            <button type="button" onClick="{{goSettings}}" style="width: 100%; height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: {{c.onSurface}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.onSurfaceVariant}}"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
+              Einstellungen
+            </button>
+          </li>
+          <li>
+            <button type="button" style="width: 100%; height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: {{c.onSurface}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.onSurfaceVariant}}"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+              Abmelden
+            </button>
+          </li>
+        </ul>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{snackOpen}}" hint-placeholder-val="{{ false }}">
+      <div role="status" aria-live="polite" style="position: absolute; z-index: 30; left: {{snackLeft}}; right: {{snackRight}}; bottom: 16px; min-width: {{snackMinW}}; max-width: 560px; min-height: 48px; box-sizing: border-box; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 16px; border-radius: 4px; background: {{c.inverseSurface}}; color: {{c.inverseOnSurface}}; box-shadow: {{elev3}}; font-size: 14px; line-height: 20px; letter-spacing: 0.25px">
+        <span style="flex: 1; padding: 14px 0">{{snackText}}</span>
+        <button type="button" aria-label="Hinweis schließen" onClick="{{closeSnack}}" style="width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.inverseOnSurface}}; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{drawerOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 15; display: flex">
+      <nav aria-label="Navigation" style="width: 360px; max-width: calc(100% - 56px); height: 100%; box-sizing: border-box; padding: 12px; display: flex; flex-direction: column; overflow-y: auto; border-radius: 0 16px 16px 0; background: {{c.surfaceContainerLow}}; box-shadow: {{elev1}}">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0 12px 4px">
+          <button type="button" onClick="{{askNewList}}" style="height: 56px; display: inline-flex; align-items: center; gap: 12px; padding: 0 20px 0 16px; border: 0; border-radius: 16px; background: {{c.primaryContainer}}; color: {{c.onPrimaryContainer}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; box-shadow: {{elev1}}; cursor: pointer">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+            Neue Liste
+          </button>
+          <button type="button" aria-label="Navigation schließen" onClick="{{closeDrawer}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+          </button>
+        </div>
+        <h2 style="margin: 0; padding: 16px 16px 12px; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; color: {{c.onSurfaceVariant}}">Meine Listen</h2>
+        <sc-if value="{{noLists}}" hint-placeholder-val="{{ false }}">
+          <p style="margin: 0; padding: 8px 16px 16px; font-size: 14px; line-height: 20px; color: {{c.onSurfaceVariant}}">Noch keine Listen.</p>
+        </sc-if>
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+          <sc-for list="{{lists}}" as="l" hint-placeholder-count="3">
+            <li>
+              <button type="button" onClick="{{l.pickClose}}" aria-current="{{l.current}}" aria-label="{{l.label}}" style="width: 100%; height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 24px 0 16px; border: 0; border-radius: 28px; background: {{l.bg}}; color: {{l.fg}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"></path></svg>
+                <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{l.name}}</span>
+                <span>{{l.openCount}}</span>
+              </button>
+            </li>
+          </sc-for>
+        </ul>
+        <div aria-hidden="true" style="height: 1px; margin: 8px 16px; background: {{c.outlineVariant}}"></div>
+        <button type="button" onClick="{{goSettingsClose}}" aria-current="{{settingsCurrent}}" style="width: 100%; height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 24px 0 16px; border: 0; border-radius: 28px; background: {{settingsBg}}; color: {{settingsFg}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; text-align: left; cursor: pointer">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
+          Einstellungen
+        </button>
+      </nav>
+      <button type="button" tabindex="-1" aria-hidden="true" onClick="{{closeDrawer}}" style="flex: 1; border: 0; padding: 0; background: rgba(0,0,0,0.32); cursor: pointer"></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{dialogOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box; background: rgba(0,0,0,0.32)">
+      <dialog open aria-modal="true" aria-labelledby="dlg-title" aria-describedby="dlg-desc" style="position: static; margin: 0; width: 100%; min-width: 280px; max-width: {{dlg.maxW}}; box-sizing: border-box; padding: 24px; border: 0; border-radius: 28px; background: {{c.surfaceContainerHigh}}; color: {{c.onSurface}}; box-shadow: {{elev3}}">
+        <form onSubmit="{{confirmDialog}}" style="display: flex; flex-direction: column; gap: 16px">
+          <h2 id="dlg-title" style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 400">{{dlg.title}}</h2>
+          <p id="dlg-desc" style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">{{dlg.text}}</p>
+
+          <sc-if value="{{dlg.hasField}}" hint-placeholder-val="{{ false }}">
+            <div style="position: relative; margin-top: 8px">
+              <label for="dlg-field" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{c.surfaceContainerHigh}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.primary}}">{{dlg.fieldLabel}}</label>
+              <input id="dlg-field" type="{{dlg.fieldType}}" autocomplete="{{dlg.autocomplete}}" value="{{dlgValue}}" onChange="{{onDlgValue}}" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 2px solid {{c.primary}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+            </div>
+          </sc-if>
+
+          <sc-if value="{{dlg.isShare}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px">
+              <div style="position: relative">
+                <label for="dlg-link" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{c.surfaceContainerHigh}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Teilen-Link</label>
+                <input id="dlg-link" type="text" readonly value="https://einkauf.beispiel.de/j/7Kx2pQ9m" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+              </div>
+              <button type="button" onClick="{{copyLink}}" style="height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 24px 0 16px; border: 0; border-radius: 20px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>
+                Link kopieren
+              </button>
+              <p style="margin: 0; display: flex; gap: 8px; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg>
+                Link an die falsche Person geschickt? Erneuere ihn – der alte Link funktioniert dann nicht mehr.
+              </p>
+            </div>
+          </sc-if>
+
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px">
+            <sc-if value="{{dlg.isShare}}" hint-placeholder-val="{{ false }}">
+              <button type="button" onClick="{{askRenew}}" style="height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Link erneuern</button>
+            </sc-if>
+            <sc-if value="{{dlg.hasDelete}}" hint-placeholder-val="{{ false }}">
+              <button type="button" onClick="{{deleteItem}}" style="height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.error}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Löschen</button>
+            </sc-if>
+            <div style="flex: 1"></div>
+            <sc-if value="{{dlg.hasCancel}}" hint-placeholder-val="{{ true }}">
+              <button type="button" onClick="{{closeDialog}}" style="height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Abbrechen</button>
+            </sc-if>
+            <button type="submit" style="height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{dlg.color}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">{{dlg.confirm}}</button>
+          </div>
+        </form>
+      </dialog>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"device":{"editor":"enum","options":["auto","compact","medium","expanded"],"default":"auto"},"view":{"editor":"enum","options":["list","settings"],"default":"list"},"empty":{"editor":"enum","options":["","noLists","noItems"],"default":""},"drawer":{"editor":"boolean","default":false},"menu":{"editor":"boolean","default":false},"dialog":{"editor":"enum","options":["","delete","clear","leave","renew","share","rename","newList","editItem","deleteAccount"],"default":""},"snackbar":{"editor":"enum","options":["","copied","renewed","joined","cleared","deleted","left","saved","created"],"default":""},"doneOpen":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this._onResize = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
+  seed() {
+    if (this.props.empty === 'noLists') return [];
+    const raw = [
+      ['woche', 'Wocheneinkauf', [['2× Milch, laktosefrei', 0], ['Vollkornbrot', 0], ['6 Eier', 0], ['Tomaten', 0], ['Bananen', 0], ['Kaffeebohnen 500 g', 0], ['Spülmittel', 0], ['Butter', 1], ['Naturjoghurt', 1]]],
+      ['grill', 'Grillabend Samstag', [['Grillkohle', 0], ['Halloumi', 0], ['4 Maiskolben', 0], ['Kräuterbaguette', 0], ['Senf', 1]]],
+      ['wg', 'WG-Vorrat', [['Toilettenpapier', 0], ['Reis 1 kg', 0], ['Haferflocken', 1]]]
+    ];
+    if (this.props.empty === 'noItems') raw.push(['mia', 'Geburtstag Mia', []]);
+    return raw.map(([id, name, items]) => ({ id, name, items: items.map(([text, d], i) => ({ id: id + '-' + i, text, done: !!d })) }));
+  }
+  renderVals() {
+    const s = this.state || {};
+    const p = this.props;
+    const lists = s.lists || this.seed();
+    const pref = s.themePref || 'system';
+    const theme = pref === 'system' ? (p.theme || 'light') : pref;
+    const vw = s.vw || 1280;
+    const pd = p.device;
+    const size = pd && pd !== 'auto' ? pd : (vw < 600 ? 'compact' : vw < 840 ? 'medium' : 'expanded');
+    const compact = size === 'compact';
+    const expanded = size === 'expanded';
+    const S = {
+      light: { primary: '#415F91', onPrimary: '#FFFFFF', primaryContainer: '#D6E3FF', onPrimaryContainer: '#284777', secondaryContainer: '#DAE2F9', onSecondaryContainer: '#3E4759', surface: '#F9F9FF', onSurface: '#191C20', onSurfaceVariant: '#44474E', outline: '#74777F', outlineVariant: '#C4C6D0', surfaceContainerLow: '#F3F3FA', surfaceContainer: '#EDEDF4', surfaceContainerHigh: '#E7E8EE', surfaceContainerHighest: '#E2E2E9', error: '#BA1A1A', inverseSurface: '#2E3036', inverseOnSurface: '#F0F0F7', pageBg: '#EDEDF4', card: '#FFFFFF' },
+      dark: { primary: '#AAC7FF', onPrimary: '#0A305F', primaryContainer: '#284777', onPrimaryContainer: '#D6E3FF', secondaryContainer: '#3E4759', onSecondaryContainer: '#DAE2F9', surface: '#111318', onSurface: '#E2E2E9', onSurfaceVariant: '#C4C6D0', outline: '#8E9099', outlineVariant: '#44474E', surfaceContainerLow: '#191C20', surfaceContainer: '#1D2024', surfaceContainerHigh: '#282A2F', surfaceContainerHighest: '#33353A', error: '#FFB4AB', inverseSurface: '#E2E2E9', inverseOnSurface: '#2E3036', pageBg: '#111318', card: '#1D2024' }
+    };
+    const c = S[theme] || S.light;
+    const view = s.view || p.view || 'list';
+    const defaultActive = p.snackbar === 'joined' ? 'grill' : p.empty === 'noItems' ? 'mia' : 'woche';
+    const activeId = s.active || defaultActive;
+    const active = lists.find((l) => l.id === activeId) || lists[0] || { id: '', name: '', items: [] };
+    const hasLists = lists.length > 0;
+    const updateLists = (fn, extra) => this.setState({ ...(extra || {}), lists: fn(lists) });
+    const setActiveItems = (fn, extra) => updateLists((ls) => ls.map((l) => (l.id === active.id ? { ...l, items: fn(l.items) } : l)), extra);
+    const toggle = (id) => setActiveItems((items) => items.map((it) => (it.id === id ? { ...it, done: !it.done } : it)));
+    const open = active.items.filter((i) => !i.done);
+    const done = active.items.filter((i) => i.done);
+    const total = active.items.length;
+    const mapItem = (it, i) => ({
+      ...it,
+      sep: i === 0 ? 'none' : '1px solid ' + c.outlineVariant,
+      editLabel: '„' + it.text + '“ bearbeiten',
+      edit: () => this.setState({ dialog: 'editItem', editId: it.id, dlgValue: it.text }),
+      toggle: () => toggle(it.id),
+      boxBorder: it.done ? c.primary : c.onSurfaceVariant,
+      boxBg: it.done ? c.primary : 'transparent'
+    });
+    const drawerOpen = !expanded && (s.drawer !== undefined ? s.drawer : !!p.drawer);
+    const menuOpen = s.menu !== undefined ? s.menu : !!p.menu;
+    const dialog = s.dialog !== undefined ? s.dialog : (p.dialog || '');
+    const snack = s.snack !== undefined ? s.snack : (p.snackbar || '');
+    const doneOpen = s.doneOpen !== undefined ? s.doneOpen : !!p.doneOpen;
+    const editId = s.editId || (open[0] && open[0].id);
+    const editItemObj = active.items.find((i) => i.id === editId);
+    const defaults = { rename: active.name, newList: '', editItem: editItemObj ? editItemObj.text : '', deleteAccount: '' };
+    const dlgValue = s.dlgValue !== undefined ? s.dlgValue : (defaults[dialog] || '');
+    const base = { maxW: '400px', hasField: false, isShare: false, hasDelete: false, hasCancel: true, color: c.primary, fieldType: 'text', autocomplete: 'off', fieldLabel: '' };
+    const D = {
+      delete: { ...base, title: '„' + active.name + '“ löschen?', text: 'Die Liste wird für alle Mitglieder gelöscht. Das kann nicht rückgängig gemacht werden.', confirm: 'Löschen', color: c.error },
+      clear: { ...base, title: 'Erledigte entfernen?', text: done.length + ' erledigte Artikel werden für alle Mitglieder entfernt.', confirm: 'Entfernen' },
+      leave: { ...base, title: '„' + active.name + '“ verlassen?', text: 'Die Liste verschwindet aus deiner Übersicht. Wenn du das letzte Mitglied bist, wird sie gelöscht.', confirm: 'Verlassen' },
+      renew: { ...base, title: 'Teilen-Link erneuern?', text: 'Der bisherige Link funktioniert danach nicht mehr. Wer schon Mitglied ist, bleibt Mitglied.', confirm: 'Erneuern' },
+      share: { ...base, maxW: '480px', isShare: true, hasCancel: false, title: '„' + active.name + '“ teilen', text: 'Jede Person mit diesem Link und einem Konto kann der Liste beitreten und sie bearbeiten.', confirm: 'Fertig' },
+      rename: { ...base, hasField: true, fieldLabel: 'Name der Liste', title: 'Liste umbenennen', text: 'Der neue Name ist für alle Mitglieder sichtbar.', confirm: 'Speichern' },
+      newList: { ...base, hasField: true, fieldLabel: 'Name der Liste', title: 'Neue Liste', text: 'Zum Beispiel „Wocheneinkauf“ oder „Grillabend“. Du kannst sie danach teilen.', confirm: 'Erstellen' },
+      editItem: { ...base, hasField: true, hasDelete: true, fieldLabel: 'Artikel', title: 'Artikel bearbeiten', text: 'Änderungen sind sofort für alle Mitglieder sichtbar.', confirm: 'Speichern' },
+      deleteAccount: { ...base, hasField: true, fieldType: 'password', autocomplete: 'current-password', fieldLabel: 'Passwort zur Bestätigung', title: 'Konto löschen?', text: 'Dein Konto wird dauerhaft gelöscht und du verlässt alle Listen. Listen, in denen du das letzte Mitglied bist, werden ebenfalls gelöscht.', confirm: 'Konto löschen', color: c.error }
+    };
+    const SN = {
+      copied: 'Link kopiert',
+      renewed: 'Neuer Teilen-Link erstellt. Der alte Link funktioniert nicht mehr.',
+      joined: 'Du bist der Liste „Grillabend Samstag“ beigetreten.',
+      cleared: 'Erledigte Artikel entfernt',
+      deleted: 'Liste gelöscht',
+      left: 'Du hast die Liste verlassen',
+      saved: 'Gespeichert',
+      created: 'Liste erstellt'
+    };
+    const removeActive = (snackKey) => {
+      const rest = lists.filter((l) => l.id !== active.id);
+      this.setState({ dialog: '', snack: snackKey, lists: rest, active: rest[0] ? rest[0].id : '' });
+    };
+    const fixedH = { compact: '844px', medium: '1112px', expanded: '800px' };
+    const isSettings = view === 'settings';
+    const themeOpts = [['system', 'System'], ['light', 'Hell'], ['dark', 'Dunkel']];
+    return {
+      c,
+      theme,
+      isDark: theme === 'dark',
+      isLight: theme !== 'dark',
+      themeLabel: theme === 'dark' ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren',
+      toggleTheme: () => this.setState({ themePref: theme === 'dark' ? 'light' : 'dark' }),
+      elev1: '0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15)',
+      elev2: '0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15)',
+      elev3: '0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15)',
+      rootH: pd && pd !== 'auto' ? fixedH[pd] : '100vh',
+      compact,
+      notCompact: !compact,
+      expanded,
+      notExpanded: !expanded,
+      maxW: expanded ? '1040px' : compact ? '100%' : '840px',
+      bodyPad: compact ? '4px 12px 96px' : '4px 24px 96px',
+      h1Pad: compact ? '4px 12px 20px' : '4px 20px 24px',
+      h1Size: expanded ? '28px' : '24px',
+      h1Line: expanded ? '36px' : '32px',
+      gridCols: compact ? 'minmax(0, 1fr)' : 'minmax(0, 3fr) minmax(0, 2fr)',
+      isList: !isSettings && hasLists,
+      showNoLists: !isSettings && !hasLists,
+      isSettings,
+      noLists: !hasLists,
+      pageTitle: isSettings ? 'Einstellungen' : hasLists ? active.name : 'Einkaufsliste',
+      active,
+      total,
+      openCount: open.length,
+      doneCount: done.length,
+      pct: total ? Math.round((done.length / total) * 100) + '%' : '0%',
+      hasItems: total > 0,
+      emptyList: total === 0,
+      allDone: total > 0 && open.length === 0,
+      hasDone: done.length > 0,
+      noDone: done.length === 0,
+      openItems: open.map(mapItem),
+      doneItems: done.map(mapItem),
+      addPlaceholder: compact ? 'z. B. 2× Milch' : 'z. B. 2× Milch, laktosefrei',
+      draft: s.draft || '',
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onAdd: (e) => {
+        e.preventDefault();
+        const v = (s.draft || '').trim();
+        if (!v) return;
+        setActiveItems((items) => [...items, { id: active.id + '-' + Date.now(), text: v, done: false }], { draft: '' });
+      },
+      doneOpen,
+      doneExpanded: doneOpen ? 'true' : 'false',
+      chevronRot: doneOpen ? 'rotate(180deg)' : 'none',
+      toggleDone: () => this.setState({ doneOpen: !doneOpen }),
+      drawerOpen,
+      drawerExpanded: drawerOpen ? 'true' : 'false',
+      openDrawer: () => this.setState({ drawer: true, menu: false }),
+      closeDrawer: () => this.setState({ drawer: false }),
+      menuOpen: menuOpen && !isSettings && hasLists,
+      menuExpanded: menuOpen ? 'true' : 'false',
+      menuBtnBg: menuOpen ? c.surfaceContainerHighest : 'transparent',
+      toggleMenu: () => this.setState({ menu: !menuOpen }),
+      closeMenu: () => this.setState({ menu: false }),
+      goSettings: () => this.setState({ view: 'settings', menu: false }),
+      goSettingsClose: () => this.setState({ view: 'settings', drawer: false }),
+      settingsCurrent: isSettings ? 'page' : 'false',
+      settingsBg: isSettings ? c.secondaryContainer : 'transparent',
+      settingsFg: isSettings ? c.onSecondaryContainer : c.onSurfaceVariant,
+      openShare: () => this.setState({ dialog: 'share' }),
+      askNewList: () => this.setState({ dialog: 'newList', dlgValue: '', drawer: false }),
+      askRename: () => this.setState({ menu: false, dialog: 'rename', dlgValue: active.name }),
+      askRenew: () => this.setState({ menu: false, dialog: 'renew' }),
+      askDelete: () => this.setState({ menu: false, dialog: 'delete' }),
+      askLeave: () => this.setState({ menu: false, dialog: 'leave' }),
+      askClear: () => this.setState({ dialog: 'clear' }),
+      askDeleteAccount: () => this.setState({ dialog: 'deleteAccount', dlgValue: '' }),
+      dialogOpen: !!D[dialog],
+      dlg: D[dialog] || D.delete,
+      dlgValue,
+      onDlgValue: (e) => this.setState({ dlgValue: e.target.value }),
+      closeDialog: () => this.setState({ dialog: '', dlgValue: undefined }),
+      copyLink: () => this.setState({ snack: 'copied' }),
+      deleteItem: () => setActiveItems((items) => items.filter((i) => i.id !== editId), { dialog: '', dlgValue: undefined }),
+      confirmDialog: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const v = (dlgValue || '').trim();
+        if (dialog === 'clear') setActiveItems((items) => items.filter((i) => !i.done), { dialog: '', snack: 'cleared' });
+        else if (dialog === 'delete') removeActive('deleted');
+        else if (dialog === 'leave') removeActive('left');
+        else if (dialog === 'renew') this.setState({ dialog: '', snack: 'renewed' });
+        else if (dialog === 'rename' && v) updateLists((ls) => ls.map((l) => (l.id === active.id ? { ...l, name: v } : l)), { dialog: '', dlgValue: undefined, snack: 'saved' });
+        else if (dialog === 'newList' && v) {
+          const id = 'l' + Date.now();
+          updateLists((ls) => [...ls, { id, name: v, items: [] }], { dialog: '', dlgValue: undefined, active: id, view: 'list', snack: 'created' });
+        } else if (dialog === 'editItem' && v) setActiveItems((items) => items.map((i) => (i.id === editId ? { ...i, text: v } : i)), { dialog: '', dlgValue: undefined });
+        else if (dialog === 'share' || dialog === 'deleteAccount') this.setState({ dialog: '', dlgValue: undefined });
+      },
+      snackOpen: !!SN[snack],
+      snackText: SN[snack] || '',
+      closeSnack: () => this.setState({ snack: '' }),
+      snackLeft: compact ? '12px' : '24px',
+      snackRight: compact ? '12px' : 'auto',
+      snackMinW: compact ? '0' : '344px',
+      profileName: s.profileName !== undefined ? s.profileName : 'Mara',
+      onProfileName: (e) => this.setState({ profileName: e.target.value }),
+      saveProfile: (e) => {
+        e.preventDefault();
+        this.setState({ snack: 'saved' });
+      },
+      themeOptions: themeOpts.map(([key, label], i) => {
+        const sel = pref === key;
+        return {
+          label,
+          sel,
+          pressed: sel ? 'true' : 'false',
+          ml: i === 0 ? '0' : '-1px',
+          radius: i === 0 ? '20px 0 0 20px' : i === themeOpts.length - 1 ? '0 20px 20px 0' : '0',
+          bg: sel ? c.secondaryContainer : 'transparent',
+          fg: sel ? c.onSecondaryContainer : c.onSurface,
+          pick: () => this.setState({ themePref: key })
+        };
+      }),
+      lists: lists.map((l) => {
+        const cur = l.id === active.id && !isSettings;
+        const oc = l.items.filter((i) => !i.done).length;
+        return {
+          ...l,
+          openCount: oc,
+          label: l.name + ', ' + oc + ' offen',
+          current: cur ? 'page' : 'false',
+          bg: cur ? c.secondaryContainer : 'transparent',
+          fg: cur ? c.onSecondaryContainer : c.onSurfaceVariant,
+          pick: () => this.setState({ active: l.id, view: 'list' }),
+          pickClose: () => this.setState({ active: l.id, view: 'list', drawer: false })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Konzept A – Zwei-Spalten-Navigation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="height: {{rootH}}; width: 100%; display: flex; position: relative; overflow: hidden; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; background: {{t.bg}}; color: {{t.text}}; color-scheme: {{theme}}">
+
+  <sc-if value="{{wide}}" hint-placeholder-val="{{ true }}">
+    <nav aria-label="Listen" style="width: {{sideW}}; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 20px 16px; box-sizing: border-box; background: {{t.surface}}; border-right: 1px solid {{t.border}}">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 4px 8px 16px">
+        <span style="width: 36px; height: 36px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: {{t.accent}}; color: {{t.accentText}}">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18"></path><path d="M5 10l2 10h10l2-10"></path><path d="M9 10l3-6 3 6"></path></svg>
+        </span>
+        <span style="font-weight: 700; font-size: 18px">Einkaufsliste</span>
+      </div>
+      <h2 style="margin: 0; padding: 0 8px 4px; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: {{t.muted}}">Meine Listen</h2>
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+        <sc-for list="{{lists}}" as="l" hint-placeholder-count="3">
+          <li>
+            <button type="button" onClick="{{l.pick}}" aria-current="{{l.current}}" aria-label="{{l.label}}" style="width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; border: 0; border-radius: 10px; font: inherit; font-size: 16px; text-align: left; cursor: pointer; background: {{l.bg}}; color: {{t.text}}; font-weight: {{l.fw}}">
+              <span>{{l.name}}</span>
+              <span style="font-size: 14px; color: {{l.countColor}}">{{l.openCount}}</span>
+            </button>
+          </li>
+        </sc-for>
+      </ul>
+      <button type="button" style="min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px dashed {{t.control}}; border-radius: 10px; background: transparent; color: {{t.text}}; font: inherit; font-size: 16px; cursor: pointer">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+        Neue Liste
+      </button>
+      <div style="flex: 1"></div>
+      <button type="button" style="min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: {{t.text}}; font: inherit; font-size: 16px; cursor: pointer">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg>
+        Einstellungen
+      </button>
+    </nav>
+  </sc-if>
+
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%">
+    <header style="display: flex; align-items: center; gap: 4px; padding: {{hdrPad}}; background: {{t.surface}}; border-bottom: 1px solid {{t.border}}">
+      <sc-if value="{{mobile}}" hint-placeholder-val="{{ false }}">
+        <button type="button" aria-label="Alle Listen anzeigen" onClick="{{openDrawer}}" style="width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: transparent; color: {{t.text}}; cursor: pointer">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+      </sc-if>
+      <div style="flex: 1; min-width: 0; padding: 0 4px">
+        <h1 style="margin: 0; font-size: {{h1Size}}; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{active.name}}</h1>
+        <p style="margin: 2px 0 0; font-size: 14px; color: {{t.muted}}">{{summary}}</p>
+      </div>
+      <button type="button" aria-label="{{themeLabel}}" onClick="{{toggleTheme}}" style="width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: transparent; color: {{t.text}}; cursor: pointer">
+        <sc-if value="{{isDark}}" hint-placeholder-val="{{ false }}">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        </sc-if>
+        <sc-if value="{{isLight}}" hint-placeholder-val="{{ true }}">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+        </sc-if>
+      </button>
+      <sc-if value="{{wide}}" hint-placeholder-val="{{ true }}">
+        <button type="button" style="height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border: 1px solid {{t.control}}; border-radius: 10px; background: transparent; color: {{t.text}}; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>
+          Teilen
+        </button>
+      </sc-if>
+      <sc-if value="{{mobile}}" hint-placeholder-val="{{ false }}">
+        <button type="button" aria-label="Liste teilen" style="width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: transparent; color: {{t.text}}; cursor: pointer">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>
+        </button>
+      </sc-if>
+      <button type="button" aria-label="Weitere Aktionen: umbenennen, löschen, verlassen" style="width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: transparent; color: {{t.text}}; cursor: pointer">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>
+      </button>
+    </header>
+
+    <div style="flex: 1; overflow-y: auto; padding: {{contentPad}}">
+      <div style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px">
+
+        <sc-if value="{{wide}}" hint-placeholder-val="{{ true }}">
+          <form onSubmit="{{onAdd}}" style="display: flex; gap: 8px">
+            <label for="add-item" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Neuen Artikel hinzufügen</label>
+            <input id="add-item" type="text" autocomplete="off" value="{{draft}}" onChange="{{onDraft}}" placeholder="Artikel hinzufügen, z. B. 2× Milch" style="flex: 1; min-width: 0; height: 48px; box-sizing: border-box; padding: 0 14px; font: inherit; font-size: 16px; border: 1px solid {{t.control}}; border-radius: 12px; background: {{t.surface}}; color: {{t.text}}">
+            <button type="submit" style="height: 48px; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; border: 0; border-radius: 12px; background: {{t.accent}}; color: {{t.accentText}}; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              Hinzufügen
+            </button>
+          </form>
+        </sc-if>
+
+        <section aria-labelledby="open-heading" style="display: flex; flex-direction: column; gap: 8px">
+          <h2 id="open-heading" style="margin: 0; font-size: 14px; font-weight: 600; color: {{t.muted}}">Noch zu kaufen ({{openCount}})</h2>
+          <sc-if value="{{hasOpen}}" hint-placeholder-val="{{ true }}">
+            <ul style="list-style: none; margin: 0; padding: 0; background: {{t.surface}}; border: 1px solid {{t.border}}; border-radius: 14px; overflow: hidden">
+              <sc-for list="{{openItems}}" as="it" hint-placeholder-count="7">
+                <li style="border-top: {{it.sep}}">
+                  <label style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 4px 16px; cursor: pointer; font-size: 17px">
+                    <input type="checkbox" checked="{{it.done}}" onChange="{{it.toggle}}" style="width: 22px; height: 22px; margin: 0; flex-shrink: 0; accent-color: {{t.accent}}">
+                    <span>{{it.text}}</span>
+                  </label>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+          <sc-if value="{{noOpen}}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; padding: 20px 16px; border-radius: 14px; background: {{t.surface}}; border: 1px solid {{t.border}}; color: {{t.muted}}">Alles erledigt – nichts mehr zu kaufen.</p>
+          </sc-if>
+        </section>
+
+        <sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+          <section aria-labelledby="done-heading" style="display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+              <h2 id="done-heading" style="margin: 0; font-size: 14px; font-weight: 600; color: {{t.muted}}">Erledigt ({{doneCount}})</h2>
+              <button type="button" onClick="{{onClear}}" style="min-height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: {{t.accentInk}}; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg>
+                Erledigte entfernen
+              </button>
+            </div>
+            <ul style="list-style: none; margin: 0; padding: 0; background: {{t.surface}}; border: 1px solid {{t.border}}; border-radius: 14px; overflow: hidden">
+              <sc-for list="{{doneItems}}" as="it" hint-placeholder-count="2">
+                <li style="border-top: {{it.sep}}">
+                  <label style="display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 4px 16px; cursor: pointer; font-size: 17px; color: {{t.muted}}">
+                    <input type="checkbox" checked="{{it.done}}" onChange="{{it.toggle}}" style="width: 22px; height: 22px; margin: 0; flex-shrink: 0; accent-color: {{t.accent}}">
+                    <span style="text-decoration: line-through">{{it.text}}</span>
+                  </label>
+                </li>
+              </sc-for>
+            </ul>
+          </section>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{mobile}}" hint-placeholder-val="{{ false }}">
+      <form onSubmit="{{onAdd}}" style="display: flex; gap: 8px; padding: 12px 16px 20px; background: {{t.surface}}; border-top: 1px solid {{t.border}}">
+        <label for="add-item-m" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Neuen Artikel hinzufügen</label>
+        <input id="add-item-m" type="text" autocomplete="off" value="{{draft}}" onChange="{{onDraft}}" placeholder="Artikel hinzufügen" style="flex: 1; min-width: 0; height: 48px; box-sizing: border-box; padding: 0 14px; font: inherit; font-size: 16px; border: 1px solid {{t.control}}; border-radius: 12px; background: {{t.bg}}; color: {{t.text}}">
+        <button type="submit" aria-label="Hinzufügen" style="width: 48px; height: 48px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: {{t.accent}}; color: {{t.accentText}}; cursor: pointer">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+        </button>
+      </form>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{drawerOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 10; display: flex">
+      <nav aria-label="Listen" style="width: 300px; max-width: 85%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 20px; background: {{t.surface}}; box-shadow: 0 0 40px rgba(0,0,0,0.35)">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <h2 style="margin: 0; padding-left: 8px; font-size: 18px; font-weight: 700">Meine Listen</h2>
+          <button type="button" aria-label="Listen schließen" onClick="{{closeDrawer}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: transparent; color: {{t.text}}; cursor: pointer">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+          <sc-for list="{{lists}}" as="l" hint-placeholder-count="3">
+            <li>
+              <button type="button" onClick="{{l.pickClose}}" aria-current="{{l.current}}" aria-label="{{l.label}}" style="width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; border: 0; border-radius: 10px; font: inherit; font-size: 16px; text-align: left; cursor: pointer; background: {{l.bg}}; color: {{t.text}}; font-weight: {{l.fw}}">
+                <span>{{l.name}}</span>
+                <span style="font-size: 14px; color: {{l.countColor}}">{{l.openCount}}</span>
+              </button>
+            </li>
+          </sc-for>
+        </ul>
+        <button type="button" style="min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px dashed {{t.control}}; border-radius: 10px; background: transparent; color: {{t.text}}; font: inherit; font-size: 16px; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Neue Liste
+        </button>
+        <div style="flex: 1"></div>
+        <button type="button" style="min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: {{t.text}}; font: inherit; font-size: 16px; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg>
+          Einstellungen
+        </button>
+      </nav>
+      <button type="button" tabindex="-1" aria-hidden="true" onClick="{{closeDrawer}}" style="flex: 1; border: 0; padding: 0; background: rgba(0,0,0,0.55); cursor: pointer"></button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"device":{"editor":"enum","options":["auto","mobile","tablet","desktop"],"default":"auto"},"drawer":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this._onResize = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
+  seed() {
+    const raw = [
+      ['woche', 'Wocheneinkauf', [['2× Milch, laktosefrei', 0], ['Vollkornbrot', 0], ['6 Eier', 0], ['Tomaten', 0], ['Bananen', 0], ['Kaffeebohnen 500 g', 0], ['Spülmittel', 0], ['Butter', 1], ['Naturjoghurt', 1]]],
+      ['grill', 'Grillabend Samstag', [['Grillkohle', 0], ['Halloumi', 0], ['4 Maiskolben', 0], ['Kräuterbaguette', 0], ['Senf', 1]]],
+      ['wg', 'WG-Vorrat', [['Toilettenpapier', 0], ['Reis 1 kg', 0], ['Haferflocken', 1]]]
+    ];
+    return raw.map(([id, name, items]) => ({ id, name, items: items.map(([text, d], i) => ({ id: id + '-' + i, text, done: !!d })) }));
+  }
+  renderVals() {
+    const s = this.state || {};
+    const lists = s.lists || this.seed();
+    const theme = s.theme || this.props.theme || 'light';
+    const vw = s.vw || 1280;
+    const pd = this.props.device;
+    const device = pd && pd !== 'auto' ? pd : (vw < 700 ? 'mobile' : vw < 1100 ? 'tablet' : 'desktop');
+    const mobile = device === 'mobile';
+    const T = {
+      light: { bg: '#F8FAFC', surface: '#FFFFFF', text: '#0F172A', muted: '#475569', border: '#E2E8F0', control: '#64748B', accent: '#0F766E', accentText: '#FFFFFF', accentInk: '#0F766E', accentSoft: '#CCFBF1' },
+      dark: { bg: '#0B1220', surface: '#111A2E', text: '#E2E8F0', muted: '#94A3B8', border: '#1E293B', control: '#94A3B8', accent: '#2DD4BF', accentText: '#042F2E', accentInk: '#5EEAD4', accentSoft: '#134E4A' }
+    };
+    const t = T[theme] || T.light;
+    const activeId = s.active || 'woche';
+    const active = lists.find((l) => l.id === activeId) || lists[0];
+    const setActiveItems = (fn) => this.setState({ lists: lists.map((l) => (l.id === active.id ? { ...l, items: fn(l.items) } : l)) });
+    const toggle = (id) => setActiveItems((items) => items.map((it) => (it.id === id ? { ...it, done: !it.done } : it)));
+    const open = active.items.filter((i) => !i.done);
+    const done = active.items.filter((i) => i.done);
+    const mapItem = (it, i) => ({ ...it, toggle: () => toggle(it.id), sep: i === 0 ? 'none' : '1px solid ' + t.border });
+    const drawerOpen = mobile && (s.drawer !== undefined ? s.drawer : !!this.props.drawer);
+    const fixedH = { mobile: '844px', tablet: '1112px', desktop: '800px' };
+    return {
+      t,
+      theme,
+      isDark: theme === 'dark',
+      isLight: theme !== 'dark',
+      themeLabel: theme === 'dark' ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren',
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      rootH: pd && pd !== 'auto' ? fixedH[pd] : '100vh',
+      mobile,
+      wide: !mobile,
+      sideW: device === 'desktop' ? '300px' : '260px',
+      hdrPad: mobile ? '8px 4px 8px 4px' : '16px 24px',
+      contentPad: mobile ? '16px 16px 24px' : '24px 32px 40px',
+      h1Size: mobile ? '20px' : '26px',
+      active,
+      summary: open.length + ' offen · ' + done.length + ' erledigt',
+      lists: lists.map((l) => {
+        const cur = l.id === active.id;
+        const oc = l.items.filter((i) => !i.done).length;
+        return {
+          ...l,
+          openCount: oc,
+          label: l.name + ', ' + oc + ' offen',
+          current: cur ? 'page' : 'false',
+          bg: cur ? t.accentSoft : 'transparent',
+          fw: cur ? '600' : '400',
+          countColor: cur ? t.text : t.muted,
+          pick: () => this.setState({ active: l.id }),
+          pickClose: () => this.setState({ active: l.id, drawer: false })
+        };
+      }),
+      openItems: open.map(mapItem),
+      doneItems: done.map(mapItem),
+      openCount: open.length,
+      doneCount: done.length,
+      hasOpen: open.length > 0,
+      noOpen: open.length === 0,
+      hasDone: done.length > 0,
+      onClear: () => setActiveItems((items) => items.filter((i) => !i.done)),
+      draft: s.draft || '',
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onAdd: (e) => {
+        e.preventDefault();
+        const v = (s.draft || '').trim();
+        if (!v) return;
+        this.setState({ draft: '', lists: lists.map((l) => (l.id === active.id ? { ...l, items: [...l.items, { id: l.id + '-' + Date.now(), text: v, done: false }] } : l)) });
+      },
+      drawerOpen,
+      openDrawer: () => this.setState({ drawer: true }),
+      closeDrawer: () => this.setState({ drawer: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

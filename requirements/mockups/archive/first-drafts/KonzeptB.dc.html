@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Konzept B – Kacheln und Board</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="height: {{rootH}}; width: 100%; display: flex; flex-direction: column; position: relative; overflow: hidden; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; background: {{t.bg}}; color: {{t.text}}; color-scheme: {{theme}}">
+
+  <header style="display: flex; align-items: center; gap: 4px; padding: {{hdrPad}}; flex-shrink: 0">
+    <span style="width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; background: {{t.accent}}; color: {{t.accentText}}">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18"></path><path d="M5 10l2 10h10l2-10"></path><path d="M9 10l3-6 3 6"></path></svg>
+    </span>
+    <span style="flex: 1; padding-left: 8px; font-family: 'Space Grotesk', Inter, sans-serif; font-weight: 700; font-size: 20px">Einkauf</span>
+    <button type="button" aria-label="{{themeLabel}}" onClick="{{toggleTheme}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{t.text}}; cursor: pointer">
+      <sc-if value="{{isDark}}" hint-placeholder-val="{{ false }}">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      </sc-if>
+      <sc-if value="{{isLight}}" hint-placeholder-val="{{ true }}">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+      </sc-if>
+    </button>
+    <button type="button" aria-label="Einstellungen" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{t.text}}; cursor: pointer">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg>
+    </button>
+  </header>
+
+  <sc-if value="{{tabsMode}}" hint-placeholder-val="{{ false }}">
+    <nav aria-label="Listen" style="flex-shrink: 0; padding: 0 {{px}}">
+      <ul style="display: flex; gap: 8px; overflow-x: auto; list-style: none; margin: 0; padding: 4px 0 12px">
+        <sc-for list="{{lists}}" as="l" hint-placeholder-count="3">
+          <li style="flex-shrink: 0">
+            <button type="button" onClick="{{l.pick}}" aria-current="{{l.current}}" aria-label="{{l.label}}" style="height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 999px; border: 1px solid {{l.chipBorder}}; background: {{l.chipBg}}; color: {{l.chipFg}}; font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap; cursor: pointer">
+              {{l.name}}
+              <span style="min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; background: {{l.badgeBg}}; color: {{l.badgeFg}}">{{l.openCount}}</span>
+            </button>
+          </li>
+        </sc-for>
+        <li style="flex-shrink: 0">
+          <button type="button" style="height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; border-radius: 999px; border: 1px dashed {{t.control}}; background: transparent; color: {{t.text}}; font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap; cursor: pointer">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+            Neue Liste
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <main style="flex: 1; overflow-y: auto; padding: 8px {{px}} 120px">
+      <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px">
+        <h1 style="flex: 1; min-width: 0; margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: {{h1Size}}; font-weight: 700; line-height: 1.15">{{active.name}}</h1>
+        <button type="button" aria-label="Liste teilen" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid {{t.border}}; border-radius: 999px; background: {{t.surface}}; color: {{t.text}}; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>
+        </button>
+        <button type="button" aria-label="Weitere Aktionen: umbenennen, löschen, verlassen" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid {{t.border}}; border-radius: 999px; background: {{t.surface}}; color: {{t.text}}; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+        </button>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px">
+        <p style="margin: 0; font-size: 15px; color: {{t.muted}}">{{summary}}</p>
+        <sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+          <button type="button" onClick="{{onClear}}" style="min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: {{t.accentInk}}; font: inherit; font-size: 15px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Erledigte entfernen</button>
+        </sc-if>
+      </div>
+      <ul style="display: grid; grid-template-columns: repeat({{cols}}, minmax(0, 1fr)); gap: 12px; list-style: none; margin: 0; padding: 0">
+        <sc-for list="{{tiles}}" as="it" hint-placeholder-count="9">
+          <li>
+            <button type="button" aria-pressed="{{it.pressed}}" onClick="{{it.toggle}}" style="width: 100%; min-height: 104px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 14px; border-radius: 18px; border: {{it.border}}; background: {{it.bg}}; color: {{it.fg}}; font: inherit; text-align: left; cursor: pointer">
+              <span aria-hidden="true" style="width: 28px; height: 28px; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid {{it.ring}}; background: {{it.ringBg}}; color: {{t.accentText}}">
+                <sc-if value="{{it.done}}" hint-placeholder-val="{{ false }}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                </sc-if>
+              </span>
+              <span style="font-size: 17px; font-weight: 600; line-height: 1.3; text-decoration: {{it.deco}}">{{it.text}}</span>
+            </button>
+          </li>
+        </sc-for>
+      </ul>
+    </main>
+
+    <button type="button" onClick="{{openSheet}}" style="position: absolute; right: 20px; bottom: 24px; height: 60px; display: inline-flex; align-items: center; gap: 8px; padding: 0 24px; border: 0; border-radius: 999px; background: {{t.accent}}; color: {{t.accentText}}; font: inherit; font-size: 17px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.25); cursor: pointer">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+      Hinzufügen
+    </button>
+
+    <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column">
+        <button type="button" tabindex="-1" aria-hidden="true" onClick="{{closeSheet}}" style="flex: 1; border: 0; padding: 0; background: rgba(0,0,0,0.55); cursor: pointer"></button>
+        <form onSubmit="{{onAdd}}" role="dialog" aria-modal="true" aria-labelledby="sheet-title" style="display: flex; flex-direction: column; gap: 12px; padding: 20px {{px}} 28px; border-radius: 24px 24px 0 0; background: {{t.surface}}">
+          <div style="display: flex; align-items: center; justify-content: space-between">
+            <h2 id="sheet-title" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 700">Zu „{{active.name}}“ hinzufügen</h2>
+            <button type="button" aria-label="Schließen" onClick="{{closeSheet}}" style="width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{t.text}}; cursor: pointer">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+            </button>
+          </div>
+          <label for="sheet-input" style="font-size: 15px; font-weight: 600">Artikel</label>
+          <input id="sheet-input" type="text" autocomplete="off" value="{{draft}}" onChange="{{onDraft}}" placeholder="z. B. 2× Milch, laktosefrei" style="height: 52px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 17px; border: 2px solid {{t.control}}; border-radius: 14px; background: {{t.bg}}; color: {{t.text}}">
+          <button type="submit" style="height: 52px; border: 0; border-radius: 999px; background: {{t.accent}}; color: {{t.accentText}}; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer">Hinzufügen</button>
+        </form>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{boardMode}}" hint-placeholder-val="{{ true }}">
+    <main style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding: 8px 32px 32px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px">
+        <h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 30px; font-weight: 700">Meine Listen</h1>
+        <button type="button" style="height: 48px; display: inline-flex; align-items: center; gap: 8px; padding: 0 20px; border: 0; border-radius: 999px; background: {{t.accent}}; color: {{t.accentText}}; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Neue Liste
+        </button>
+      </div>
+      <div style="flex: 1; min-height: 0; display: flex; gap: 20px; align-items: flex-start; overflow-x: auto; padding-bottom: 8px">
+        <sc-for list="{{columns}}" as="col" hint-placeholder-count="3">
+          <section aria-labelledby="{{col.headId}}" style="width: 340px; max-height: 100%; flex-shrink: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 22px; background: {{t.col}}; border: 1px solid {{t.border}}">
+            <div style="display: flex; align-items: center; gap: 4px">
+              <div style="flex: 1; min-width: 0">
+                <h2 id="{{col.headId}}" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 20px; font-weight: 700">{{col.name}}</h2>
+                <p style="margin: 2px 0 0; font-size: 14px; color: {{t.muted}}">{{col.summary}}</p>
+              </div>
+              <button type="button" aria-label="{{col.shareLabel}}" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{t.text}}; cursor: pointer">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>
+              </button>
+              <button type="button" aria-label="{{col.moreLabel}}" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{t.text}}; cursor: pointer">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+              </button>
+            </div>
+            <form onSubmit="{{col.onAdd}}" style="display: flex; gap: 8px">
+              <label for="{{col.inputId}}" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">{{col.addLabel}}</label>
+              <input id="{{col.inputId}}" type="text" autocomplete="off" value="{{col.draft}}" onChange="{{col.onDraft}}" placeholder="Artikel hinzufügen" style="flex: 1; min-width: 0; height: 44px; box-sizing: border-box; padding: 0 14px; font: inherit; font-size: 15px; border: 1px solid {{t.control}}; border-radius: 999px; background: {{t.surface}}; color: {{t.text}}">
+              <button type="submit" aria-label="{{col.addLabel}}" style="width: 44px; height: 44px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: {{t.accent}}; color: {{t.accentText}}; cursor: pointer">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              </button>
+            </form>
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto">
+              <sc-for list="{{col.tiles}}" as="it" hint-placeholder-count="5">
+                <li>
+                  <button type="button" aria-pressed="{{it.pressed}}" onClick="{{it.toggle}}" style="width: 100%; min-height: 52px; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-radius: 14px; border: {{it.border}}; background: {{it.bg}}; color: {{it.fg}}; font: inherit; text-align: left; cursor: pointer">
+                    <span aria-hidden="true" style="width: 24px; height: 24px; flex-shrink: 0; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid {{it.ring}}; background: {{it.ringBg}}; color: {{t.accentText}}">
+                      <sc-if value="{{it.done}}" hint-placeholder-val="{{ false }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                      </sc-if>
+                    </span>
+                    <span style="font-size: 16px; font-weight: 500; text-decoration: {{it.deco}}">{{it.text}}</span>
+                  </button>
+                </li>
+              </sc-for>
+            </ul>
+            <sc-if value="{{col.hasDone}}" hint-placeholder-val="{{ true }}">
+              <button type="button" onClick="{{col.onClear}}" style="min-height: 44px; border: 0; background: transparent; color: {{t.accentInk}}; font: inherit; font-size: 15px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; align-self: flex-start; padding: 0 4px">Erledigte entfernen</button>
+            </sc-if>
+          </section>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"device":{"editor":"enum","options":["auto","mobile","tablet","desktop"],"default":"auto"},"addOpen":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this._onResize = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
+  seed() {
+    const raw = [
+      ['woche', 'Wocheneinkauf', [['2× Milch, laktosefrei', 0], ['Vollkornbrot', 0], ['6 Eier', 0], ['Tomaten', 0], ['Bananen', 0], ['Kaffeebohnen 500 g', 0], ['Spülmittel', 0], ['Butter', 1], ['Naturjoghurt', 1]]],
+      ['grill', 'Grillabend Samstag', [['Grillkohle', 0], ['Halloumi', 0], ['4 Maiskolben', 0], ['Kräuterbaguette', 0], ['Senf', 1]]],
+      ['wg', 'WG-Vorrat', [['Toilettenpapier', 0], ['Reis 1 kg', 0], ['Haferflocken', 1]]]
+    ];
+    return raw.map(([id, name, items]) => ({ id, name, items: items.map(([text, d], i) => ({ id: id + '-' + i, text, done: !!d })) }));
+  }
+  renderVals() {
+    const s = this.state || {};
+    const lists = s.lists || this.seed();
+    const theme = s.theme || this.props.theme || 'light';
+    const vw = s.vw || 1280;
+    const pd = this.props.device;
+    const device = pd && pd !== 'auto' ? pd : (vw < 700 ? 'mobile' : vw < 1100 ? 'tablet' : 'desktop');
+    const mobile = device === 'mobile';
+    const T = {
+      light: { bg: '#FAFAF9', surface: '#FFFFFF', col: '#F5F5F4', text: '#1C1917', muted: '#57534E', border: '#D6D3D1', control: '#78716C', accent: '#C2410C', accentText: '#FFFFFF', accentInk: '#C2410C', doneBg: '#F5F5F4' },
+      dark: { bg: '#1C1917', surface: '#292524', col: '#231F1D', text: '#FAFAF9', muted: '#D6D3D1', border: '#44403C', control: '#A8A29E', accent: '#FB923C', accentText: '#1C1917', accentInk: '#FDBA74', doneBg: '#1C1917' }
+    };
+    const t = T[theme] || T.light;
+    const activeId = s.active || 'woche';
+    const active = lists.find((l) => l.id === activeId) || lists[0];
+    const setItems = (lid, fn) => this.setState({ lists: lists.map((l) => (l.id === lid ? { ...l, items: fn(l.items) } : l)) });
+    const tileOf = (lid) => (it) => ({
+      ...it,
+      pressed: it.done ? 'true' : 'false',
+      toggle: () => setItems(lid, (items) => items.map((x) => (x.id === it.id ? { ...x, done: !x.done } : x))),
+      border: it.done ? '1px dashed ' + t.border : '1px solid ' + t.border,
+      bg: it.done ? t.doneBg : t.surface,
+      fg: it.done ? t.muted : t.text,
+      ring: it.done ? t.accent : t.control,
+      ringBg: it.done ? t.accent : 'transparent',
+      deco: it.done ? 'line-through' : 'none'
+    });
+    const sorted = (items) => [...items.filter((i) => !i.done), ...items.filter((i) => i.done)];
+    const drafts = s.drafts || {};
+    const addTo = (lid, text, extra) => {
+      const v = (text || '').trim();
+      if (!v) return;
+      this.setState({ ...extra, lists: lists.map((l) => (l.id === lid ? { ...l, items: [...l.items, { id: l.id + '-' + Date.now(), text: v, done: false }] } : l)) });
+    };
+    const openA = active.items.filter((i) => !i.done).length;
+    const doneA = active.items.length - openA;
+    const sheetOpen = s.sheet !== undefined ? s.sheet : !!this.props.addOpen;
+    const fixedH = { mobile: '844px', tablet: '1112px', desktop: '800px' };
+    return {
+      t,
+      theme,
+      isDark: theme === 'dark',
+      isLight: theme !== 'dark',
+      themeLabel: theme === 'dark' ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren',
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      rootH: pd && pd !== 'auto' ? fixedH[pd] : '100vh',
+      tabsMode: device !== 'desktop',
+      boardMode: device === 'desktop',
+      px: mobile ? '16px' : '28px',
+      hdrPad: mobile ? '12px 8px 8px 16px' : '16px 20px 12px 28px',
+      h1Size: mobile ? '28px' : '34px',
+      cols: mobile ? 2 : 3,
+      active,
+      summary: openA + ' offen · ' + doneA + ' erledigt',
+      hasDone: doneA > 0,
+      onClear: () => setItems(active.id, (items) => items.filter((i) => !i.done)),
+      lists: lists.map((l) => {
+        const cur = l.id === active.id;
+        const oc = l.items.filter((i) => !i.done).length;
+        return {
+          ...l,
+          openCount: oc,
+          label: l.name + ', ' + oc + ' offen',
+          current: cur ? 'page' : 'false',
+          chipBg: cur ? t.text : t.surface,
+          chipFg: cur ? t.bg : t.text,
+          chipBorder: cur ? t.text : t.border,
+          badgeBg: cur ? t.accent : t.col,
+          badgeFg: cur ? t.accentText : t.text,
+          pick: () => this.setState({ active: l.id })
+        };
+      }),
+      tiles: sorted(active.items).map(tileOf(active.id)),
+      sheetOpen,
+      openSheet: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      draft: drafts[active.id] || '',
+      onDraft: (e) => this.setState({ drafts: { ...drafts, [active.id]: e.target.value } }),
+      onAdd: (e) => {
+        e.preventDefault();
+        addTo(active.id, drafts[active.id], { sheet: false, drafts: { ...drafts, [active.id]: '' } });
+      },
+      columns: lists.map((l) => {
+        const oc = l.items.filter((i) => !i.done).length;
+        const dc = l.items.length - oc;
+        return {
+          name: l.name,
+          headId: 'col-' + l.id,
+          inputId: 'add-' + l.id,
+          summary: oc + ' offen · ' + dc + ' erledigt',
+          shareLabel: 'Liste „' + l.name + '“ teilen',
+          moreLabel: 'Weitere Aktionen für „' + l.name + '“',
+          addLabel: 'Artikel zu „' + l.name + '“ hinzufügen',
+          tiles: sorted(l.items).map(tileOf(l.id)),
+          hasDone: dc > 0,
+          onClear: () => setItems(l.id, (items) => items.filter((i) => !i.done)),
+          draft: drafts[l.id] || '',
+          onDraft: (e) => this.setState({ drafts: { ...drafts, [l.id]: e.target.value } }),
+          onAdd: (e) => {
+            e.preventDefault();
+            addTo(l.id, drafts[l.id], { drafts: { ...drafts, [l.id]: '' } });
+          }
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Material 3 – Anmeldung</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="height: {{rootH}}; width: 100%; position: relative; overflow-y: auto; box-sizing: border-box; display: flex; justify-content: center; align-items: flex-start; padding: {{rootPad}}; font-family: Roboto, system-ui, sans-serif; background: {{rootBg}}; color: {{c.onSurface}}; color-scheme: {{theme}}">
+
+  <button type="button" aria-label="{{themeLabel}}" onClick="{{toggleTheme}}" style="position: absolute; top: 8px; right: 8px; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+    <sc-if value="{{isDark}}" hint-placeholder-val="{{ false }}">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"></path></svg>
+    </sc-if>
+    <sc-if value="{{isLight}}" hint-placeholder-val="{{ true }}">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.030 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"></path></svg>
+    </sc-if>
+  </button>
+
+  <main style="width: 100%; max-width: {{cardMaxW}}; box-sizing: border-box; padding: {{cardPad}}; border-radius: 16px; background: {{cardBg}}; border: {{cardBorder}}; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <span aria-hidden="true" style="width: 48px; height: 48px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: {{c.primaryContainer}}; color: {{c.onPrimaryContainer}}">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+      </span>
+      <span style="font-size: 22px; line-height: 28px; font-weight: 400">Einkaufsliste</span>
+    </div>
+
+    <sc-if value="{{hasInvite}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; gap: 12px; padding: 16px; border-radius: 12px; background: {{c.secondaryContainer}}; color: {{c.onSecondaryContainer}}">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></path></svg>
+        <p style="margin: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.25px">Du wurdest zur Liste <strong style="font-weight: 500">„Grillabend Samstag“</strong> eingeladen. Erstelle ein Konto oder melde dich an, um beizutreten.</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isLogin}}" hint-placeholder-val="{{ true }}">
+      <form onSubmit="{{noop}}" style="display: flex; flex-direction: column; gap: 20px">
+        <div>
+          <h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 400">Anmelden</h1>
+          <p style="margin: 4px 0 0; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">Willkommen zurück.</p>
+        </div>
+        <div style="position: relative; margin-top: 4px">
+          <label for="li-email" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{fieldBg}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">E-Mail-Adresse</label>
+          <input id="li-email" type="email" autocomplete="email" value="{{f.email}}" onChange="{{on.email}}" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+        </div>
+        <div style="position: relative">
+          <label for="li-pw" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{fieldBg}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Passwort</label>
+          <input id="li-pw" type="{{pwType}}" autocomplete="current-password" value="{{f.pw}}" onChange="{{on.pw}}" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 56px 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+          <button type="button" aria-label="Passwort anzeigen" aria-pressed="{{pwPressed}}" onClick="{{togglePw}}" style="position: absolute; right: 4px; top: 4px; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: -12px">
+          <button type="button" onClick="{{goReset}}" style="height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Passwort vergessen?</button>
+        </div>
+        <button type="submit" style="height: 48px; border: 0; border-radius: 24px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Anmelden</button>
+        <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 20px; border-top: 1px solid {{c.outlineVariant}}">
+          <p style="margin: 0; text-align: center; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">Noch kein Konto?</p>
+          <button type="button" onClick="{{goRegister}}" style="height: 48px; border: 1px solid {{c.outline}}; border-radius: 24px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Konto erstellen</button>
+        </div>
+      </form>
+    </sc-if>
+
+    <sc-if value="{{isRegister}}" hint-placeholder-val="{{ false }}">
+      <form onSubmit="{{noop}}" style="display: flex; flex-direction: column; gap: 20px">
+        <h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 400">Konto erstellen</h1>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px">
+          <div style="position: relative">
+            <label for="rg-name" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{fieldBg}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Anzeigename</label>
+            <input id="rg-name" type="text" autocomplete="nickname" value="{{f.name}}" onChange="{{on.name}}" aria-describedby="rg-name-help" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+          </div>
+          <p id="rg-name-help" style="margin: 0; padding: 0 16px; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">So wirst du in der App angezeigt.</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <div style="position: relative">
+            <label for="rg-email" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{fieldBg}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{emailLabelColor}}">E-Mail-Adresse</label>
+            <input id="rg-email" type="email" autocomplete="email" value="{{f.email}}" onChange="{{on.email}}" aria-invalid="{{emailInvalid}}" aria-describedby="rg-email-help" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 48px 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: {{emailBorder}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+            <sc-if value="{{emailError}}" hint-placeholder-val="{{ false }}">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="{{c.error}}" style="position: absolute; right: 12px; top: 16px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+            </sc-if>
+          </div>
+          <p id="rg-email-help" style="margin: 0; padding: 0 16px; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{emailHelpColor}}">{{emailHelp}}</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <div style="position: relative">
+            <label for="rg-pw" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{fieldBg}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Passwort</label>
+            <input id="rg-pw" type="{{pwType}}" autocomplete="new-password" value="{{f.pw}}" onChange="{{on.pw}}" aria-describedby="rg-pw-help" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 56px 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+            <button type="button" aria-label="Passwort anzeigen" aria-pressed="{{pwPressed}}" onClick="{{togglePw}}" style="position: absolute; right: 4px; top: 4px; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path></svg>
+            </button>
+          </div>
+          <p id="rg-pw-help" style="margin: 0; padding: 0 16px; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Mindestens 8 Zeichen. Passwort-Manager und Einfügen sind erlaubt.</p>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Mit der Registrierung akzeptierst du die <a href="#nutzungsbedingungen" style="color: {{c.primary}}">Nutzungsbedingungen</a> und die <a href="#datenschutz" style="color: {{c.primary}}">Datenschutzhinweise</a>.</p>
+        <button type="submit" style="height: 48px; border: 0; border-radius: 24px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">{{registerCta}}</button>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 4px; padding-top: 16px; border-top: 1px solid {{c.outlineVariant}}">
+          <span style="font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">Schon ein Konto?</span>
+          <button type="button" onClick="{{goLogin}}" style="height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Anmelden</button>
+        </div>
+      </form>
+    </sc-if>
+
+    <sc-if value="{{isReset}}" hint-placeholder-val="{{ false }}">
+      <form onSubmit="{{sendReset}}" style="display: flex; flex-direction: column; gap: 20px">
+        <div>
+          <h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 400">Passwort zurücksetzen</h1>
+          <p style="margin: 8px 0 0; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">Gib die E-Mail-Adresse deines Kontos ein. Wir schicken dir einen Link, mit dem du ein neues Passwort festlegen kannst.</p>
+        </div>
+        <div style="position: relative; margin-top: 4px">
+          <label for="rs-email" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{fieldBg}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">E-Mail-Adresse</label>
+          <input id="rs-email" type="email" autocomplete="email" value="{{f.email}}" onChange="{{on.email}}" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+        </div>
+        <button type="submit" style="height: 48px; border: 0; border-radius: 24px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Link senden</button>
+        <button type="button" onClick="{{goLogin}}" style="align-self: center; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+          Zurück zur Anmeldung
+        </button>
+      </form>
+    </sc-if>
+
+    <sc-if value="{{isResetSent}}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display: flex; flex-direction: column; gap: 20px">
+        <span aria-hidden="true" style="width: 64px; height: 64px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: {{c.secondaryContainer}}; color: {{c.onSecondaryContainer}}">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path></svg>
+        </span>
+        <div>
+          <h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 400">Prüfe dein Postfach</h1>
+          <p style="margin: 8px 0 0; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">Falls ein Konto mit <strong style="font-weight: 500; color: {{c.onSurface}}">{{sentTo}}</strong> existiert, haben wir dir einen Link zum Zurücksetzen geschickt. Schau auch im Spam-Ordner nach.</p>
+        </div>
+        <button type="button" onClick="{{goLogin}}" style="height: 48px; border: 0; border-radius: 24px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Zurück zur Anmeldung</button>
+        <button type="button" onClick="{{goReset}}" style="align-self: center; height: 40px; padding: 0 12px; border: 0; border-radius: 20px; background: transparent; color: {{c.primary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Keine E-Mail bekommen? Erneut senden</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isNewPw}}" hint-placeholder-val="{{ false }}">
+      <form onSubmit="{{goLoginSubmit}}" style="display: flex; flex-direction: column; gap: 20px">
+        <div>
+          <h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 400">Neues Passwort festlegen</h1>
+          <p style="margin: 8px 0 0; font-size: 14px; line-height: 20px; letter-spacing: 0.25px; color: {{c.onSurfaceVariant}}">Für mara@beispiel.de</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px">
+          <div style="position: relative">
+            <label for="np-pw" style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: {{fieldBg}}; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Neues Passwort</label>
+            <input id="np-pw" type="{{pwType}}" autocomplete="new-password" value="{{f.pw}}" onChange="{{on.pw}}" aria-describedby="np-pw-help" style="width: 100%; height: 56px; box-sizing: border-box; padding: 0 56px 0 16px; font: inherit; font-size: 16px; line-height: 24px; letter-spacing: 0.5px; border: 1px solid {{c.outline}}; border-radius: 4px; background: transparent; color: {{c.onSurface}}">
+            <button type="button" aria-label="Passwort anzeigen" aria-pressed="{{pwPressed}}" onClick="{{togglePw}}" style="position: absolute; right: 4px; top: 4px; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: {{c.onSurfaceVariant}}; cursor: pointer">
+              <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path></svg>
+            </button>
+          </div>
+          <p id="np-pw-help" style="margin: 0; padding: 0 16px; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: {{c.onSurfaceVariant}}">Mindestens 8 Zeichen.</p>
+        </div>
+        <button type="submit" style="height: 48px; border: 0; border-radius: 24px; background: {{c.primary}}; color: {{c.onPrimary}}; font: inherit; font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; cursor: pointer">Passwort speichern und anmelden</button>
+      </form>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"device":{"editor":"enum","options":["auto","compact","medium","expanded"],"default":"auto"},"mode":{"editor":"enum","options":["login","register","reset","resetSent","newPassword"],"default":"login"},"invite":{"editor":"boolean","default":false},"showError":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this._onResize = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
+  renderVals() {
+    const s = this.state || {};
+    const p = this.props;
+    const theme = s.theme || p.theme || 'light';
+    const vw = s.vw || 1280;
+    const pd = p.device;
+    const size = pd && pd !== 'auto' ? pd : (vw < 600 ? 'compact' : vw < 840 ? 'medium' : 'expanded');
+    const compact = size === 'compact';
+    const S = {
+      light: { primary: '#415F91', onPrimary: '#FFFFFF', primaryContainer: '#D6E3FF', onPrimaryContainer: '#284777', secondaryContainer: '#DAE2F9', onSecondaryContainer: '#3E4759', surface: '#F9F9FF', onSurface: '#191C20', onSurfaceVariant: '#44474E', outline: '#74777F', outlineVariant: '#C4C6D0', error: '#BA1A1A', pageBg: '#EDEDF4', card: '#FFFFFF' },
+      dark: { primary: '#AAC7FF', onPrimary: '#0A305F', primaryContainer: '#284777', onPrimaryContainer: '#D6E3FF', secondaryContainer: '#3E4759', onSecondaryContainer: '#DAE2F9', surface: '#111318', onSurface: '#E2E2E9', onSurfaceVariant: '#C4C6D0', outline: '#8E9099', outlineVariant: '#44474E', error: '#FFB4AB', pageBg: '#111318', card: '#1D2024' }
+    };
+    const c = S[theme] || S.light;
+    const mode = s.mode || p.mode || 'login';
+    const showError = s.showError !== undefined ? s.showError : !!p.showError;
+    const f = s.f || (showError ? { name: 'Mara', email: 'mara@beispiel', pw: '' } : { name: '', email: mode === 'resetSent' ? 'mara@beispiel.de' : '', pw: '' });
+    const setF = (k) => (e) => this.setState({ f: { ...f, [k]: e.target.value }, showError: false });
+    const emailError = mode === 'register' && showError;
+    const fixedH = { compact: '844px', medium: '1112px', expanded: '800px' };
+    return {
+      c,
+      theme,
+      isDark: theme === 'dark',
+      isLight: theme !== 'dark',
+      themeLabel: theme === 'dark' ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren',
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      rootH: pd && pd !== 'auto' ? fixedH[pd] : '100vh',
+      rootPad: compact ? '56px 0 32px' : '64px 24px 48px',
+      rootBg: compact ? c.card : c.pageBg,
+      fieldBg: c.card,
+      cardMaxW: compact ? '100%' : '448px',
+      cardPad: compact ? '0 20px' : '40px',
+      cardBg: c.card,
+      cardBorder: compact ? '0' : '1px solid ' + c.outlineVariant,
+      hasInvite: !!p.invite && (mode === 'register' || mode === 'login'),
+      isLogin: mode === 'login',
+      isRegister: mode === 'register',
+      isReset: mode === 'reset',
+      isResetSent: mode === 'resetSent',
+      isNewPw: mode === 'newPassword',
+      registerCta: p.invite ? 'Konto erstellen und beitreten' : 'Konto erstellen',
+      f,
+      on: { email: setF('email'), pw: setF('pw'), name: setF('name') },
+      pwType: s.showPw ? 'text' : 'password',
+      pwPressed: s.showPw ? 'true' : 'false',
+      togglePw: () => this.setState({ showPw: !s.showPw }),
+      emailError,
+      emailInvalid: emailError ? 'true' : 'false',
+      emailBorder: emailError ? '2px solid ' + c.error : '1px solid ' + c.outline,
+      emailLabelColor: emailError ? c.error : c.onSurfaceVariant,
+      emailHelpColor: emailError ? c.error : c.onSurfaceVariant,
+      emailHelp: emailError ? 'Fehler: Diese E-Mail-Adresse ist unvollständig. Beispiel: name@beispiel.de' : 'Wir schicken dir keine Werbung.',
+      sentTo: f.email || 'deiner E-Mail-Adresse',
+      noop: (e) => e.preventDefault(),
+      goLogin: () => this.setState({ mode: 'login' }),
+      goLoginSubmit: (e) => {
+        e.preventDefault();
+        this.setState({ mode: 'login' });
+      },
+      goRegister: () => this.setState({ mode: 'register' }),
+      goReset: () => this.setState({ mode: 'reset' }),
+      sendReset: (e) => {
+        e.preventDefault();
+        this.setState({ mode: 'resetSent' });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
