@@ -1,5 +1,16 @@
 {
   "recommendations": [
-    "EditorConfig.EditorConfig"
+    "42Crunch.vscode-openapi",
+    "Angular.ng-template",
+    "EditorConfig.EditorConfig",
+    "dbaeumer.vscode-eslint",
+    "deque-systems.vscode-axe-linter",
+    "esbenp.prettier-vscode",
+    "ms-azuretools.vscode-containers",
+    "ms-playwright.playwright",
+    "redhat.vscode-yaml",
+    "vitest.explorer",
+    "vmware.vscode-boot-dev-pack",
+    "vscjava.vscode-java-pack"
   ]
 }

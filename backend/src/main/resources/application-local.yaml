@@ -1,0 +1,25 @@
+# src/main/resources/application-local.yaml (SPRING-DEV-02/03)
+# Activate with: ./mvnw spring-boot:run -Dspring-boot.run.profiles=local  (IDE: active profile `local`)
+# Boot starts compose.yaml automatically because spring-boot-docker-compose is on the runtime classpath.
+# That module is left out of the repackaged jar and disabled in tests by default.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/groceries?connectTimeout=2&socketTimeout=10
+    username: groceries
+    password: groceries
+  flyway:
+    placeholders:
+      app-role: groceries
+  docker:
+    compose:
+      # lifecycle-management: start-only   # keep Postgres/Kafka running after the app stops
+      # profiles:
+      #   active: tools,auth                 # optional Compose profiles, see compose.yaml
+
+app:
+  frontend:
+    bundle-enabled: false            # the Angular dev server serves the SPA and proxies to this backend (REL-FE-02)
+
+springdoc:
+  api-docs:
+    enabled: true                     # local only; deployed it stays off (SPRING-API-10)

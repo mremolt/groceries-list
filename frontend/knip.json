@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["src/**/*.spec.ts", "e2e/**/*.ts", "scripts/*.mjs"],
+  "project": ["src/**/*.ts", "e2e/**/*.ts", "test/**/*.ts"],
+  "ignoreIssues": {
+    "src/platform/platform.tokens.ts": ["exports"],
+    "src/platform/index.ts": ["exports", "types"]
+  },
+  "ignore": ["test/fixtures/**"]
+}

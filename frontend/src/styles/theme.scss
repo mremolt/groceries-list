@@ -1,0 +1,103 @@
+// The one global Angular Material theme (NG-UI-04). Palettes come from the theme-color schematic with the primary
+// seed #415F91 of requirements/mockups/design-tokens.json (src/styles/_theme-colors.scss, regenerate when the brand
+// changes). Roles that the design tokens fix to exact values are set below with mat.theme-overrides so the result
+// matches the mockups 1:1; high contrast (NG-UI-07) comes last and wins under prefers-contrast: more.
+@use '@angular/material' as mat;
+@use './theme-colors' as brand;
+
+// design-tokens.json -> M3 roles, as light-dark(<light>, <dark>)
+$token-roles: (
+  primary: light-dark(#415f91, #aac7ff),
+  on-primary: light-dark(#ffffff, #0a305f),
+  primary-container: light-dark(#d6e3ff, #284777),
+  on-primary-container: light-dark(#284777, #d6e3ff),
+  secondary-container: light-dark(#dae2f9, #3e4759),
+  on-secondary-container: light-dark(#3e4759, #dae2f9),
+  surface: light-dark(#f9f9ff, #111318),
+  on-surface: light-dark(#191c20, #e2e2e9),
+  on-surface-variant: light-dark(#44474e, #c4c6d0),
+  outline: light-dark(#74777f, #8e9099),
+  outline-variant: light-dark(#c4c6d0, #44474e),
+  surface-container-lowest: light-dark(#ffffff, #0c0e13),
+  surface-container-low: light-dark(#f3f3fa, #191c20),
+  surface-container: light-dark(#ededf4, #1d2024),
+  surface-container-high: light-dark(#e7e8ee, #282a2f),
+  surface-container-highest: light-dark(#e2e2e9, #33353a),
+  error: light-dark(#ba1a1a, #ffb4ab),
+  inverse-surface: light-dark(#2e3036, #e2e2e9),
+  inverse-on-surface: light-dark(#f0f0f7, #2e3036),
+);
+
+html {
+  color-scheme: light dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: brand.$primary-palette,
+        tertiary: brand.$tertiary-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+  @include mat.theme-overrides($token-roles);
+  // NFR-A11Y-02: visible focus ring, 3 px (the 2 px offset is set in styles.scss on the focus ring custom property)
+  @include mat.strong-focus-indicators(
+    (
+      border-width: 3px,
+      border-color: var(--mat-sys-primary),
+    )
+  );
+
+  // App-specific roles of the design (design-tokens.json: pageBg, card), the only own colour family (NG-UI-05)
+  --app-color-page-bg: light-dark(#ededf4, #111318);
+  --app-color-card: light-dark(#ffffff, #1d2024);
+
+  // Spacing on the 4/8 px grid (NG-UI-11, UI-03)
+  --app-space-1: 0.25rem;
+  --app-space-2: 0.5rem;
+  --app-space-3: 0.75rem;
+  --app-space-4: 1rem;
+  --app-space-5: 1.5rem;
+  --app-space-6: 2rem;
+  --app-space-7: 3rem;
+
+  // Motion (NG-UI-15): M3 standard values, collapsed by prefers-reduced-motion below
+  --app-motion-duration-short: 150ms;
+  --app-motion-duration-medium: 250ms;
+  --app-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  @media (prefers-contrast: more) {
+    @include brand.high-contrast-overrides(color-scheme);
+    --app-color-page-bg: var(--mat-sys-surface);
+    --app-color-card: var(--mat-sys-surface);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    --app-motion-duration-short: 0ms;
+    --app-motion-duration-medium: 0ms;
+  }
+}
+
+// FR-SET-02: explicit per-device choice overrides the system setting (set by ColorScheme on <html>)
+html[data-color-scheme='light'] {
+  color-scheme: light;
+}
+
+html[data-color-scheme='dark'] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--app-color-page-bg);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-large);
+}
+
+// Forced colours (NFR-A11Y-09, A11Y-28): own surfaces keep a real border, system colours take over
+@media (forced-colors: active) {
+  .app-card {
+    border: 1px solid CanvasText;
+  }
+}

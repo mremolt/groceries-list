@@ -1,0 +1,39 @@
+# Keys a deployment sets (CFG-12). Read by ConfigurationKeysTest (TEST-CFG-04/05). Own keys (app.*) are checked in both
+# directions against the generated configuration metadata; required keys have no default in application.yaml.
+keys:
+  - key: spring.datasource.url
+    required: true
+    secret: false
+    description: JDBC URL of the PostgreSQL database, with pgjdbc timeouts (connectTimeout=2&socketTimeout=10).
+  - key: spring.datasource.username
+    required: true
+    secret: true
+    description: DML-only database role of the running service (SPRING-SEC-27). Mounted file in deployments.
+  - key: spring.datasource.password
+    required: true
+    secret: true
+    description: Password of the DML role. Mounted file in deployments.
+  - key: spring.flyway.user
+    required: true
+    secret: true
+    description: DDL role used only by Flyway at start-up (SPRING-REL-01).
+  - key: spring.flyway.password
+    required: true
+    secret: true
+    description: Password of the Flyway DDL role.
+  - key: app.frontend.bundle-enabled
+    required: false
+    secret: false
+    description: Serve the embedded Angular bundle (default true; a deployed instance fails to start without it, false = API-only run).
+  - key: app.frontend.environment
+    required: false
+    secret: false
+    description: Environment name sent to the SPA in /config.json (default local); shown in error reports only.
+  - key: app.frontend.error-reporting-enabled
+    required: false
+    secret: false
+    description: Whether the SPA reports errors to the same-origin report path (default false).
+  - key: app.limits.max-body-size
+    required: false
+    secret: false
+    description: Largest accepted request body, e.g. 64KB (default 64KB); larger requests get 413.

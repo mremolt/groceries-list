@@ -1,0 +1,13 @@
+{
+  "shell": {
+    "appName": "Einkaufsliste",
+    "title": {
+      "home": "Start"
+    }
+  },
+  "platform": {
+    "error": {
+      "generic": "Das hat nicht geklappt. Bitte versuche es noch einmal."
+    }
+  }
+}

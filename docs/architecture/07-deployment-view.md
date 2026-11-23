@@ -1,6 +1,6 @@
 # 7. Deployment View
 
-Repository layout, CI, delivery, images and local development follow the baseline: [../baseline/07-deployment-view](../baseline/07-deployment-view/README.md). Interim per REL-CD-08: [ADR 0004](../adr/0004-local-gates-and-compose-test-environment.md). Status: planned until M0 scaffolding exists.
+Repository layout, CI, delivery, images and local development follow the baseline: [../baseline/07-deployment-view](../baseline/07-deployment-view/README.md). Interim per REL-CD-08: [ADR 0004](../adr/0004-local-gates-and-compose-test-environment.md). Status: M0 scaffolding exists (backend `compose.yaml`, `compose.app.yaml`, `configuration-keys.yaml`); image build and deployment not yet exercised.
 
 ## 7.1 Infrastructure
 
@@ -47,7 +47,7 @@ Local Docker Compose is the only environment (ADR 0004): `backend/compose.yaml` 
 
 | Component | Key list | Secret source |
 |---|---|---|
-| backend | `backend/configuration-keys.yaml` (planned in M0) | mounted files, local dev only |
+| backend | `backend/configuration-keys.yaml`  | mounted files, local dev only |
 
 ## 7.5 Rollout, availability and recovery
 

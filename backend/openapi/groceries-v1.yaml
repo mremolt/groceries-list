@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: Groceries list API
+  version: v1
+servers:
+- url: /
+paths: {}
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      description: RFC 9457 problem details; code is stable (API-REST-07)
+      properties:
+        code:
+          type: string
+        detail:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+        instance:
+          type: string
+        status:
+          type: integer
+          format: int32
+        title:
+          type: string
+        traceId:
+          type: string
+        type:
+          type: string
+      required:
+      - code
+      - status

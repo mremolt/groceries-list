@@ -1,0 +1,11 @@
+{
+  "shell.appName": {
+    "description": "Name of the app; suffix of every document title and heading of the top bar",
+    "maxLength": 30
+  },
+  "shell.title.home": { "description": "Document title of the start page (route title)", "maxLength": 40 },
+  "platform.error.generic": {
+    "description": "Generic error text shown when an action fails (FR-FB-05)",
+    "maxLength": 80
+  }
+}

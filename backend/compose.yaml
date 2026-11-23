@@ -1,0 +1,58 @@
+# backend/compose.yaml - local development dependencies (never used in production)
+# No `latest` (SPRING-DEV-04). CI starts the core services for e2e:smoke (SPRING-DEV-10): pin those by digest
+# in the project (`postgres:18@sha256:…`, SEC-CI-02); the update automation keeps tags and digests current (TS-TOOL-15).
+name: groceries-dev
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: groceries
+      POSTGRES_USER: groceries
+      POSTGRES_PASSWORD: groceries
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./dev/postgres/init-roles.sql:/docker-entrypoint-initdb.d/10-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U groceries -d groceries"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    profiles: [auth]
+    image: quay.io/keycloak/keycloak:26.8
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8180"                          # same port inside and outside, so the issuer URL is identical (SPRING-DEV-11)
+      KC_HOSTNAME: http://keycloak.localhost:8180   # issuer seen by the browser, the app on the host and other containers
+      KC_HEALTH_ENABLED: "true"                     # /health/ready on the management port 9000 (SPRING-DEV-12)
+    networks:
+      default:
+        aliases:
+          - keycloak.localhost                      # other containers (compose.app.yaml) reach the same issuer URL
+    volumes:
+      - ./dev/keycloak:/opt/keycloak/data/import:ro # realm template: dev/keycloak/groceries-realm.json (SPRING-DEV-12)
+    ports:
+      - "127.0.0.1:8180:8180"
+    healthcheck:                                    # the image has no curl: plain bash /dev/tcp against the management port
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 60                                   # realm import on first start takes a while
+      start_period: 10s
+
+  mailpit:
+    profiles: [mail]
+    image: axllent/mailpit:v1.34
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
+
+volumes:
+  postgres-data:

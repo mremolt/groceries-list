@@ -1,0 +1,28 @@
+# Adds the application image built from the same commit to the dependencies of compose.yaml (SPRING-DEV-10, ADR 0004):
+#   ./mvnw spring-boot:build-image -Dfrontend.dist=../frontend/dist/frontend/browser -Dspring-boot.build-image.imageName=groceries:local
+#   docker compose -f compose.yaml -f compose.app.yaml up
+# Local installation only: the credentials are the fictitious development values of dev/postgres/init-roles.sql. The
+# service connects as the DML-only role, Flyway as the DDL owner (SPRING-REL-01). Deployments mount these as secret files.
+name: groceries-dev
+
+services:
+  app:
+    image: groceries:local
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/groceries?connectTimeout=2&socketTimeout=10
+      SPRING_DATASOURCE_USERNAME: groceries_app
+      SPRING_DATASOURCE_PASSWORD: groceries_app
+      SPRING_FLYWAY_USER: groceries_owner
+      SPRING_FLYWAY_PASSWORD: groceries_owner
+      INFO_RELEASE_VERSION: local
+    ports:
+      - "127.0.0.1:8080:8080"
+    stop_grace_period: 60s   # above the shutdown budget (SPRING-OBS-04, REL-RUN-06)
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true

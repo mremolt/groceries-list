@@ -12,3 +12,8 @@ Quality goals: [chapter 1](01-introduction-and-goals.md). Baseline: [../baseline
 | Q6 | First load, mid-range phone, 4G | LCP ≤ 2.5 s, INP ≤ 200 ms | M7 measurement |
 
 PR-tier wall-clock budget for E2E (TS-TEST-30): to be recorded in M0 once measured.
+
+## Budgets and tiers (recorded at M0)
+
+- Frontend initial bundle budget (NG-TOOL-05): warn 810 kB / error 970 kB raw (measured 737 kB + 10 %); first measurement, to be tightened.
+- E2E stubbed tier runs Chromium and Firefox here; WebKit needs host libraries missing on the development machine (`E2E_SKIP_WEBKIT=1`, explicit switch, see implementation log). PR-tier wall clock budget (TS-TEST-30): the M0 e2e run takes ~10 s.
