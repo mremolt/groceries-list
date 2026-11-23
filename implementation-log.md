@@ -14,7 +14,7 @@
 | M3 Items | done | 9a65f1a | m3-done |
 | M4 Sharing and joining | done | 90fc5a7 | m4-done |
 | M5 Synchronisation | done | ae98bc7 | m5-done |
-| M6 Settings and account | done | PENDING | m6-done |
+| M6 Settings and account | done | da1d286 | m6-done |
 | M7 Internal test readiness | not started | | |
 
 - **Next action:** M7 Internal test readiness (read requirements/05 M7 and 04 §4 NFRs; deferred NFR-PRIV are out of scope per 05 §5): close known issues from the milestone entries, run `verify` + real tier + full gates, check docs/architecture against code (DOC-ARC-11), write the final log entry, commit `M7 done`, tag.
