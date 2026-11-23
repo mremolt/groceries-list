@@ -20,6 +20,7 @@
 		<nullaway.version>0.14.4</nullaway.version>
 		<findsecbugs.version>1.14.0</findsecbugs.version>
 		<bucket4j.version>8.17.0</bucket4j.version>
+		<datasource-proxy.version>1.11.1</datasource-proxy.version>
 		<archunit.version>1.5.1</archunit.version>
 		<spotless.version>3.11.0</spotless.version>
 		<spotbugs-plugin.version>4.10.5.0</spotbugs-plugin.version>
@@ -96,6 +97,13 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<!-- JDBC-level statement counts for query ports (SPRING-TEST-06, API-N1-06); test scope only -->
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
+			<version>${datasource-proxy.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.tngtech.archunit</groupId>

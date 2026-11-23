@@ -70,5 +70,149 @@
   "shell.settings.placeholder": {
     "description": "UI text of the app shell: shell.settings.placeholder",
     "maxLength": 70
+  },
+  "shell.nav.loadFailed": {
+    "description": "Drawer text when the lists could not be loaded",
+    "maxLength": 60
+  },
+  "shell.nav.retry": {
+    "description": "Button that loads the lists again",
+    "maxLength": 30
+  },
+  "shell.menu.rename": {
+    "description": "⋮ menu entry: rename the open list (FR-NAV-05)",
+    "maxLength": 30
+  },
+  "shell.menu.leave": {
+    "description": "⋮ menu entry: leave the open list (FR-NAV-05)",
+    "maxLength": 30
+  },
+  "shell.menu.delete": {
+    "description": "⋮ menu entry: delete the open list, shown in the error colour (FR-NAV-05)",
+    "maxLength": 30
+  },
+  "shell.dialog.cancel": {
+    "description": "Dialog button that closes without changes",
+    "maxLength": 20
+  },
+  "shell.dialog.field": {
+    "description": "Label of the list name field in the create and rename dialogs (FR-LIST-01)",
+    "maxLength": 30
+  },
+  "shell.dialog.keptHint": {
+    "description": "Status line when Esc or a click outside was ignored because a name was entered (UI-21)",
+    "maxLength": 90
+  },
+  "shell.dialog.create.title": {
+    "description": "Title of the create-list dialog (FR-LIST-01 AC1)",
+    "maxLength": 20
+  },
+  "shell.dialog.create.submit": {
+    "description": "Submit button of the create-list dialog",
+    "maxLength": 20
+  },
+  "shell.dialog.rename.title": {
+    "description": "Title of the rename dialog (FR-LIST-02 AC1)",
+    "maxLength": 30
+  },
+  "shell.dialog.rename.text": {
+    "description": "Note in the rename dialog (FR-LIST-02 AC1)",
+    "maxLength": 60
+  },
+  "shell.dialog.rename.submit": {
+    "description": "Submit button of the rename dialog",
+    "maxLength": 20
+  },
+  "shell.dialog.leave.title": {
+    "description": "Title of the leave confirmation; {name} is the list name (FR-LIST-04 AC1)",
+    "maxLength": 120
+  },
+  "shell.dialog.leave.text": {
+    "description": "Text of the leave confirmation (FR-LIST-04 AC1)",
+    "maxLength": 140
+  },
+  "shell.dialog.leave.confirm": {
+    "description": "Confirm button of the leave confirmation",
+    "maxLength": 20
+  },
+  "shell.dialog.delete.title": {
+    "description": "Title of the delete confirmation; {name} is the list name (FR-LIST-03 AC1)",
+    "maxLength": 120
+  },
+  "shell.dialog.delete.text": {
+    "description": "Text of the delete confirmation (FR-LIST-03 AC1)",
+    "maxLength": 140
+  },
+  "shell.dialog.delete.confirm": {
+    "description": "Confirm button of the delete confirmation, error colour",
+    "maxLength": 20
+  },
+  "shell.error.nameRequired": {
+    "description": "Field error: empty list name (FR-LIST-01 AC3)",
+    "maxLength": 50
+  },
+  "shell.error.nameTooLong": {
+    "description": "Field error: list name over 80 characters (FR-LIST-01 AC3)",
+    "maxLength": 70
+  },
+  "shell.error.limitReached": {
+    "description": "Field error: the person already is in 100 lists (BR-12)",
+    "maxLength": 120
+  },
+  "shell.snackbar.created": {
+    "description": "Snackbar after creating a list (FR-LIST-01 AC2)",
+    "maxLength": 40
+  },
+  "shell.snackbar.saved": {
+    "description": "Snackbar after saving (FR-LIST-02 AC2)",
+    "maxLength": 40
+  },
+  "shell.snackbar.left": {
+    "description": "Snackbar after leaving a list (FR-LIST-04 AC2)",
+    "maxLength": 50
+  },
+  "shell.snackbar.deleted": {
+    "description": "Snackbar after deleting a list (FR-LIST-03 AC2)",
+    "maxLength": 40
+  },
+  "shell.snackbar.gone": {
+    "description": "Snackbar when the list was already gone while a command ran",
+    "maxLength": 50
+  },
+  "shell.list.loading": {
+    "description": "Accessible name of the progress bar while a list loads",
+    "maxLength": 40
+  },
+  "shell.list.itemsFollow": {
+    "description": "Placeholder body of a list page until the items arrive (M3)",
+    "maxLength": 60
+  },
+  "shell.list.failed": {
+    "description": "Error text when a list could not be loaded",
+    "maxLength": 60
+  },
+  "shell.list.retry": {
+    "description": "Retry button on the list page",
+    "maxLength": 30
+  },
+  "shell.list.notFound.title": {
+    "description": "Heading of the page for a list that does not exist or is not accessible (FR-NAV-06 AC2)",
+    "maxLength": 40
+  },
+  "shell.list.notFound.text": {
+    "description": "Text of that page; identical for both cases (FR-NAV-06 AC2)",
+    "maxLength": 80
+  },
+  "shell.list.notFound.action": {
+    "description": "Link/button back to the start page",
+    "maxLength": 30
+  },
+  "shell.empty.lists.loading": {
+    "description": "Accessible name of the progress bar while the lists load",
+    "maxLength": 40
+  },
+  "shell.nav.listLabel": {
+    "description": "Accessible name of a list entry in the drawer: list name and number of open items (FR-NAV-02 AC3). The visible text is the name and the count, so the name contains it (WCAG 2.5.3); {name}, {count}",
+    "maxLength": 80
   }
 }

@@ -86,3 +86,52 @@ start	duration_s	milestone	category	label	exit
 2026-11-23T12:52:56+01:00	15	M1-e2e	e2e	e2e:real sixth run (final, with log check)	0
 2026-11-23T12:53:11+01:00	34	M1-e2e	build-gate	mvnw verify (final)	0
 2026-11-23T12:36:30+01:00	300	M1-e2e	code	e2e real specs, support helpers, config, scripts, docs (hand row)	0
+2026-11-23T12:57:53+01:00	4	M2-backend	test-run	RED: domain tests do not compile	1
+2026-11-23T12:58:08+01:00	9	M2-backend	test-run	GREEN: domain tests	0
+2026-11-23T12:58:54+01:00	4	M2-backend	test-run	RED: use case tests do not compile	1
+2026-11-23T12:59:30+01:00	8	M2-backend	test-run	GREEN: use case tests	1
+2026-11-23T12:59:54+01:00	7	M2-backend	test-run	GREEN: use case tests	1
+2026-11-23T13:00:06+01:00	12	M2-backend	test-run	GREEN: use case tests	0
+2026-11-23T13:01:17+01:00	5	M2-backend	test-run	RED: persistence ITs (no migration/adapters yet)	1
+2026-11-23T13:01:33+01:00	19	M2-backend	test-run	RED: persistence ITs (no migration/adapters yet)	1
+2026-11-23T13:02:19+01:00	29	M2-backend	test-run	GREEN: persistence ITs	0
+2026-11-23T13:02:54+01:00	20	M2-backend	test-run	MUTATION: locks removed, concurrency ITs must fail	1
+2026-11-23T13:03:19+01:00	21	M2-backend	test-run	MUTATION: user lock removed, limit race IT must fail	1
+2026-11-23T13:04:27+01:00	6	M2-backend	test-run	RED: web slice tests do not compile	1
+2026-11-23T13:04:55+01:00	21	M2-frontend	build-gate	check (typecheck lint arch unused)	1
+2026-11-23T13:05:15+01:00	25	M2-backend	test-run	GREEN: web slice tests	1
+2026-11-23T13:05:52+01:00	48	M2-backend	build-gate	mvnw verify (first full, with -Dopenapi.update=true)	0
+2026-11-23T13:06:31+01:00	33	M2-frontend	build-gate	check (all but e2e/build)	1
+2026-11-23T13:07:12+01:00	8	M2-backend	test-run	ListsApiIT + MigrationRolesIT	1
+2026-11-23T13:07:24+01:00	29	M2-backend	test-run	ListsApiIT + MigrationRolesIT	0
+2026-11-23T13:08:02+01:00	51	M2-backend	build-gate	mvnw verify -Dopenapi.update=true (final-ish)	0
+2026-11-23T13:08:58+01:00	6	M2-backend	build-gate	mvnw verify -Dopenapi.update=true	1
+2026-11-23T13:09:04+01:00	4	M2-backend	build-gate	mvnw verify (no update flag: spec must not be stale)	1
+2026-11-23T13:08:49+01:00	21	M2-frontend	e2e	e2e fast (expanded)	1
+2026-11-23T13:09:22+01:00	26	M2-frontend	e2e	e2e fast (expanded) 2	1
+2026-11-23T13:09:14+01:00	54	M2-backend	build-gate	mvnw verify -Dopenapi.update=true	0
+2026-11-23T13:10:30+01:00	9	M2-frontend	test-run	unit tests	0
+2026-11-23T13:10:44+01:00	60	M2-backend	build-gate	mvnw verify (final, no update flag)	0
+2026-11-23T12:55:29+01:00	131	M2-backend	read-docs	existing backend code, generator, test support, SPRING-DB/TEST rules	0
+2026-11-23T12:57:40+01:00	13	M2-backend	code	domain tests (ListName, ShoppingList) + domain types	0
+2026-11-23T12:58:17+01:00	37	M2-backend	code	use case tests (6 services) + ports + services	0
+2026-11-23T12:59:38+01:00	16	M2-backend	debug	Error Prone ignored-return on orElseThrow; package dir missing	0
+2026-11-23T13:00:18+01:00	59	M2-backend	code	persistence + concurrency IT tests (Arrange, StatementCounting)	0
+2026-11-23T13:01:52+01:00	27	M2-backend	code	migration V5 + JPA/JDBC adapters	0
+2026-11-23T13:02:48+01:00	6	M2-backend	debug	mutation experiments (edit/restore locks)	0
+2026-11-23T13:04:33+01:00	47	M2-backend	code	web slice tests (5 controllers)	0
+2026-11-23T13:05:15+01:00	42	M2-backend	code	controllers, DTOs, handler VALIDATION_FAILED, audit event	0
+2026-11-23T13:06:40+01:00	32	M2-backend	debug	cross-user rule, NO_CALLER_SUPPLIED_ID entry, ListMyLists tagged test	0
+2026-11-23T13:07:41+01:00	30	M2-backend	code	ListsApiIT (two users, real chain) + MigrationRolesIT privilege test	0
+2026-11-23T13:08:53+01:00	65	M2-backend	debug	springdoc: @Schema has no maxItems -> @ArraySchema; spec refresh	0
+2026-11-23T13:10:08+01:00	91	M2-backend	docs	arc42 ch5/8, threat model, data-protection docs, ADR 0006/0007 notes	0
+2026-11-23T13:10:42+01:00	89	M2-frontend	e2e	e2e all stubbed projects	1
+2026-11-23T13:13:30+01:00	78	M2-frontend	e2e	e2e all stubbed projects 2	1
+2026-11-23T14:45:32+01:00	45	M2-backend	build-gate	mvnw verify (resume)	0
+2026-11-23T14:46:53+01:00	16	M2-frontend	e2e	e2e fast (resume)	0
+2026-11-23T14:47:12+01:00	0	M2-frontend	e2e	e2e real (resume)	1
+2026-11-23T14:47:27+01:00	23	M2-frontend	infra	compose up (image build)	0
+2026-11-23T14:47:52+01:00	1	M2-frontend	e2e	e2e real lists	1
+2026-11-23T14:48:02+01:00	12	M2-frontend	infra	build image	0
+2026-11-23T14:48:17+01:00	0	M2-frontend	e2e	e2e real lists+auth	1
+2026-11-23T14:48:22+01:00	22	M2-frontend	e2e	e2e real lists+auth	0

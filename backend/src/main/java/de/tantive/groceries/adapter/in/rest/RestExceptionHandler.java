@@ -4,6 +4,7 @@ import de.tantive.groceries.domain.AccessDeniedException;
 import de.tantive.groceries.domain.BusinessRuleException;
 import de.tantive.groceries.domain.ConflictException;
 import de.tantive.groceries.domain.DomainValidationException;
+import de.tantive.groceries.domain.ListNotFoundException;
 import de.tantive.groceries.domain.NotFoundException;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +21,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,7 +49,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DomainValidationException.class)
     ResponseEntity<Object> validation(DomainValidationException exception, WebRequest request) {
-        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, exception.code(), exception.getMessage());
+        ProblemDetail problem = problem(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", exception.getMessage());
         String field = exception.field();
         problem.setProperty(
                 "errors",
@@ -59,6 +62,13 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     ResponseEntity<Object> notFound(NotFoundException exception, WebRequest request) {
+        if (exception instanceof ListNotFoundException) {
+            // a refusal and a miss look the same to the client; the audit event records who asked (SPRING-SEC-22)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof AppOidcUser user) {
+                AuditLog.listAccessRefused(user.toCaller().userId());
+            }
+        }
         return respond(exception, problem(HttpStatus.NOT_FOUND, exception.code(), exception.getMessage()), request);
     }
 

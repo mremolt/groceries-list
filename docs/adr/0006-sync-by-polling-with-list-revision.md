@@ -22,3 +22,7 @@ R1: polling every 5 s, cheap when unchanged (NFR-PERF-04), drawer counts (FR-LIS
 Simple, scales for the stated sizes (< 100 items, < 10 members). Query count asserted by test (SPRING-TEST-06, API-N1-06).
 
 **Revisit when:** lists grow far beyond 500 items or push (SSE) is wanted.
+
+## Implementation note (M2)
+
+`lists.revision` exists since M2 (migration `V5__lists_and_memberships.sql`) and is the Hibernate `@Version` of the list entity as well; renames increase it with `revision = revision + 1`. The drawer read `GET /api/v1/lists` is one grouped statement (asserted by test). The ETag/304 item snapshot follows with M3/M5. The decision above is unchanged.

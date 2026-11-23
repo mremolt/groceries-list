@@ -5,6 +5,198 @@ info:
 servers:
 - url: /
 paths:
+  /api/v1/lists:
+    get:
+      operationId: listMyLists
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyListsResponse"
+          description: "The lists, possibly none"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+      summary: "The lists of the logged-in person, at most 100, oldest membership\
+        \ first"
+      tags:
+      - lists
+    post:
+      operationId: createList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListResponse"
+          description: The new list; Location points to it
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Invalid name; code VALIDATION_FAILED with errors[].code NAME_REQUIRED\
+            \ or NAME_TOO_LONG"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "409":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: 100 lists reached (BR-12); code LIST_LIMIT_REACHED
+      summary: Create a list; the caller becomes its only member
+      tags:
+      - lists
+  /api/v1/lists/{listId}:
+    delete:
+      operationId: deleteList
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list or no member; code LIST_NOT_FOUND, the same answer\
+            \ for both"
+      summary: Delete a list with its items and memberships for all members
+      tags:
+      - lists
+    get:
+      operationId: getList
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListResponse"
+          description: The list
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list or no member; code LIST_NOT_FOUND, the same answer\
+            \ for both"
+      summary: One list of the logged-in person
+      tags:
+      - lists
+    patch:
+      operationId: renameList
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameListRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListResponse"
+          description: The renamed list
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Invalid name; code VALIDATION_FAILED with errors[].code NAME_REQUIRED\
+            \ or NAME_TOO_LONG"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list or no member; code LIST_NOT_FOUND, the same answer\
+            \ for both"
+      summary: Rename a list; the new name is visible to all members
+      tags:
+      - lists
+  /api/v1/lists/{listId}/members/me:
+    delete:
+      operationId: leaveList
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Left
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list or no member; code LIST_NOT_FOUND, the same answer\
+            \ for both"
+      summary: Leave a list; the last member leaving deletes it
+      tags:
+      - lists
   /api/v1/me:
     get:
       operationId: getCurrentUser
@@ -26,6 +218,16 @@ paths:
       - me-controller
 components:
   schemas:
+    CreateListRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Wocheneinkauf
+          maxLength: 80
+          minLength: 1
+      required:
+      - name
     CurrentUserResponse:
       type: object
       properties:
@@ -42,6 +244,40 @@ components:
       - displayName
       - email
       - id
+    ListResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Wocheneinkauf
+          maxLength: 80
+        openCount:
+          type: integer
+          format: int32
+          description: Number of items that are not checked yet
+          minimum: 0
+        revision:
+          type: integer
+          format: int64
+          description: Changes whenever the list or one of its items changes
+      required:
+      - id
+      - name
+      - openCount
+      - revision
+    MyListsResponse:
+      type: object
+      properties:
+        lists:
+          type: array
+          items:
+            $ref: "#/components/schemas/ListResponse"
+          maxItems: 100
+      required:
+      - lists
     ProblemDetail:
       type: object
       description: RFC 9457 problem details; code is stable (API-REST-07)
@@ -68,3 +304,13 @@ components:
       required:
       - code
       - status
+    RenameListRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: WG-Vorrat
+          maxLength: 80
+          minLength: 1
+      required:
+      - name

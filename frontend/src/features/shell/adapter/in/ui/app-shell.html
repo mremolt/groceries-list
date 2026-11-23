@@ -7,7 +7,7 @@
   >
     <nav [attr.aria-label]="'shell.nav.label' | transloco" class="nav">
       <div class="drawer-head">
-        <button matButton="tonal" class="new-list" type="button" disabledInteractive [disabled]="true">
+        <button matButton="tonal" class="new-list" type="button" (click)="newList()">
           <app-icon name="add" />
           {{ 'shell.nav.newList' | transloco }}
         </button>
@@ -23,7 +23,31 @@
         }
       </div>
       <h2 class="nav-heading">{{ 'shell.nav.myLists' | transloco }}</h2>
-      <p class="nav-empty">{{ 'shell.nav.noLists' | transloco }}</p>
+      @if (lists.hasLists()) {
+        <ul class="nav-list">
+          @for (list of lists.lists(); track list.id) {
+            <li>
+              <a
+                class="nav-item"
+                [routerLink]="['/listen', list.id]"
+                routerLinkActive="active"
+                ariaCurrentWhenActive="page"
+                [attr.aria-label]="'shell.nav.listLabel' | transloco: { name: list.name, count: list.openCount }"
+                (click)="closeIfModal()"
+              >
+                <app-icon name="list" />
+                <span class="nav-name">{{ list.name }}</span>{{ ' '
+                }}<span class="nav-count">{{ list.openCount }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      } @else if (lists.status() === 'failed') {
+        <p class="nav-empty">{{ 'shell.nav.loadFailed' | transloco }}</p>
+        <button matButton type="button" (click)="retryLists()">{{ 'shell.nav.retry' | transloco }}</button>
+      } @else if (lists.status() === 'ready') {
+        <p class="nav-empty">{{ 'shell.nav.noLists' | transloco }}</p>
+      }
       <mat-divider />
       <a
         class="nav-item"
@@ -63,7 +87,7 @@
           <app-icon name="moreVert" />
         </button>
       </div>
-      <h1 class="page-title">{{ headingKey() | transloco }}</h1>
+      <h1 class="page-title">{{ listName() ?? (headingKey() | transloco) }}</h1>
     </header>
     <main class="page">
       <router-outlet />
@@ -72,6 +96,21 @@
 </mat-sidenav-container>
 
 <mat-menu #more="matMenu" xPosition="before">
+  @if (onList()) {
+    <button mat-menu-item type="button" (click)="renameList()">
+      <app-icon name="edit" />
+      <span>{{ 'shell.menu.rename' | transloco }}</span>
+    </button>
+    <button mat-menu-item type="button" (click)="leaveList()">
+      <app-icon name="exit" />
+      <span>{{ 'shell.menu.leave' | transloco }}</span>
+    </button>
+    <button mat-menu-item type="button" class="danger" (click)="deleteList()">
+      <app-icon name="delete" />
+      <span>{{ 'shell.menu.delete' | transloco }}</span>
+    </button>
+    <mat-divider />
+  }
   <a mat-menu-item routerLink="/einstellungen">
     <app-icon name="settings" />
     <span>{{ 'shell.menu.settings' | transloco }}</span>

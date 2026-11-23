@@ -11,22 +11,76 @@
     "newList": "Neue Liste",
     "myLists": "Meine Listen",
     "noLists": "Noch keine Listen.",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "loadFailed": "Die Listen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "listLabel": "{name}, {count} offen"
   },
   "menu": {
     "more": "Weitere Optionen",
     "settings": "Einstellungen",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "rename": "Liste umbenennen",
+    "leave": "Liste verlassen",
+    "delete": "Liste löschen"
   },
   "empty": {
     "lists": {
       "title": "Noch keine Listen",
       "text": "Lege deine erste Einkaufsliste an und teile sie mit Familie, Partner oder WG.",
       "action": "Neue Liste",
-      "hint": "Du hast einen Teilen-Link bekommen? Öffne ihn einfach – die Liste erscheint dann hier."
+      "hint": "Du hast einen Teilen-Link bekommen? Öffne ihn einfach – die Liste erscheint dann hier.",
+      "loading": "Listen werden geladen"
     }
   },
   "settings": {
     "placeholder": "Hier entstehen deine Einstellungen."
+  },
+  "dialog": {
+    "cancel": "Abbrechen",
+    "field": "Name der Liste",
+    "keptHint": "Du hast eine Eingabe gemacht. Wähle „Abbrechen“, um sie zu verwerfen.",
+    "create": {
+      "title": "Neue Liste",
+      "submit": "Erstellen"
+    },
+    "rename": {
+      "title": "Liste umbenennen",
+      "text": "Der neue Name ist für alle Mitglieder sichtbar.",
+      "submit": "Speichern"
+    },
+    "leave": {
+      "title": "„{name}“ verlassen?",
+      "text": "Die Liste verschwindet aus deiner Übersicht. Wenn du das letzte Mitglied bist, wird sie gelöscht.",
+      "confirm": "Verlassen"
+    },
+    "delete": {
+      "title": "„{name}“ löschen?",
+      "text": "Die Liste wird für alle Mitglieder gelöscht. Das kann nicht rückgängig gemacht werden.",
+      "confirm": "Löschen"
+    }
+  },
+  "error": {
+    "nameRequired": "Bitte gib einen Namen ein.",
+    "nameTooLong": "Der Name darf höchstens 80 Zeichen lang sein.",
+    "limitReached": "Du bist schon in 100 Listen. Verlasse oder lösche eine Liste, bevor du eine neue anlegst."
+  },
+  "snackbar": {
+    "created": "Liste erstellt",
+    "saved": "Gespeichert",
+    "left": "Du hast die Liste verlassen",
+    "deleted": "Liste gelöscht",
+    "gone": "Diese Liste gibt es nicht mehr."
+  },
+  "list": {
+    "loading": "Liste wird geladen",
+    "itemsFollow": "Hier erscheinen die Artikel dieser Liste.",
+    "failed": "Die Liste konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "notFound": {
+      "title": "Liste nicht gefunden",
+      "text": "Diese Liste gibt es nicht oder du hast keinen Zugriff.",
+      "action": "Zu meinen Listen"
+    }
   }
 }

@@ -1,7 +1,9 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, type Page, test as base } from '@playwright/test';
 
+import type { ListResponse } from '../src/features/lists/adapter/out/http/generated/model/listResponse';
 import { stubConfig } from './fixtures/config';
+import { type ListsStub, stubLists } from './fixtures/lists';
 import { stubSession } from './fixtures/session';
 
 const AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
@@ -21,6 +23,10 @@ interface Fixtures {
   session: { signedIn: boolean };
   /** Number of `/api/v1/me` calls (request budget, TS-TEST-14). */
   meCalls: () => number;
+  /** The lists the stubbed backend starts with (default: none); set per test with `test.use`. */
+  initialLists: { readonly lists: readonly ListResponse[] };
+  /** Stateful stub of the lists API (`/api/v1/lists`). */
+  listsApi: ListsStub;
 }
 
 const recordedApiCalls = new WeakMap<Page, string[]>();
@@ -32,6 +38,13 @@ async function stubRuntimeConfig(page: Page): Promise<void> {
 
 export const test = base.extend<Fixtures>({
   session: [{ signedIn: true }, { option: true }],
+  initialLists: [{ lists: [] }, { option: true }],
+  listsApi: [
+    async ({ page, initialLists }, use) => {
+      await use(await stubLists(page, initialLists.lists));
+    },
+    { auto: true },
+  ],
   meCalls: [
     async ({ page, session }, use) => {
       const stub = await stubSession(page, session.signedIn);

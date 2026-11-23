@@ -8,6 +8,7 @@ import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
 import { expectNoAxeViolations } from '@testing/axe';
+import { listUseCaseFakes } from '@testing/list-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
 import { fireEvent, screen, within } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
@@ -35,8 +36,10 @@ async function setup(size: SizeClass = 'compact', url = '/') {
   // NG-TOOL-11: explicit fake, `expect(mock.method)` trips unbound-method
   const assign = vi.fn<(url: string) => void>();
   const navigation: PageNavigation = { assign };
+  const { providers: listProviders } = listUseCaseFakes();
   TestBed.configureTestingModule({
     providers: [
+      ...listProviders,
       provideRouter(ROUTES),
       Snackbar,
       { provide: WindowSize, useValue: { sizeClass } },
@@ -80,7 +83,7 @@ describe('AppShell', () => {
       expect(await screen.findByRole('heading', { level: 1, name: 'Einstellungen' })).toBeTruthy();
     });
 
-    it('shows the empty state of FR-FB-01 AC1 with an inactive „Neue Liste“ button', async () => {
+    it('shows the empty state of FR-FB-01 AC1 with an active „Neue Liste“ button', async () => {
       await setup();
 
       const main = within(await screen.findByRole('main'));
@@ -91,7 +94,7 @@ describe('AppShell', () => {
       expect(
         main.getByText('Du hast einen Teilen-Link bekommen? Öffne ihn einfach – die Liste erscheint dann hier.'),
       ).toBeTruthy();
-      expect(main.getByRole('button', { name: 'Neue Liste' }).getAttribute('aria-disabled')).toBe('true');
+      expect(main.getByRole('button', { name: 'Neue Liste' }).getAttribute('aria-disabled')).not.toBe('true');
     });
   });
 

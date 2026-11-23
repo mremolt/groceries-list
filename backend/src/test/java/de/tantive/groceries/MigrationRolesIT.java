@@ -43,6 +43,18 @@ class MigrationRolesIT {
     }
 
     @Test
+    void theDmlRoleHasDataRightsOnTheListTablesAndCannotChangeThem() throws SQLException {
+        try (Connection dml = connectAsDmlRole();
+                Statement statement = dml.createStatement()) {
+            assertThat(statement.execute("select count(*) from lists")).isTrue();
+            assertThat(statement.execute("select count(*) from memberships")).isTrue();
+            assertThatThrownBy(() -> statement.execute("alter table lists add column nope int"))
+                    .isInstanceOfSatisfying(
+                            SQLException.class, e -> assertThat(e.getSQLState()).isEqualTo(INSUFFICIENT_PRIVILEGE));
+        }
+    }
+
+    @Test
     void theDmlRoleReadsAndWritesTablesCreatedLaterButCannotChangeTheSchema() throws SQLException {
         new JdbcTemplate(owner).execute("create table dml_probe (id int primary key, note text)");
         try (Connection dml = connectAsDmlRole();

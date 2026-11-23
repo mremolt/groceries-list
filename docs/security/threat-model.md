@@ -53,14 +53,14 @@ Entry points: `/api/v1/**`, `/oauth2/**`, `/login/oauth2/code/**`, `/logout`, ba
 
 | Threat | Mitigation | Rule IDs / ASVS | Test | Status |
 |---|---|---|---|---|
-| T1 | Membership check in every use case, 404 for non-members | SPRING-SEC-16/36, ASVS V8 | cross-user tests per use case (tag `cross-user`) | per milestone |
+| T1 | Membership check in every use case, 404 for non-members | SPRING-SEC-16/36, ASVS V8 | cross-user tests per use case (tag `cross-user`); `ListsApiIT` (real chain + PostgreSQL: B cannot read/rename/delete/leave A's list, answer identical to an unknown id); audit event `access.refused` | lists done (M2); items M3 |
 | T2 | 256-bit CSPRNG token, uniform 404, rate limit, `Referrer-Policy: no-referrer`, masked paths | SEC-CRY-05, NFR-SEC-05/09, ADR 0008 | token entropy/shape test, log assertion | M4 |
 | T3 | Keycloak brute-force detection (5 failures / 15 min, plus a quick-login check: failures less than a second apart lock after two), generic error for unknown account and wrong password | SPRING-SEC-21, ASVS V6/V7 | real-backend E2E (`@real`): generic message equal, lockout text, correct password refused while locked | done in M1. Known deviations: the „Zu viele Versuche“ text reveals that the account exists once it is locked (required by FR-AUTH-02 AC4); a newer reset link does not invalidate older ones (FR-AUTH-04 AC3 not met; each link is single use and expires after 60 minutes) |
 | T4 | `csrf.spa()`, `X-XSRF-TOKEN`, `SameSite=Lax` | SPRING-SEC-24/25, ASVS V3 | web slice tests 403 without CSRF | M1 |
 | T5 | Angular interpolation only, no `innerHTML`, strict nonce CSP | NG-SEC-01..06, NFR-SEC-07 | component test with `<script>` text, CSP E2E | M3 |
 | T6 | HttpOnly SameSite=Lax cookie (`Secure`/`__Host-` outside the local installation), session rotation on login, lifetimes ([ADR 0002](../adr/0002-bff-in-backend-and-keycloak-idp.md)); anonymous API calls create no session | SPRING-SEC-24/32/37 | real tier: pre-login session id rejected after login, cookie flags and 30-day lifetime, other sessions ended after a password reset; backend test: anonymous call creates no session | done in M1 |
 | T7 | Bucket4j per user and IP | SPRING-SEC-21 | 429 test | M4 |
-| T8 | limits BR-12, bounded queries, 304 polling; no server session for anonymous API calls | API-N1-07, SPRING-SEC-15 | limit tests (M2/M3/M5); `MeControllerTest.anAnonymousCallCreatesNoServerSideSession` | partly M1 |
+| T8 | limits BR-12, bounded queries, 304 polling; no server session for anonymous API calls | API-N1-07, SPRING-SEC-15 | limit tests (M2/M3/M5); `MeControllerTest.anAnonymousCallCreatesNoServerSideSession`; `ListRulesConcurrencyIT` (100-list limit under concurrency), `ListSummaryJdbcAdapterIT` (`LIMIT 100`, one statement) | lists done (M2), items M3, polling M5 |
 | T9 | Re-authentication at IdP, single transaction, session invalidation | ADR 0003, DP-DSR-01 | integration test | M6 |
 | T10 | No bodies logged; secret type; log tests | SPRING-LOG-08, SPRING-CFG-11, SPRING-DP-07 | log capture tests | M1/M4 |
 | T11 | Redirect targets allow-listed to internal paths | TS-SEC-03 | unit test | M4 |

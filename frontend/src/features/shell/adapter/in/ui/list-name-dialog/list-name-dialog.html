@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>
+  {{ (data.mode === 'create' ? 'shell.dialog.create.title' : 'shell.dialog.rename.title') | transloco }}
+</h2>
+<form novalidate (submit)="$event.preventDefault(); save()">
+  <mat-dialog-content>
+    @if (data.mode === 'rename') {
+      <p class="text">{{ 'shell.dialog.rename.text' | transloco }}</p>
+    }
+    <app-validated-field
+      [label]="'shell.dialog.field' | transloco"
+      autocomplete="off"
+      [formField]="nameForm.name"
+      [errorMessages]="errorMessages()"
+    />
+    <p class="note" role="status">{{ note() }}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button matButton type="button" mat-dialog-close>{{ 'shell.dialog.cancel' | transloco }}</button>
+    <button matButton="filled" type="submit">
+      {{ (data.mode === 'create' ? 'shell.dialog.create.submit' : 'shell.dialog.rename.submit') | transloco }}
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -10,6 +10,20 @@ Source of truth: [`requirements/04-detailed-requirements.md` §2.2](../../requir
 
 Use cases authorize on the `Caller` (SPRING-SEC-02); every list/item use case loads the membership first and answers `NotFoundException` for non-members, so "no access" and "does not exist" are identical (SPRING-SEC-36). Cross-user tests per use case (SPRING-SEC-16).
 
+## Lists: rules, concurrency and data loading (M2)
+
+| Topic | Realisation |
+|---|---|
+| BR-01/NFR-SEC-04 | `LoadListPort.findForMember` and `ListSummaryPort` only find lists the caller is a member of, so a non-member and an unknown id are the same empty result and the use case raises `ListNotFoundException` (404 `LIST_NOT_FOUND`, one body). Proven per use case (`@Tag("cross-user")` unit tests) and through the real chain and PostgreSQL in `ListsApiIT` |
+| Audit | A refusal logs the structured event `access.refused` (resource `list`, pseudonymous user id only, no list name or e-mail, SPRING-SEC-22) in the REST advice |
+| BR-02/05 | no roles: any member renames and deletes; deleting a list removes memberships by `ON DELETE CASCADE` |
+| BR-04 | `LeaveList` locks the list row (`SELECT … FOR UPDATE OF l`) before it counts the remaining members; the last two members leaving at once delete the list exactly once (`ListRulesConcurrencyIT`) |
+| BR-10 | order of `GET /lists`: `memberships.joined_at, lists.id` ascending, served by `memberships_user_joined_idx` |
+| BR-12 (100 lists per user) | `CreateList` locks the user's row (`SELECT … FOR UPDATE`, SPRING-DB-22), then counts, then inserts; two parallel creations at 99 lists let exactly one through (`ListRulesConcurrencyIT`). The overview query has the hard bound `LIMIT 100` (SPRING-DB-12, API-N1-07) |
+| Revision | `lists.revision` (also the Hibernate `@Version`) is increased by every rename (`revision = revision + 1`, atomic, last write wins, [ADR 0007](../adr/0007-last-write-wins-item-updates.md)); M3 increases it on item changes (ADR 0006) |
+| N+1 (API-N1-01) | strategy: backend view endpoint. `GET /api/v1/lists` is **one** set-based statement for all lists of the user (asserted: `ListSummaryJdbcAdapterIT.usesOneStatementNoMatterHowManyListsTheUserHas`, SPRING-TEST-06); the drawer never calls per list. M3 adds the open count as a grouped sub-select in the same statement, not a second query |
+| Name rule | 1–80 characters after trimming, validated once in `ListName` (domain); a missing name is `NAME_REQUIRED` like an empty one |
+
 ## Authentication and sessions
 
 See [ADR 0002](../adr/0002-bff-in-backend-and-keycloak-idp.md)/[0003](../adr/0003-map-auth-requirements-to-oidc.md). IdP configuration for SEC-CRY-06 exists as the dev realm `backend/dev/keycloak/groceries-realm.json` and the German login/e-mail theme `backend/dev/keycloak/theme/groceries/` (policy table in [security requirements](../security/requirements.md)); run with `docker compose --profile auth --profile mail up`. Wiring the backend to it (OIDC client, sessions) is built by the M1 backend work and is not documented as existing here yet.
@@ -24,7 +38,7 @@ One injected `Clock` in the backend (ARCH-UC-20); `CLOCK` token in the frontend 
 
 ## Errors
 
-RFC 9457 problem details with stable codes (catalogue grows per milestone: `LIST_NOT_FOUND`, `ITEM_NOT_FOUND`, `LIMIT_REACHED`, `SHARE_LINK_INVALID`, `VALIDATION_FAILED`).
+RFC 9457 problem details with stable codes. Validation errors are always `400` with `code: VALIDATION_FAILED` and `errors: [{field, code}]` (field codes such as `NAME_REQUIRED`, `NAME_TOO_LONG`). Existing codes: `VALIDATION_FAILED`, `UNAUTHENTICATED`, `RATE_LIMITED`, `LIST_NOT_FOUND`, `LIST_LIMIT_REACHED`. Planned: `ITEM_NOT_FOUND`, `SHARE_LINK_INVALID`, item/member limit codes.
 
 ## Rate limits (SPRING-SEC-21)
 

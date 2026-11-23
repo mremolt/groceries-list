@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  type OnInit,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
@@ -20,18 +28,28 @@ import { Snackbar } from '@shared/ui/snackbar/snackbar';
 import { SnackbarHost } from '@shared/ui/snackbar/snackbar-host';
 import { filter, map, startWith } from 'rxjs';
 
+import { ListActions } from './list-actions';
+import { ListsStore } from './lists-store';
 import { ShellStore } from './shell-store';
 
-/** The translation key of the page heading, set as `data.heading` on the route (FR-NAV-04 AC1). */
-function headingKeyOf(route: ActivatedRouteSnapshot): string {
+interface PageHeading {
+  /** The translation key of the page heading, set as `data.heading` on the route (FR-NAV-04 AC1). */
+  readonly key: string;
+  /** The page is a list: its name is the heading as soon as it is known (FR-NAV-04 AC1). */
+  readonly fromList: boolean;
+}
+
+function pageHeadingOf(route: ActivatedRouteSnapshot): PageHeading {
   let current: ActivatedRouteSnapshot | null = route;
   let key = '';
+  let fromList = false;
   while (current) {
     const heading: unknown = current.data['heading'];
     if (typeof heading === 'string') key = heading;
+    fromList = fromList || current.data['headingFromList'] === true;
     current = current.firstChild;
   }
-  return key;
+  return { key, fromList };
 }
 
 /**
@@ -67,26 +85,40 @@ function headingKeyOf(route: ActivatedRouteSnapshot): string {
   styleUrl: './app-shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppShell {
+export class AppShell implements OnInit {
   private readonly router = inject(Router);
   private readonly transloco = inject(TranslocoService);
   private readonly navigation = inject(PAGE_NAVIGATION);
   private readonly snackbar = inject(Snackbar);
   protected readonly store = inject(ShellStore);
+  protected readonly lists = inject(ListsStore);
+  private readonly actions = inject(ListActions);
   protected readonly windowSize = inject(WindowSize);
 
   protected readonly drawer = viewChild.required(MatSidenav);
   private readonly menuButton = viewChild<unknown, ElementRef<HTMLElement>>('menuButton', { read: ElementRef });
 
   protected readonly expanded = computed(() => this.windowSize.sizeClass() === 'expanded');
-  protected readonly headingKey = toSignal(
+  private readonly pageHeading = toSignal(
     this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),
       startWith(null),
-      map(() => headingKeyOf(this.router.routerState.snapshot.root)),
+      map(() => pageHeadingOf(this.router.routerState.snapshot.root)),
     ),
-    { initialValue: '' },
+    { initialValue: { key: '', fromList: false } },
   );
+
+  protected readonly headingKey = computed(() => this.pageHeading().key);
+  /** The h1 on a list page once the list is loaded: its name; otherwise the page's own heading (`headingKey`). */
+  protected readonly listName = computed(() =>
+    this.pageHeading().fromList ? (this.lists.currentList()?.name ?? null) : null,
+  );
+  /** The ⋮ menu offers the list commands only on a list that was found. */
+  protected readonly onList = computed(() => this.pageHeading().fromList && this.lists.currentList() !== null);
+
+  ngOnInit(): void {
+    void this.lists.ensureLoaded(); // the drawer needs the lists on every page, also on a deep link
+  }
 
   /**
    * The drawer is closed: focus returns to the menu button (FR-NAV-02 AC4, NG-UI-33). Without animations (reduced
@@ -102,6 +134,31 @@ export class AppShell {
   /** FR-NAV-02 AC4: selecting an entry closes the modal drawer. */
   protected closeIfModal(): void {
     if (!this.expanded()) void this.drawer().close();
+  }
+
+  protected newList(): void {
+    this.closeIfModal();
+    void this.actions.create(() => this.menuButton()?.nativeElement ?? document.querySelector<HTMLElement>('h1'));
+  }
+
+  protected renameList(): void {
+    void this.actions.renameCurrent(() => this.moreButton());
+  }
+
+  protected leaveList(): void {
+    void this.actions.leaveCurrent(() => this.moreButton());
+  }
+
+  protected deleteList(): void {
+    void this.actions.deleteCurrent(() => this.moreButton());
+  }
+
+  protected retryLists(): void {
+    void this.lists.reload();
+  }
+
+  private moreButton(): HTMLElement | null {
+    return document.querySelector<HTMLElement>('.more-button');
   }
 
   protected async logout(): Promise<void> {

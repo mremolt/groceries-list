@@ -62,7 +62,7 @@ test.describe('navigation drawer @responsive @shell @a11y-shell', () => {
     await expect(nav.getByRole('heading', { name: 'Meine Listen' })).toBeVisible();
     await expect(nav.getByText('Noch keine Listen.')).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Einstellungen' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Neue Liste' }).first()).toHaveAttribute('aria-disabled', 'true');
+    await expect(page.getByRole('button', { name: 'Neue Liste' }).first()).toBeEnabled();
     await expectAccessible('modal drawer open');
 
     for (let i = 0; i < 6; i++) {

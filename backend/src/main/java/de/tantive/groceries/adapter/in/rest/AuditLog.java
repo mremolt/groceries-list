@@ -41,4 +41,13 @@ final class AuditLog {
                 .addKeyValue("scope", bySid ? "sid" : "subject")
                 .log("Security event");
     }
+
+    /** A person asked for a list they may not see (or that does not exist: the answer is the same, BR-01). */
+    static void listAccessRefused(UUID userId) {
+        AUDIT.atWarn()
+                .addKeyValue("event", "access.refused")
+                .addKeyValue("resource", "list")
+                .addKeyValue("userId", userId)
+                .log("Security event");
+    }
 }

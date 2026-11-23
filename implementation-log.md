@@ -10,15 +10,15 @@
 | M0 design (documents only) | done | f9e82bc | |
 | M0 Project setup | done | b0ecad1 | m0-done |
 | M1 Accounts and app shell | done | 16e1331 | m1-done |
-| M2 Lists | in progress | | |
+| M2 Lists | done | PENDING | m2-done |
 | M3 Items | not started | | |
 | M4 Sharing and joining | not started | | |
 | M5 Synchronisation | not started | | |
 | M6 Settings and account | not started | | |
 | M7 Internal test readiness | not started | | |
 
-- **Next action:** M2 Lists (BR-01–05, BR-10–12 lists, FR-LIST-01–05, FR-NAV-02/03/05/06, FR-FB-01 AC1, FR-FB-03). Plan: backend fork (lists/memberships use cases, jpa, REST v1, tests incl. cross-user) and frontend fork (lists feature, drawer entries, dialogs, ⋮ menu, deep links, start screen) in parallel against a contract fixed up front, then extend the real-backend E2E tier, verify both gates, commit `M2 done`, tag.
-- **Work in flight:** M2 backend and frontend forks running (uncommitted files under backend/, frontend/, docs/; scratch .m2-*-feedback.txt to merge with `merge_fb.py`-style step into baseline-feedback.md and delete).
+- **Next action:** M3 Items (BR-06–09, FR-ITEM-*, per 04 by requirement ID): backend + frontend in parallel against a contract fixed up front, then extend the real-backend E2E tier, verify both gates (frontend e2e Chromium projects only, see memory), commit `M3 done`, tag.
+- **Work in flight:** none.
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
 ## Durations (implementation time per step)
@@ -35,6 +35,16 @@ Wall-clock timestamps taken with `date -Is` at step start and end. Durations are
 | M0 scaffolding: frontend fork | 2026-11-23T11:32:17+01:00 | 2026-11-23T11:47:29+01:00 | ~15 min (ng new+install 1 min, theme/platform/shell+tests 6 min, lint/arch fixes 3 min, Playwright matrix 3 min) |
 | M1 (see below) | 2026-11-23T11:53:00+01:00 | | |
 | M0 integration (config.json contract, real index.html test, IDE setup, verify of both) | 2026-11-23T11:47:30+01:00 | 2026-11-23T11:51:30+01:00 | ~4 min |
+
+### M2 Lists (2026-11-23)
+
+| Done when | Status |
+|---|---|
+| FR-LIST-01..05, FR-NAV-02/03/05/06, BR-01–05, BR-10–12 (lists) | Backend: domain, 6 use cases, JPA/JDBC adapters, V5 migration, REST v1 with member-only 404, concurrency ITs (mutation-checked), cross-user tests. Frontend: lists store, drawer entries with counts, create/rename/delete/leave dialogs, ⋮ menu, deep links, start screen. Gates: `mvnw verify` green; frontend format/lint/typecheck/arch/unused/unit (185) green; stubbed e2e 38 green (Chromium); real tier 18 green (2 new list scenarios incl. BR-01 isolation) |
+
+Deviations: frontend e2e run on Chromium only (`e2e:fast`) by the user's instruction; Firefox/WebKit projects stay in the config and are not run. N+1: drawer counts come from one summary read model query (asserted by StatementCounting). Baseline feedback: F-61..F-71.
+
+Manual check (for human review): create, rename, delete and leave lists on a phone; open a list URL as another account.
 
 ## Assumptions
 

@@ -1,0 +1,28 @@
+@switch (store.current().status) {
+  @case ('found') {
+    <p class="items-follow">{{ 'shell.list.itemsFollow' | transloco }}</p>
+  }
+  @case ('notFound') {
+    <app-empty-state
+      icon="list"
+      [heading]="'shell.list.notFound.title' | transloco"
+      [text]="'shell.list.notFound.text' | transloco"
+    >
+      <a matButton="filled" empty-action routerLink="/">{{ 'shell.list.notFound.action' | transloco }}</a>
+    </app-empty-state>
+  }
+  @case ('failed') {
+    <app-empty-state
+      icon="list"
+      [heading]="'shell.list.failed' | transloco"
+      [text]="'platform.error.generic' | transloco"
+    >
+      <button matButton="filled" empty-action type="button" (click)="reload()">
+        {{ 'shell.list.retry' | transloco }}
+      </button>
+    </app-empty-state>
+  }
+  @default {
+    <app-loading-indicator [label]="'shell.list.loading' | transloco" />
+  }
+}

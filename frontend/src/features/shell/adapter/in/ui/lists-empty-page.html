@@ -1,11 +1,29 @@
-<app-empty-state
-  icon="cart"
-  [heading]="'shell.empty.lists.title' | transloco"
-  [text]="'shell.empty.lists.text' | transloco"
->
-  <button matButton="filled" empty-action type="button" disabledInteractive [disabled]="true">
-    <app-icon name="add" />
-    {{ 'shell.empty.lists.action' | transloco }}
-  </button>
-  <p empty-hint>{{ 'shell.empty.lists.hint' | transloco }}</p>
-</app-empty-state>
+@switch (store.status()) {
+  @case ('failed') {
+    <app-empty-state
+      icon="list"
+      [heading]="'shell.nav.loadFailed' | transloco"
+      [text]="'platform.error.generic' | transloco"
+    >
+      <button matButton="filled" empty-action type="button" (click)="retry()">
+        {{ 'shell.nav.retry' | transloco }}
+      </button>
+    </app-empty-state>
+  }
+  @case ('ready') {
+    <app-empty-state
+      icon="cart"
+      [heading]="'shell.empty.lists.title' | transloco"
+      [text]="'shell.empty.lists.text' | transloco"
+    >
+      <button matButton="filled" empty-action type="button" (click)="create($event)">
+        <app-icon name="add" />
+        {{ 'shell.empty.lists.action' | transloco }}
+      </button>
+      <p empty-hint>{{ 'shell.empty.lists.hint' | transloco }}</p>
+    </app-empty-state>
+  }
+  @default {
+    <app-loading-indicator [label]="'shell.empty.lists.loading' | transloco" />
+  }
+}

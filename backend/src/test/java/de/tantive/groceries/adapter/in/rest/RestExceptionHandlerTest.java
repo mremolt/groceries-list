@@ -30,16 +30,17 @@ class RestExceptionHandlerTest {
     MockMvcTester mvc;
 
     @Test
-    void mapsAValidationErrorTo400WithTheFieldAndCode() {
+    void mapsAValidationErrorTo400WithTheStableCodeAndTheFieldErrors() {
         var result = mvc.get().uri("/api/v1/failing/validation").exchange();
 
         assertThat(result).hasStatus(400);
         assertThat(result.getResponse().getContentType()).startsWith("application/problem+json");
         assertThat(result)
                 .bodyJson()
-                .hasPathSatisfying("$.code", code -> code.assertThat().isEqualTo("NAME_EMPTY"))
+                .hasPathSatisfying("$.code", code -> code.assertThat().isEqualTo("VALIDATION_FAILED"))
                 .hasPathSatisfying(
-                        "$.errors[0].field", field -> field.assertThat().isEqualTo("name"));
+                        "$.errors[0].field", field -> field.assertThat().isEqualTo("name"))
+                .hasPathSatisfying("$.errors[0].code", code -> code.assertThat().isEqualTo("NAME_EMPTY"));
     }
 
     @Test

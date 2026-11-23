@@ -479,7 +479,9 @@ class ArchitectureTest {
             "de.tantive.groceries.application.accounts.ProvideUserService", // login: no caller yet, identity from the
             // IdP
             "de.tantive.groceries.application.sessions.RegisterIdpSessionService", // login: records the new own session
-            "de.tantive.groceries.application.sessions.EndIdpSessionsService" // provider-initiated back-channel logout
+            "de.tantive.groceries.application.sessions.EndIdpSessionsService", // provider-initiated back-channel logout
+            "de.tantive.groceries.application.lists.CreateListService" // creates a new aggregate: no id from the
+            // caller; the user's own limit is locked per user (ListRulesConcurrencyIT)
             );
 
     @ArchTest
