@@ -5,7 +5,7 @@
     @case ('ready') {
       <mat-form-field class="link-field" appearance="outline">
         <mat-label>{{ 'shell.share.field' | transloco }}</mat-label>
-        <input matInput type="text" readonly [value]="link()" (focus)="selectAll($event)" />
+        <textarea matInput class="link" rows="3" readonly [value]="link()" (focus)="selectAll($event)"></textarea>
       </mat-form-field>
       <div class="link-actions">
         <button matButton="filled" type="button" class="copy" (click)="copy()">

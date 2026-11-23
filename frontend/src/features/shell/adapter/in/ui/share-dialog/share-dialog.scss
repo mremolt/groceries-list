@@ -50,3 +50,10 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+// The link is a long, unbroken string: a textarea shows all of it at any text size (WCAG 1.4.4, 1.4.10), a one-line input
+// would cut it off.
+.link {
+  resize: none;
+  overflow-wrap: anywhere;
+}

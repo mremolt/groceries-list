@@ -15,9 +15,9 @@
 | M4 Sharing and joining | done | 90fc5a7 | m4-done |
 | M5 Synchronisation | done | ae98bc7 | m5-done |
 | M6 Settings and account | done | da1d286 | m6-done |
-| M7 Internal test readiness | not started | | |
+| M7 Internal test readiness | done | PENDING | m7-done |
 
-- **Next action:** M7 Internal test readiness (read requirements/05 M7 and 04 §4 NFRs; deferred NFR-PRIV are out of scope per 05 §5): close known issues from the milestone entries, run `verify` + real tier + full gates, check docs/architecture against code (DOC-ARC-11), write the final log entry, commit `M7 done`, tag.
+- **Next action:** none open. All milestones done. Human review (kickoff 1.4): see M7 entry (LCP just over target in emulation, no screen-reader or real-device pass, Firefox/WebKit e2e skipped). Follow-up requested by the user: add eslint-plugin-vitest and eslint-plugin-playwright (recommended rulesets) to the frontend ESLint config, autofix, then fix the remaining findings.
 - **Work in flight:** none.
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
@@ -87,6 +87,20 @@ Manual check (for human review): two devices side by side: add, check, rename, d
 Deviations: FR-SET-04 AC1 password field replaced by re-authentication at the IdP (ADR 0003); two dialogs, the final one adds „Du hast dich gerade noch einmal angemeldet.“; the wrong-password text comes from Keycloak. `REAUTH_REQUIRED` (stale login) is covered in backend tests and the stubbed tier only. A deletion whose Keycloak call fails still answers 204 (data erased, IdP deletion retried). The Keycloak dev realm must be re-imported (`docker compose down -v`) to get the `groceries-admin` service account. The backend fork once ran `git stash`/`pop`; no loss (verified by green gates).
 
 Manual check (for human review): switch the theme on a phone and compare with the system setting; delete a test account that shares a list.
+
+### M7 Internal test readiness (2026-11-23)
+
+| Done when | Status |
+|---|---|
+| No open accessibility violations of level A/AA | New `e2e/a11y-matrix.spec.ts`: 17 screen states in every Chromium project, each as-is and at 200 % text size/spacing (axe incl. target-size, 48 px targets, focus not obscured, reflow, reduced motion); 2560 px project `nightly-ultrawide`. Findings fixed in the product (icon size in rem, card heads, drawer width at 200 %, theme control, floating labels, share link field, modal drawer scroll). Coverage matrix in `docs/accessibility.md` |
+| Core Web Vitals within target on the test device | **Not met on the emulated 4G profile for LCP**: 2.66 s vs 2.5 s (INP 64 ms, CLS 0.005 are well inside). Method: emulated mobile, 4x CPU slowdown, cold cache, 120 items, 5 runs, medians; no real phone. Gzip for JS/CSS/SVG added (1402 kB to 458 kB transferred, LCP 3.5 s to 2.66 s; `StaticAssetCompressionIT`). Leads (arc42 ch. 10): about eight serial round trips on the critical path, zod is 521 of 937 kB of the main bundle. Initial bundle 951 kB still above the 810 kB budget warning |
+| Tester guide available | `docs/tester-guide.md` (German), seed script `tools/seed-demo.mjs` (two users, three shared lists, via real login and REST API; idempotent; 4 unit tests) |
+
+Gates: `mvnw verify` green; frontend unit 464 green; stubbed Chromium e2e 134 passed in the `e2e:fast` project, full 7-project run 639 passed/34 skipped by design (audit fork, twice); real tier 36 green; seed script run twice against the stack.
+
+Not verified here (human review): Firefox, Safari/WebKit, Edge, previous browser versions and real devices (Firefox/WebKit e2e skipped on the user's instruction); screen-reader pass NFR-A11Y-10 (NVDA, VoiceOver, TalkBack); a real mid-range phone for NFR-PERF-01; the 200 % text-size check starts at 768x500 (stricter than NFR-A11Y-06, 320 px covered by `stubbed-reflow`). Deferred by 05 §5: NFR-PRIV, FR-SET-05, NFR-OPS, backups.
+
+Manual check (for human review): performance on a mid-range phone over 4G; keyboard-only walkthrough; one screen-reader pass; tester guide dry run with the two seed accounts.
 
 ## Assumptions
 

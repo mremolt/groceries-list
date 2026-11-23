@@ -29,8 +29,12 @@ mat-card-content {
 .theme {
   inline-size: 100%;
 
+  // NFR-A11Y-06: at a large text size the three segments no longer fit side by side; they wrap instead of being clipped
+  flex-wrap: wrap;
+  overflow: visible;
+
   mat-button-toggle {
-    flex: 1 1 0;
+    flex: 1 1 auto;
   }
 }
 

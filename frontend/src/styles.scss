@@ -29,6 +29,22 @@
   line-height: 1 !important;
 }
 
+// NFR-A11Y-06 / WCAG 1.4.12: Material clips a floating label at the width of its field (`overflow: hidden`). With a reader's
+// text size and spacing the label grows past that width; show it in full instead of cutting it off.
+.mat-mdc-floating-label {
+  overflow: visible;
+}
+
+// The check mark box of a segment is an icon: it keeps its size when the text size grows.
+.mat-button-toggle-checkbox-wrapper {
+  font-size: 16px;
+}
+
+// NFR-A11Y-05: a segment of the theme choice is at least 48 px high (Material's default is 40 px).
+.mat-button-toggle-group {
+  --mat-button-toggle-height: 48px;
+}
+
 // An unselected segment has no check mark: Material collapses its box to 0 px and clips it; take it out of the layout instead.
 .mat-button-toggle:not(.mat-button-toggle-checked) .mat-button-toggle-checkbox-wrapper {
   display: none;

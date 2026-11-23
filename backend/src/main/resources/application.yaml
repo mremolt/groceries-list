@@ -45,6 +45,10 @@ spring:
       cleanup-cron: "0 */10 * * * *"  # Spring Session removes expired sessions
 
 server:
+  compression:                        # NFR-PERF-01: the hashed JS/CSS of the bundle is ~4x smaller on the wire
+    enabled: true
+    mime-types: text/javascript,application/javascript,text/css,image/svg+xml   # static assets only: no HTML (CSP nonce) and no JSON (account data), BREACH
+    min-response-size: 1KB
   servlet:
     session:
       cookie:

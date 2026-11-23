@@ -2,8 +2,8 @@
   display: inline-flex;
   flex: none;
   vertical-align: middle;
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
+  inline-size: 24px; // fixed like Material's own icons: the 40 px icon buttons do not grow with the text (NFR-A11Y-06)
+  block-size: 24px;
 }
 
 svg {

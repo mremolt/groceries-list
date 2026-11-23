@@ -69,6 +69,8 @@ export default defineConfig({
         // T2: npm run e2e:nightly
         { name: 'nightly-large', ...responsive, use: { browserName: 'chromium' as const, ...size(1440, 900) } },
         { name: 'nightly-extra-large', ...responsive, use: { browserName: 'chromium' as const, ...size(1920, 1080) } },
+        // NFR-COMP-02: widths up to at least 2560 px
+        { name: 'nightly-ultrawide', ...responsive, use: { browserName: 'chromium' as const, ...size(2560, 1440) } },
         {
           name: 'nightly-compact-landscape',
           ...responsive,

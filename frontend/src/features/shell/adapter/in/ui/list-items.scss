@@ -85,6 +85,7 @@
 .card-head {
   display: flex;
   align-items: center;
+  flex-wrap: wrap; // NFR-A11Y-06: title, badge and progress text wrap at a large text size instead of being clipped
   justify-content: space-between;
   gap: var(--app-space-3);
   padding: var(--app-space-4) var(--app-space-4) var(--app-space-3);
