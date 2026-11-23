@@ -29,7 +29,7 @@ Base package `de.tantive.groceries`. Rings and adapters per [spring.md](../basel
 |---|---|---|
 | accounts | provision user at first login (M1), update display name (M6), delete account (M6) | `rest.v1`, `jpa`, `http` (Keycloak admin) |
 | lists | **built (M2):** `CreateList`, `ListMyLists`, `GetList`, `RenameList`, `DeleteList`, `LeaveList` (one `@UseCase` each in `application.lists`; ports `ports.in.*UseCase`, commands/queries as records; outgoing ports `LoadListPort`, `SaveListPort`, `DeleteListPort`, `MembershipPort`, `ListSummaryPort`); domain `ShoppingList`, `ListName`, `Membership`, `ListSummary`, `ListNotFoundException`, `ListLimitReachedException` | `adapter.in.rest.v1` (`MyListsController`, `CreateListController`, `RenameListController`, `DeleteListController`, `LeaveListController`), `adapter.out.jpa` (`ListPersistenceAdapter`: JPA entity for creation, `JdbcClient` for member-scoped reads, locked read, rename, delete), `adapter.out.jdbc` (`MembershipJdbcAdapter`, `ListSummaryJdbcAdapter`) |
-| items | add, edit, check, delete, clear checked (M3) | `rest.v1`, `jpa` |
+| items | **built (M3):** `ListItems`, `AddItem`, `UpdateItem` (text and/or done), `DeleteItem`, `ClearCheckedItems` (one `@UseCase` each in `application.items`; outgoing port `ItemPort`; domain `Item`, `ItemText`, `ItemNotFoundException`, `ItemLimitReachedException`) | `adapter.in.rest.v1` (`ListItemsController`, `AddItemController`, `UpdateItemController`, `DeleteItemController`, `ClearCheckedItemsController`), `adapter.out.jpa` (`ItemPersistenceAdapter`: JPA entity for creation, `JdbcClient` for the set-based updates; every write also moves `lists.revision`) |
 | sharing | renew token, join, lookup invitation (M4) | `rest.v1`, `jpa` |
 | sync | read items with revision, read list summaries (M5; read side of M2/M3) | `rest.v1`, `jpa` |
 | demo | seed two users and three lists (M0/M7) | `adapter.in.demo` |
@@ -45,11 +45,23 @@ Base package `de.tantive.groceries`. Rings and adapters per [spring.md](../basel
 | `deleteList` | `DELETE /api/v1/lists/{listId}` | 204; 404 |
 | `leaveList` | `DELETE /api/v1/lists/{listId}/members/me` | 204; the last member leaving deletes the list; 404 |
 
-`openCount` is `0` until M3 (the items table does not exist yet); M3 changes only the SQL of `ListSummaryJdbcAdapter`.
+`openCount` is the number of unchecked items (M3): a correlated sub-select over the partial index `items_open_idx` inside the same single statement of `ListSummaryJdbcAdapter`.
+
+### Items API (M3, contract of `backend/openapi/groceries-v1.yaml`)
+
+All paths below `/api/v1/lists/{listId}/items`; a non-member or unknown list always answers 404 `LIST_NOT_FOUND` (same answer, BR-01). The server chooses ids; `Item = {id, text, done, createdAt, version}`.
+
+| Operation | Path | Result |
+|---|---|---|
+| `listItems` | `GET …/items` | 200 `{items:[Item]}`, `createdAt` ascending (BR-09), at most 500 |
+| `addItem` | `POST …/items` `{text}` | 201 + `Location`; 400 `VALIDATION_FAILED` (`errors[].field=text`, `TEXT_REQUIRED` / `TEXT_TOO_LONG`); 409 `ITEM_LIMIT_REACHED` (BR-12) |
+| `updateItem` | `PATCH …/items/{itemId}` `{text?, done?}` | 200 with the item (idempotent set, no `If-Match`, ADR 0007); 400 if neither field (`CHANGE_REQUIRED`) or invalid text; 404 `ITEM_NOT_FOUND` if gone (FR-SYNC-02 AC3) |
+| `deleteItem` | `DELETE …/items/{itemId}` | 204, also when the item is already gone (idempotent) |
+| `clearCheckedItems` | `POST …/items/clear-checked` `{itemIds}` | 200 `{removed:n}`; deletes only the given ids that are still checked (FR-ITEM-05 AC4); more than 500 ids → 400 `TOO_MANY_ITEMS` |
 
 ## 5.3 Level 2: frontend
 
-Rings per [angular.md](../baseline/05-building-block-view/angular.md). Built in M1 (DOC-ARC-11); lists, items, sharing and settings are planned for M2-M6.
+Rings per [angular.md](../baseline/05-building-block-view/angular.md). Built in M1-M3 (DOC-ARC-11); sharing and settings are planned for M4 and M6.
 
 | Element | Content | Status |
 |---|---|---|
@@ -57,4 +69,7 @@ Rings per [angular.md](../baseline/05-building-block-view/angular.md). Built in 
 | `src/shared/ui` | `AppIcon` (self-hosted SVG icons), `WindowSize` (size classes), `Announcer`, `Snackbar` + `SnackbarHost`, `ConfirmDialogs`, `ValidatedField` (Signal Forms control), `EmptyState` | built |
 | `features/session` | use cases `LoadCurrentUser`, `Logout`; ports; HTTP adapter over the generated client; published API `provideSessionApi()` | built (adapter see implementation log) |
 | `features/shell` | `AppShell` (app bar with the page's h1, drawer, ⋮ menu), `ShellStore` (sign-out), `authenticatedGuard`, empty lists page, settings placeholder | built |
-| `features/lists`, `items`, `sharing`, `settings` | | planned (M2-M6) |
+| `features/lists` | use cases for my lists and the list commands, ports, HTTP adapter, storage adapter for the list opened last; published API `provideListsApi()` | built (M2) |
+| `features/items` | domain `Item`, `parseItemText`, order (BR-09) and `focusTargetAfterChecking`; use cases `LoadItems`, `AddItem`, `EditItem`, `SetItemDone`, `DeleteItem`, `ClearCheckedItems`; HTTP adapter over the generated client (one list call returns all items, API-N1-01); published API `provideItemsApi()` | built (M3) |
+| `features/shell` list page | `ItemsStore` (view state of the open list's items, route level), `ListItems` (add card, „Noch zu kaufen“, „Im Wagen“, collapsible on compact), `ItemDialog` (edit and delete), clear-checked confirmation. The page forwards the open count to `ListsStore.setOpenCount`, so the drawer follows without a second request (NG-STATE-03: stores never call each other) | built (M3) |
+| `features/sharing`, `settings` | | planned (M4, M6) |

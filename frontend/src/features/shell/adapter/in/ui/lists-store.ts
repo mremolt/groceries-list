@@ -145,6 +145,20 @@ export const ListsStore = signalStore(
           }
         },
 
+        /**
+         * The open count of one list changed through its items: patched locally, so the drawer follows without another
+         * request (API-N1-01). The next full load brings the server's number again.
+         */
+        setOpenCount(id: string, openCount: number): void {
+          const current = store.current();
+          patchState(store, {
+            lists: store.lists().map((list) => (list.id === id ? { ...list, openCount } : list)),
+            ...(current.status === 'found' && current.list.id === id
+              ? { current: { status: 'found' as const, list: { ...current.list, openCount } } }
+              : {}),
+          });
+        },
+
         close(): void {
           currentLoad?.abort();
           patchState(store, { current: { status: 'none' } });

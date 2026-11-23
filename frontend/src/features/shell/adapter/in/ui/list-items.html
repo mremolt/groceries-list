@@ -1,0 +1,141 @@
+<section class="card add" [attr.aria-label]="'shell.items.add.title' | transloco">
+  <h2 class="card-title">{{ 'shell.items.add.title' | transloco }}</h2>
+  <form class="add-form" novalidate (submit)="$event.preventDefault(); add()">
+    <app-validated-field
+      class="add-field"
+      [label]="'shell.items.add.field' | transloco"
+      [placeholder]="'shell.items.add.placeholder' | transloco"
+      autocomplete="off"
+      [formField]="addForm.text"
+      [errorMessages]="{
+        textRequired: 'shell.items.error.textRequired' | transloco,
+        textTooLong: 'shell.items.error.textTooLong' | transloco,
+        limitReached: 'shell.items.error.limitReached' | transloco,
+        default: 'platform.error.generic' | transloco,
+      }"
+    />
+    <button matButton="filled" type="submit" class="add-button">
+      <app-icon name="add" />
+      <span class="add-label">{{ 'shell.items.add.submit' | transloco }}</span>
+    </button>
+  </form>
+</section>
+
+@switch (store.status()) {
+  @case ('ready') {
+    <div class="columns">
+      <section class="card open" [attr.aria-label]="'shell.items.open.title' | transloco">
+        <div class="card-head">
+          <h2 class="card-title">
+            {{ 'shell.items.open.title' | transloco }}
+            <span class="badge">{{ store.openCount() }}</span>
+          </h2>
+          @if (store.total() > 0) {
+            <p class="progress-text">
+              {{ 'shell.items.open.progress' | transloco: { done: store.checkedCount(), total: store.total() } }}
+            </p>
+          }
+        </div>
+        @if (store.total() > 0) {
+          <mat-progress-bar class="progress" aria-hidden="true" [value]="progress()" />
+        }
+        @if (store.openCount() > 0) {
+          <ul class="rows">
+            @for (item of store.open(); track item.id) {
+              <li class="row" [attr.data-item-id]="item.id">
+                <mat-checkbox class="check" [checked]="false" (change)="check(item, $event.checked)">
+                  <span class="text">{{ item.text }}</span>
+                </mat-checkbox>
+                <button
+                  matIconButton
+                  type="button"
+                  class="edit"
+                  [attr.aria-label]="'shell.items.edit' | transloco: { text: item.text }"
+                  (click)="edit(item)"
+                >
+                  <app-icon name="edit" />
+                </button>
+              </li>
+            }
+          </ul>
+        } @else if (store.total() === 0) {
+          <div class="empty">
+            <span class="empty-badge" aria-hidden="true"><app-icon name="cart" /></span>
+            <p class="empty-title">{{ 'shell.items.open.emptyTitle' | transloco }}</p>
+            <p class="empty-text">{{ 'shell.items.open.emptyText' | transloco }}</p>
+          </div>
+        } @else {
+          <p class="empty-line">{{ 'shell.items.open.allDone' | transloco }}</p>
+        }
+      </section>
+
+      <ng-template #cartBody>
+        @if (store.checkedCount() > 0) {
+          <ul class="rows">
+            @for (item of store.checked(); track item.id) {
+              <li class="row" [attr.data-item-id]="item.id">
+                <mat-checkbox class="check" [checked]="true" (change)="check(item, $event.checked)">
+                  <span class="text struck">{{ item.text }}</span>
+                </mat-checkbox>
+              </li>
+            }
+          </ul>
+          <div class="cart-actions">
+            <button matButton type="button" class="clear" (click)="clearChecked()">
+              <app-icon name="delete" />
+              {{ 'shell.items.cart.clear' | transloco }}
+            </button>
+          </div>
+        } @else {
+          <p class="empty-line">{{ 'shell.items.cart.empty' | transloco }}</p>
+        }
+      </ng-template>
+
+      @if (compact()) {
+        <section class="card cart" [attr.aria-label]="'shell.items.cart.title' | transloco">
+          <h2 class="card-title">
+            <button
+              type="button"
+              class="toggle"
+              [attr.aria-expanded]="cartOpen()"
+              [attr.aria-controls]="cartBodyId"
+              (click)="toggleCart()"
+            >
+              <span>{{ 'shell.items.cart.title' | transloco }}</span>
+              <span class="badge">{{ store.checkedCount() }}</span>
+              <app-icon name="expandMore" class="chevron" [class.up]="cartOpen()" />
+            </button>
+          </h2>
+          <div [id]="cartBodyId" [hidden]="!cartOpen()">
+            <ng-container [ngTemplateOutlet]="cartBody" />
+          </div>
+        </section>
+      } @else {
+        <section class="card cart" [attr.aria-label]="'shell.items.cart.title' | transloco">
+          <div class="card-head">
+            <h2 class="card-title">
+              {{ 'shell.items.cart.title' | transloco }}
+              <span class="badge">{{ store.checkedCount() }}</span>
+            </h2>
+          </div>
+          <ng-container [ngTemplateOutlet]="cartBody" />
+        </section>
+      }
+    </div>
+  }
+  @case ('failed') {
+    <section class="card state" aria-live="polite">
+      <p class="empty-title">{{ 'shell.items.failed' | transloco }}</p>
+      <p class="empty-text">{{ 'platform.error.generic' | transloco }}</p>
+      <button matButton="filled" type="button" (click)="reload()">{{ 'shell.items.retry' | transloco }}</button>
+    </section>
+  }
+  @case ('notFound') {
+    <section class="card state">
+      <p class="empty-title">{{ 'shell.items.failed' | transloco }}</p>
+    </section>
+  }
+  @default {
+    <app-loading-indicator [label]="'shell.items.loading' | transloco" />
+  }
+}

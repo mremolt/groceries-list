@@ -44,7 +44,7 @@ class ListSummaryJdbcAdapterIT {
         assertThat(result).extracting(ListSummary::id).containsExactly(joinedFirst, joinedLast);
         assertThat(result).extracting(ListSummary::name).containsExactly("Früh", "Spät");
         assertThat(result).allSatisfy(summary -> {
-            assertThat(summary.openCount()).isZero(); // items arrive in M3
+            assertThat(summary.openCount()).isZero();
             assertThat(summary.revision()).isZero();
         });
     }
@@ -96,5 +96,24 @@ class ListSummaryJdbcAdapterIT {
         Arrange.list(jdbc, alice, "Nur Alice", NOW);
 
         assertThat(summaries.findSummariesOf(bob)).isEmpty();
+    }
+
+    @Test
+    void countsOnlyTheOpenItemsOfEachListInOneStatement() {
+        UUID alice = Arrange.user(jdbc);
+        UUID a = Arrange.list(jdbc, alice, "A", NOW);
+        UUID b = Arrange.list(jdbc, alice, "B", NOW.plusSeconds(1));
+        Arrange.item(jdbc, a, "Milch", false, NOW);
+        Arrange.item(jdbc, a, "Brot", false, NOW.plusSeconds(1));
+        Arrange.item(jdbc, a, "Eier", true, NOW.plusSeconds(2));
+        Arrange.item(jdbc, b, "Käse", true, NOW);
+        StatementCounting.reset();
+
+        List<ListSummary> result = summaries.findSummariesOf(alice);
+
+        assertThat(result).extracting(ListSummary::openCount).containsExactly(2, 0);
+        assertThat(StatementCounting.statements()).isEqualTo(1);
+        assertThat(summaries.findSummaryOf(alice, a))
+                .hasValueSatisfying(s -> assertThat(s.openCount()).isEqualTo(2));
     }
 }

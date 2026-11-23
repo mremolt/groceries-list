@@ -48,6 +48,10 @@ class MigrationRolesIT {
                 Statement statement = dml.createStatement()) {
             assertThat(statement.execute("select count(*) from lists")).isTrue();
             assertThat(statement.execute("select count(*) from memberships")).isTrue();
+            assertThat(statement.execute("select count(*) from items")).isTrue();
+            assertThatThrownBy(() -> statement.execute("alter table items add column nope int"))
+                    .isInstanceOfSatisfying(
+                            SQLException.class, e -> assertThat(e.getSQLState()).isEqualTo(INSUFFICIENT_PRIVILEGE));
             assertThatThrownBy(() -> statement.execute("alter table lists add column nope int"))
                     .isInstanceOfSatisfying(
                             SQLException.class, e -> assertThat(e.getSQLState()).isEqualTo(INSUFFICIENT_PRIVILEGE));

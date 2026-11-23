@@ -20,8 +20,10 @@ Use cases authorize on the `Caller` (SPRING-SEC-02); every list/item use case lo
 | BR-04 | `LeaveList` locks the list row (`SELECT … FOR UPDATE OF l`) before it counts the remaining members; the last two members leaving at once delete the list exactly once (`ListRulesConcurrencyIT`) |
 | BR-10 | order of `GET /lists`: `memberships.joined_at, lists.id` ascending, served by `memberships_user_joined_idx` |
 | BR-12 (100 lists per user) | `CreateList` locks the user's row (`SELECT … FOR UPDATE`, SPRING-DB-22), then counts, then inserts; two parallel creations at 99 lists let exactly one through (`ListRulesConcurrencyIT`). The overview query has the hard bound `LIMIT 100` (SPRING-DB-12, API-N1-07) |
-| Revision | `lists.revision` (also the Hibernate `@Version`) is increased by every rename (`revision = revision + 1`, atomic, last write wins, [ADR 0007](../adr/0007-last-write-wins-item-updates.md)); M3 increases it on item changes (ADR 0006) |
-| N+1 (API-N1-01) | strategy: backend view endpoint. `GET /api/v1/lists` is **one** set-based statement for all lists of the user (asserted: `ListSummaryJdbcAdapterIT.usesOneStatementNoMatterHowManyListsTheUserHas`, SPRING-TEST-06); the drawer never calls per list. M3 adds the open count as a grouped sub-select in the same statement, not a second query |
+| Revision | `lists.revision` (also the Hibernate `@Version`) is increased by every rename (`revision = revision + 1`, atomic, last write wins, [ADR 0007](../adr/0007-last-write-wins-item-updates.md)); every item write (add, update, delete, clear checked that removed something) increases it in the same transaction as the item change (`ItemPersistenceAdapter`, ADR 0006); items carry their own `version` (Hibernate `@Version`, +1 per set-based update) |
+| N+1 (API-N1-01) | strategy: backend view endpoint. `GET /api/v1/lists` is **one** set-based statement for all lists of the user (asserted: `ListSummaryJdbcAdapterIT.usesOneStatementNoMatterHowManyListsTheUserHas`, SPRING-TEST-06); the drawer never calls per list. the open count is a correlated sub-select in the same statement (M3), not a second query. `GET …/items` is one statement for all items of a list (`ItemPersistenceAdapterIT.readsOldestFirstInOneStatement…`, `LIMIT 500`); membership is a second, constant check |
+| BR-12 (500 items per list) | `AddItem` locks the list row (`FOR UPDATE OF l`) before it counts, then inserts; two parallel additions at 499 items let exactly one through (`ItemRulesConcurrencyIT`, mutation-checked by removing the lock). Item text 1–200 characters after trimming, validated once in `ItemText` (code points, not UTF-16 units) |
+| BR-09 | `GET …/items` orders by `created_at, id` ascending, served by `items_list_created_idx`; unchecking keeps the item's place because the order never depends on `done` |
 | Name rule | 1–80 characters after trimming, validated once in `ListName` (domain); a missing name is `NAME_REQUIRED` like an empty one |
 
 ## Authentication and sessions
@@ -38,7 +40,7 @@ One injected `Clock` in the backend (ARCH-UC-20); `CLOCK` token in the frontend 
 
 ## Errors
 
-RFC 9457 problem details with stable codes. Validation errors are always `400` with `code: VALIDATION_FAILED` and `errors: [{field, code}]` (field codes such as `NAME_REQUIRED`, `NAME_TOO_LONG`). Existing codes: `VALIDATION_FAILED`, `UNAUTHENTICATED`, `RATE_LIMITED`, `LIST_NOT_FOUND`, `LIST_LIMIT_REACHED`. Planned: `ITEM_NOT_FOUND`, `SHARE_LINK_INVALID`, item/member limit codes.
+RFC 9457 problem details with stable codes. Validation errors are always `400` with `code: VALIDATION_FAILED` and `errors: [{field, code}]` (field codes such as `NAME_REQUIRED`, `NAME_TOO_LONG`). Existing codes: `VALIDATION_FAILED`, `UNAUTHENTICATED`, `RATE_LIMITED`, `LIST_NOT_FOUND`, `LIST_LIMIT_REACHED`. `ITEM_NOT_FOUND`, `ITEM_LIMIT_REACHED` (M3), field codes `TEXT_REQUIRED`, `TEXT_TOO_LONG`, `CHANGE_REQUIRED`, `TOO_MANY_ITEMS`. Planned: `SHARE_LINK_INVALID`, member limit code.
 
 ## Rate limits (SPRING-SEC-21)
 

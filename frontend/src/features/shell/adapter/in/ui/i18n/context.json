@@ -183,10 +183,6 @@
     "description": "Accessible name of the progress bar while a list loads",
     "maxLength": 40
   },
-  "shell.list.itemsFollow": {
-    "description": "Placeholder body of a list page until the items arrive (M3)",
-    "maxLength": 60
-  },
   "shell.list.failed": {
     "description": "Error text when a list could not be loaded",
     "maxLength": 60
@@ -214,5 +210,125 @@
   "shell.nav.listLabel": {
     "description": "Accessible name of a list entry in the drawer: list name and number of open items (FR-NAV-02 AC3). The visible text is the name and the count, so the name contains it (WCAG 2.5.3); {name}, {count}",
     "maxLength": 80
+  },
+  "shell.items.add.title": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.add.title",
+    "maxLength": 30
+  },
+  "shell.items.add.field": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.add.field",
+    "maxLength": 30
+  },
+  "shell.items.add.placeholder": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.add.placeholder",
+    "maxLength": 30
+  },
+  "shell.items.add.submit": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.add.submit",
+    "maxLength": 30
+  },
+  "shell.items.error.textRequired": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.error.textRequired",
+    "maxLength": 42
+  },
+  "shell.items.error.textTooLong": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.error.textTooLong",
+    "maxLength": 33
+  },
+  "shell.items.error.limitReached": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.error.limitReached",
+    "maxLength": 117
+  },
+  "shell.items.open.title": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.open.title",
+    "maxLength": 30
+  },
+  "shell.items.open.progress": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.open.progress",
+    "maxLength": 40
+  },
+  "shell.items.open.allDone": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.open.allDone",
+    "maxLength": 30
+  },
+  "shell.items.open.emptyTitle": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.open.emptyTitle",
+    "maxLength": 37
+  },
+  "shell.items.open.emptyText": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.open.emptyText",
+    "maxLength": 103
+  },
+  "shell.items.cart.title": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.cart.title",
+    "maxLength": 30
+  },
+  "shell.items.cart.empty": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.cart.empty",
+    "maxLength": 31
+  },
+  "shell.items.cart.clear": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.cart.clear",
+    "maxLength": 30
+  },
+  "shell.items.cart.toggle": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.cart.toggle",
+    "maxLength": 30
+  },
+  "shell.items.edit": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.edit",
+    "maxLength": 30
+  },
+  "shell.items.dialog.title": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.title",
+    "maxLength": 30
+  },
+  "shell.items.dialog.text": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.text",
+    "maxLength": 78
+  },
+  "shell.items.dialog.field": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.field",
+    "maxLength": 30
+  },
+  "shell.items.dialog.delete": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.delete",
+    "maxLength": 30
+  },
+  "shell.items.dialog.submit": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.submit",
+    "maxLength": 30
+  },
+  "shell.items.dialog.clear.title": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.clear.title",
+    "maxLength": 30
+  },
+  "shell.items.dialog.clear.text": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.clear.text",
+    "maxLength": 169
+  },
+  "shell.items.dialog.clear.confirm": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.dialog.clear.confirm",
+    "maxLength": 30
+  },
+  "shell.items.snackbar.cleared": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.snackbar.cleared",
+    "maxLength": 39
+  },
+  "shell.items.snackbar.gone": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.snackbar.gone",
+    "maxLength": 61
+  },
+  "shell.items.loading": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.loading",
+    "maxLength": 33
+  },
+  "shell.items.failed": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.failed",
+    "maxLength": 61
+  },
+  "shell.items.retry": {
+    "description": "UI text of the items of a list (M3, FR-ITEM): shell.items.retry",
+    "maxLength": 30
   }
 }

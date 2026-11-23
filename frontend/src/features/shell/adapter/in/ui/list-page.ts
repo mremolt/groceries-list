@@ -5,19 +5,20 @@ import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
 import { LoadingIndicator } from '@shared/ui/loading/loading-indicator';
+import { take } from 'rxjs';
 
+import { ListItems } from './list-items';
 import { ListsStore } from './lists-store';
 
 /**
- * A list (`/listen/:id`, FR-NAV-06 AC1). The name is the page's h1 in the app bar. The items arrive with M3; until then
- * the body only says where they will be. A list that does not exist and one the person may not see show the same
+ * A list (`/listen/:id`, FR-NAV-06 AC1). The name is the page's h1 in the app bar. The items are the body (`app-list-items`). A list that does not exist and one the person may not see show the same
  * page (FR-NAV-06 AC2, BR-01).
  *
  * Layout (NG-UI-23): one column on every size class inside the shell's content width.
  */
 @Component({
   selector: 'app-list-page',
-  imports: [EmptyState, LoadingIndicator, MatButton, RouterLink, TranslocoPipe],
+  imports: [EmptyState, ListItems, LoadingIndicator, MatButton, RouterLink, TranslocoPipe],
   templateUrl: './list-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -42,7 +43,13 @@ export class ListPage {
       const app = this.transloco.translate('platform.appName');
       if (current.status === 'found') this.title.setTitle(`${current.list.name} | ${app}`);
       if (current.status === 'notFound') {
-        this.title.setTitle(`${this.transloco.translate('shell.list.notFound.title')} | ${app}`);
+        // the lazy `shell` scope may still be loading when the first not-found answer arrives: wait for it
+        this.transloco
+          .selectTranslate<string>('list.notFound.title', {}, { scope: 'shell' })
+          .pipe(take(1))
+          .subscribe((text) => {
+            if (this.store.current().status === 'notFound') this.title.setTitle(`${text} | ${app}`);
+          });
       }
     });
   }

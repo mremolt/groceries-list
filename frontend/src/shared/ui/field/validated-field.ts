@@ -36,6 +36,8 @@ export class ValidatedField implements FormValueControl<string> {
   readonly autocomplete = input<string>('off');
   readonly inputmode = input<'text' | 'email' | 'none'>('text');
   readonly hint = input<string>('');
+  /** Example text inside the empty field; it never replaces the label (NG-UI-12). */
+  readonly placeholder = input<string>('');
   /** Text per error `kind`; `default` answers any kind without an entry (messages are translated by the caller). */
   readonly errorMessages = input<Readonly<Record<string, string>>>({});
 

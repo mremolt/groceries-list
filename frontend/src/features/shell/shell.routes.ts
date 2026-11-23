@@ -1,9 +1,11 @@
 import type { Routes } from '@angular/router';
+import { provideItemsApi } from '@features/items';
 import { provideListsApi } from '@features/lists';
 import { provideSessionApi } from '@features/session';
 import { provideTranslocoScope } from '@jsverse/transloco';
 
 import { authenticatedGuard } from './adapter/in/ui/authenticated-guard';
+import { ItemsStore } from './adapter/in/ui/items-store';
 import { ListActions } from './adapter/in/ui/list-actions';
 import { ListsStore } from './adapter/in/ui/lists-store';
 import { startGuard } from './adapter/in/ui/start-guard';
@@ -16,7 +18,9 @@ export const SHELL_ROUTES: Routes = [
     providers: [
       provideSessionApi(),
       provideListsApi(),
+      provideItemsApi(),
       ListsStore, // NG-STATE-12: route level, shared by the drawer, the app bar menu and the pages
+      ItemsStore, // route level too: the items of the open list (NG-STATE-12)
       ListActions,
       provideTranslocoScope({
         scope: 'shell',

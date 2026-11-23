@@ -42,4 +42,12 @@ public final class Arrange {
                 .params(member, list, Timestamp.from(joinedAt))
                 .update();
     }
+
+    public static UUID item(JdbcClient jdbc, UUID list, String text, boolean done, Instant createdAt) {
+        UUID id = UUID.randomUUID();
+        jdbc.sql("insert into items (id, list_id, text, done, created_at) values (?, ?, ?, ?, ?)")
+                .params(id, list, text, done, Timestamp.from(createdAt))
+                .update();
+        return id;
+    }
 }

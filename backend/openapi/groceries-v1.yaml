@@ -168,6 +168,219 @@ paths:
       summary: Rename a list; the new name is visible to all members
       tags:
       - lists
+  /api/v1/lists/{listId}/items:
+    get:
+      operationId: listItems
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemsResponse"
+          description: "The items, oldest first (BR-09), at most 500"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list or no member; code LIST_NOT_FOUND, the same answer\
+            \ for both"
+      summary: The items of a list
+      tags:
+      - items
+    post:
+      operationId: addItem
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddItemRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemResponse"
+          description: The new item; Location points to it
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Invalid text; code VALIDATION_FAILED with errors[].code TEXT_REQUIRED\
+            \ or TEXT_TOO_LONG"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No such list or no member; code LIST_NOT_FOUND
+        "409":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: 500 items reached (BR-12); code ITEM_LIMIT_REACHED
+      summary: Add an item at the end of the open items
+      tags:
+      - items
+  /api/v1/lists/{listId}/items/clear-checked:
+    post:
+      operationId: clearCheckedItems
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClearCheckedRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClearCheckedResponse"
+          description: Number of items removed; only ids that are still checked are
+            deleted
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: More than 500 ids; code VALIDATION_FAILED
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No such list or no member; code LIST_NOT_FOUND
+      summary: Delete the given items that are still checked
+      tags:
+      - items
+  /api/v1/lists/{listId}/items/{itemId}:
+    delete:
+      operationId: deleteItem
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: itemId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No such list or no member; code LIST_NOT_FOUND
+      summary: Delete an item without confirmation (BR-11); an already deleted item
+        answers 204
+      tags:
+      - items
+    patch:
+      operationId: updateItem
+      parameters:
+      - in: path
+        name: listId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: itemId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateItemRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemResponse"
+          description: "The item after the change (last write wins, ADR 0007)"
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Neither text nor done, or invalid text; code VALIDATION_FAILED"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "No such list, no member or no such item; code LIST_NOT_FOUND\
+            \ or ITEM_NOT_FOUND"
+      summary: Set the text and/or the done state of an item
+      tags:
+      - items
   /api/v1/lists/{listId}/members/me:
     delete:
       operationId: leaveList
@@ -218,6 +431,36 @@ paths:
       - me-controller
 components:
   schemas:
+    AddItemRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          example: Milch
+          maxLength: 200
+          minLength: 1
+      required:
+      - text
+    ClearCheckedRequest:
+      type: object
+      properties:
+        itemIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 500
+      required:
+      - itemIds
+    ClearCheckedResponse:
+      type: object
+      properties:
+        removed:
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+      - removed
     CreateListRequest:
       type: object
       properties:
@@ -244,6 +487,39 @@ components:
       - displayName
       - email
       - id
+    ItemResponse:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        done:
+          type: boolean
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          maxLength: 200
+        version:
+          type: integer
+          format: int64
+      required:
+      - createdAt
+      - done
+      - id
+      - text
+      - version
+    ItemsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemResponse"
+          maxItems: 500
+      required:
+      - items
     ListResponse:
       type: object
       properties:
@@ -314,3 +590,13 @@ components:
           minLength: 1
       required:
       - name
+    UpdateItemRequest:
+      type: object
+      description: At least one of text and done
+      properties:
+        done:
+          type: boolean
+        text:
+          type: string
+          maxLength: 200
+          minLength: 1

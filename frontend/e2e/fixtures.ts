@@ -1,8 +1,10 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, type Page, test as base } from '@playwright/test';
 
+import type { ItemResponse } from '../src/features/items/adapter/out/http/generated/model/itemResponse';
 import type { ListResponse } from '../src/features/lists/adapter/out/http/generated/model/listResponse';
 import { stubConfig } from './fixtures/config';
+import { type ItemsStub, stubItems } from './fixtures/items';
 import { type ListsStub, stubLists } from './fixtures/lists';
 import { stubSession } from './fixtures/session';
 
@@ -25,8 +27,12 @@ interface Fixtures {
   meCalls: () => number;
   /** The lists the stubbed backend starts with (default: none); set per test with `test.use`. */
   initialLists: { readonly lists: readonly ListResponse[] };
+  /** Items the stubbed backend starts with, per list id; lists without an entry start with `openCount` open items. */
+  initialItems: { readonly items: Readonly<Record<string, readonly ItemResponse[]>> };
   /** Stateful stub of the lists API (`/api/v1/lists`). */
   listsApi: ListsStub;
+  /** Stateful stub of the items API (`/api/v1/lists/:id/items`), consistent with `listsApi`. */
+  itemsApi: ItemsStub;
 }
 
 const recordedApiCalls = new WeakMap<Page, string[]>();
@@ -39,9 +45,16 @@ async function stubRuntimeConfig(page: Page): Promise<void> {
 export const test = base.extend<Fixtures>({
   session: [{ signedIn: true }, { option: true }],
   initialLists: [{ lists: [] }, { option: true }],
+  initialItems: [{ items: {} }, { option: true }],
   listsApi: [
     async ({ page, initialLists }, use) => {
       await use(await stubLists(page, initialLists.lists));
+    },
+    { auto: true },
+  ],
+  itemsApi: [
+    async ({ page, listsApi, initialItems }, use) => {
+      await use(await stubItems(page, listsApi.lists, initialItems.items));
     },
     { auto: true },
   ],
@@ -118,11 +131,14 @@ export const test = base.extend<Fixtures>({
         [...document.querySelectorAll<HTMLElement>('body *')]
           .filter((el) => {
             const style = getComputedStyle(el);
-            const hidesOverflow =
-              style.overflow !== 'visible' || style.overflowX !== 'visible' || style.overflowY !== 'visible';
+            // a vertical scroll container (`auto`, `scroll`) does not clip: the person scrolls to the rest (the page body
+            // scrolls inside the app shell's content area); only `hidden` and `clip` cut text off
+            const clipsX = style.overflowX !== 'visible';
+            const clipsY = style.overflowY === 'hidden' || style.overflowY === 'clip';
             const tiny = el.offsetWidth <= 1 && el.offsetHeight <= 1;
             return (
-              !tiny && hidesOverflow && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)
+              !tiny &&
+              ((clipsX && el.scrollWidth > el.clientWidth + 1) || (clipsY && el.scrollHeight > el.clientHeight + 1))
             );
           })
           .map((el) => el.tagName.toLowerCase() + (el.className ? `.${el.className}` : '')),

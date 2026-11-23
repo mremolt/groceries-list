@@ -11,7 +11,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 
 /**
  * The navigation read model: all lists of a user with their open counts in one set-based statement (API-N1-05, ADR
- * 0006). The count of open items is the only column M3 changes: it adds a grouped sub-select over the items table.
+ * 0006). The open count is a correlated sub-select over {@code items_open_idx} (partial index on open items), part of the same
+ * statement.
  * Indexes: {@code memberships_user_joined_idx} for the filter and the order, the primary key of {@code lists} for the
  * join (SPRING-DB-17).
  */
@@ -19,7 +20,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 class ListSummaryJdbcAdapter implements ListSummaryPort {
 
     private static final String SUMMARY = """
-            SELECT l.id, l.name, l.revision, 0 AS open_count
+            SELECT l.id, l.name, l.revision,
+                   (SELECT count(*) FROM items i WHERE i.list_id = l.id AND NOT i.done) AS open_count
               FROM memberships m
               JOIN lists l ON l.id = m.list_id
              WHERE m.user_id = :userId

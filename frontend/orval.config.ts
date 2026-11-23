@@ -37,4 +37,5 @@ function feature(name: string, tag: string): Record<string, OptionsExport> {
 export default defineConfig({
   ...feature('session', 'me-controller'),
   ...feature('lists', 'lists'),
+  ...feature('items', 'items'),
 });

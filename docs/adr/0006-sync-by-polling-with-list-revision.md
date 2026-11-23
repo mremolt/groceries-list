@@ -26,3 +26,7 @@ Simple, scales for the stated sizes (< 100 items, < 10 members). Query count ass
 ## Implementation note (M2)
 
 `lists.revision` exists since M2 (migration `V5__lists_and_memberships.sql`) and is the Hibernate `@Version` of the list entity as well; renames increase it with `revision = revision + 1`. The drawer read `GET /api/v1/lists` is one grouped statement (asserted by test). The ETag/304 item snapshot follows with M3/M5. The decision above is unchanged.
+
+## Implementation note (M3)
+
+Every item write moves `lists.revision` in the same transaction (`ItemPersistenceAdapter.touchList`: add, update, delete, and clear-checked when at least one row was removed). `GET /lists/{id}/items` is one bounded statement (`LIMIT 500`); the open count of the drawer is a sub-select in the existing summary statement. The ETag/304 snapshot read follows with M5. The decision above is unchanged.

@@ -7,6 +7,7 @@
     [value]="value()"
     [disabled]="disabled()"
     [attr.autocomplete]="autocomplete()"
+    [attr.placeholder]="placeholder() || null"
     [attr.inputmode]="inputmode()"
     [attr.aria-invalid]="showError()"
     [aria-describedby]="showError() ? errorId : ''"

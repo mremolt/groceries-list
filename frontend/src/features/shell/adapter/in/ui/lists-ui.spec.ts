@@ -9,6 +9,7 @@ import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
 import { expectNoAxeViolations } from '@testing/axe';
+import { itemUseCaseFakes } from '@testing/item-use-cases';
 import { BBQ, listUseCaseFakes, WEEK } from '@testing/list-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
 import { fireEvent, screen, within } from '@testing-library/angular';
@@ -49,6 +50,7 @@ async function setup(options: { size?: SizeClass; url?: string; lists?: (typeof 
   const { size = 'expanded', url = '/', lists = [WEEK, BBQ] } = options;
   const sizeClass = signal<SizeClass>(size);
   const { fakes, providers } = listUseCaseFakes(lists);
+  const items = itemUseCaseFakes();
   fakes.loadList.execute.mockImplementation((id) => {
     const found = lists.find((list) => list.id === id);
     return found ? Promise.resolve(found) : Promise.reject(new ListNotFoundError());
@@ -60,6 +62,7 @@ async function setup(options: { size?: SizeClass; url?: string; lists?: (typeof 
       provideRouter(ROUTES, withComponentInputBinding()),
       Snackbar,
       ...providers,
+      ...items.providers,
       { provide: WindowSize, useValue: { sizeClass } },
       { provide: LOGOUT, useValue: mock<LogoutUseCase>() },
       { provide: PAGE_NAVIGATION, useValue: navigation },

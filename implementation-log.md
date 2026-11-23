@@ -11,13 +11,13 @@
 | M0 Project setup | done | b0ecad1 | m0-done |
 | M1 Accounts and app shell | done | 16e1331 | m1-done |
 | M2 Lists | done | 0eba963 | m2-done |
-| M3 Items | not started | | |
+| M3 Items | done | PENDING | m3-done |
 | M4 Sharing and joining | not started | | |
 | M5 Synchronisation | not started | | |
 | M6 Settings and account | not started | | |
 | M7 Internal test readiness | not started | | |
 
-- **Next action:** M3 Items (BR-06–09, FR-ITEM-*, per 04 by requirement ID): backend + frontend in parallel against a contract fixed up front, then extend the real-backend E2E tier, verify both gates (frontend e2e Chromium projects only, see memory), commit `M3 done`, tag.
+- **Next action:** M4 Sharing and joining (FR-SHARE-*, FR-AUTH-06, BR-06..08, BR-12 members; read 04 by requirement ID): backend + frontend forks in parallel against a contract fixed up front, then extend the real-backend E2E tier (rebuild image first), verify both gates (frontend e2e Chromium only, see memory), commit `M4 done`, tag.
 - **Work in flight:** none.
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
@@ -45,6 +45,18 @@ Wall-clock timestamps taken with `date -Is` at step start and end. Durations are
 Deviations: frontend e2e run on Chromium only (`e2e:fast`) by the user's instruction; Firefox/WebKit projects stay in the config and are not run. N+1: drawer counts come from one summary read model query (asserted by StatementCounting). Baseline feedback: F-61..F-71.
 
 Manual check (for human review): create, rename, delete and leave lists on a phone; open a list URL as another account.
+
+### M3 Items (2026-11-23)
+
+| Done when | Status |
+|---|---|
+| All ITEM acceptance criteria tested | FR-ITEM-01..06 (AC2 of 06, remembering the „Im Wagen“ state per device, is a Should and not implemented). Backend: 5 use cases, V6, cross-user ITs, concurrency IT for the 500 limit (mutation-checked). Frontend: items store with optimistic check and rollback, add card, edit/clear dialogs, focus rules. Gates: `mvnw verify` green; frontend unit (272) green; stubbed Chromium e2e 61 green (7 projects incl. compact/medium/dark/high-contrast/forced-colors run by the fork); real tier 21 green |
+| Main screen matches screenshots at three widths, both themes | Checked by layout e2e per width/theme, not by pixel comparison; no visual diff against the mockups was done |
+| Keyboard focus after checking (FR-ITEM-02 AC3) | Tested |
+
+Deviations: `expectReflowAndTextSpacing` now treats vertical overflow as clipping only for `overflow: hidden/clip` (scrolling shell areas on tall lists), for review. A second Enter while an add is in flight is ignored and the text stays in the field (no queue). One load-related flake seen once in `items.spec.ts` drawer-count test (6/6 alone, 2 full runs green afterwards). Initial-bundle budget warning (951 kB vs 810 kB) predates M3. N+1: items read is one statement (LIMIT 500), drawer count is a sub-select in the one summary statement.
+
+Manual check (for human review): a real shopping trip on a phone with the demo list.
 
 ## Assumptions
 

@@ -1,6 +1,6 @@
 @switch (store.current().status) {
   @case ('found') {
-    <p class="items-follow">{{ 'shell.list.itemsFollow' | transloco }}</p>
+    <app-list-items [listId]="id()" />
   }
   @case ('notFound') {
     <app-empty-state

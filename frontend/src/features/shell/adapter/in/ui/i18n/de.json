@@ -74,7 +74,6 @@
   },
   "list": {
     "loading": "Liste wird geladen",
-    "itemsFollow": "Hier erscheinen die Artikel dieser Liste.",
     "failed": "Die Liste konnte nicht geladen werden.",
     "retry": "Erneut versuchen",
     "notFound": {
@@ -82,5 +81,51 @@
       "text": "Diese Liste gibt es nicht oder du hast keinen Zugriff.",
       "action": "Zu meinen Listen"
     }
+  },
+  "items": {
+    "add": {
+      "title": "Artikel hinzufügen",
+      "field": "Was fehlt?",
+      "placeholder": "z. B. 2× Milch",
+      "submit": "Hinzufügen"
+    },
+    "error": {
+      "textRequired": "Bitte gib einen Artikel ein.",
+      "textTooLong": "Höchstens 200 Zeichen.",
+      "limitReached": "Diese Liste hat schon 500 Artikel. Entferne Artikel, bevor du neue hinzufügst."
+    },
+    "open": {
+      "title": "Noch zu kaufen",
+      "progress": "{done} von {total} erledigt",
+      "allDone": "Alles im Wagen.",
+      "emptyTitle": "Diese Liste ist noch leer",
+      "emptyText": "Füge oben den ersten Artikel hinzu. Alle Mitglieder sehen ihn sofort."
+    },
+    "cart": {
+      "title": "Im Wagen",
+      "empty": "Noch nichts abgehakt.",
+      "clear": "Erledigte entfernen",
+      "toggle": "Im Wagen"
+    },
+    "edit": "„{text}“ bearbeiten",
+    "dialog": {
+      "title": "Artikel bearbeiten",
+      "text": "Änderungen sind sofort für alle Mitglieder sichtbar.",
+      "field": "Artikel",
+      "delete": "Löschen",
+      "submit": "Speichern",
+      "clear": {
+        "title": "Erledigte entfernen?",
+        "text": "{count, plural, one {# erledigter Artikel wird} other {# erledigte Artikel werden}} für alle Mitglieder entfernt.",
+        "confirm": "Entfernen"
+      }
+    },
+    "snackbar": {
+      "cleared": "Erledigte Artikel entfernt",
+      "gone": "Dieser Artikel wurde inzwischen gelöscht."
+    },
+    "loading": "Artikel werden geladen",
+    "failed": "Die Artikel konnten nicht geladen werden.",
+    "retry": "Erneut versuchen"
   }
 }

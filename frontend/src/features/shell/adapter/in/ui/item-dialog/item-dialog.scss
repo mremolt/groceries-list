@@ -1,0 +1,29 @@
+@use '@angular/material' as mat;
+
+.text {
+  margin-block: 0 var(--app-space-4);
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.note {
+  min-block-size: 1.5rem;
+  margin: var(--app-space-2) 0 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// „Löschen“ sits on the left, the two other buttons on the right (Dlg-Artikel-hell)
+.actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.delete {
+  margin-inline-end: auto;
+  @include mat.button-overrides(
+    (
+      text-label-text-color: var(--mat-sys-error),
+    )
+  );
+}

@@ -22,3 +22,7 @@ Documented deviation for the rules named above only. Clients never get 412/428 o
 ## Implementation note (M2)
 
 For lists the rename is one atomic SQL update (`name = …, revision = revision + 1`), so concurrent renames and item-driven revision changes never fail and the last write wins; no adapter retry is needed. The `@Version` on the entity (= the revision column) covers only entity writes. The decision above is unchanged.
+
+## Implementation note (M3)
+
+`PATCH …/items/{itemId}` is one `UPDATE … SET text = COALESCE(:text, text), done = COALESCE(:done, done), version = version + 1 … RETURNING`, so concurrent edits and checks never fail and no adapter retry is needed; the entity's `@Version` covers creation only (as for lists). A write to a deleted item answers 404 `ITEM_NOT_FOUND`; `DELETE` of an already deleted item answers 204. The decision above is unchanged.

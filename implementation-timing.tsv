@@ -135,3 +135,52 @@ start	duration_s	milestone	category	label	exit
 2026-11-23T14:48:02+01:00	12	M2-frontend	infra	build image	0
 2026-11-23T14:48:17+01:00	0	M2-frontend	e2e	e2e real lists+auth	1
 2026-11-23T14:48:22+01:00	22	M2-frontend	e2e	e2e real lists+auth	0
+2026-11-23T14:50:02+01:00	0	M3-backend	other	hand-written item contract in openapi spec	0
+2026-11-23T14:50:46+01:00	0	M3-backend	code	domain tests+types (ItemText, Item)	0
+2026-11-23T14:51:33+01:00	0	M3-backend	code	use case tests + ports + services	0
+2026-11-23T14:52:09+01:00	6	M3-backend	build-gate	spotless apply + test-compile	1
+2026-11-23T14:52:19+01:00	7	M3-backend	build-gate	test-compile	1
+2026-11-23T14:52:29+01:00	8	M3-backend	build-gate	test-compile	0
+2026-11-23T14:54:10+01:00	7	M3-backend	build-gate	spotless + verify (springdoc update)	1
+2026-11-23T14:54:25+01:00	7	M3-backend	build-gate	verify (springdoc update)	1
+2026-11-23T14:54:38+01:00	22	M3-backend	build-gate	verify (springdoc update)	1
+2026-11-23T14:55:05+01:00	48	M3-backend	build-gate	verify (springdoc update)	1
+2026-11-23T14:56:04+01:00	50	M3-backend	build-gate	verify (springdoc update)	0
+2026-11-23T14:57:52+01:00	0	M3-backend	docs	arc42 ch5/8, threat model, DP docs, ADR notes, feedback	0
+2026-11-23T14:57:52+01:00	2	M3-frontend	build-gate	format:check	0
+2026-11-23T14:57:54+01:00	19	M3-frontend	build-gate	lint	1
+2026-11-23T14:58:13+01:00	6	M3-frontend	build-gate	typecheck	0
+2026-11-23T14:58:19+01:00	2	M3-frontend	build-gate	check:arch	0
+2026-11-23T14:58:21+01:00	1	M3-frontend	build-gate	check:unused	1
+2026-11-23T14:57:55+01:00	56	M3-backend	build-gate	mvnw verify (final, no update flag)	0
+2026-11-23T15:02:57+01:00	50	M3-frontend	e2e	e2e fast items	1
+2026-11-23T15:04:29+01:00	46	M3-frontend	e2e	e2e expanded items 2	1
+2026-11-23T15:05:19+01:00	47	M3-frontend	e2e	e2e stubbed-expanded items	1
+2026-11-23T15:06:06+01:00	136	M3-frontend	e2e	e2e stubbed-compact items	1
+2026-11-23T15:08:22+01:00	46	M3-frontend	e2e	e2e stubbed-medium items	1
+2026-11-23T15:09:08+01:00	165	M3-frontend	e2e	e2e stubbed-reflow items	1
+2026-11-23T15:11:53+01:00	6	M3-frontend	e2e	e2e stubbed-dark items	0
+2026-11-23T15:11:59+01:00	5	M3-frontend	e2e	e2e stubbed-high-contrast items	0
+2026-11-23T15:12:04+01:00	17	M3-frontend	e2e	e2e stubbed-forced-colors items	0
+2026-11-23T15:18:43+01:00	1	M3-frontend	build-gate	format:check final	0
+2026-11-23T15:18:44+01:00	15	M3-frontend	build-gate	lint final	0
+2026-11-23T15:18:59+01:00	5	M3-frontend	build-gate	typecheck final	0
+2026-11-23T15:19:04+01:00	1	M3-frontend	build-gate	check:arch final	0
+2026-11-23T15:19:05+01:00	1	M3-frontend	build-gate	check:unused final	0
+2026-11-23T15:19:06+01:00	12	M3-frontend	build-gate	test final	0
+2026-11-23T15:19:18+01:00	5	M3-frontend	build-gate	build final	0
+2026-11-23T15:21:52+01:00	20	M3-frontend	e2e	e2e stubbed-expanded final	1
+2026-11-23T15:22:12+01:00	17	M3-frontend	e2e	e2e stubbed-compact final	1
+2026-11-23T15:22:29+01:00	17	M3-frontend	e2e	e2e stubbed-medium final	0
+2026-11-23T15:22:46+01:00	18	M3-frontend	e2e	e2e stubbed-reflow final	0
+2026-11-23T15:24:35+01:00	1	M3-frontend	build-gate	format:check final2	0
+2026-11-23T15:24:36+01:00	15	M3-frontend	build-gate	lint final2	0
+2026-11-23T15:24:51+01:00	5	M3-frontend	build-gate	typecheck final2	0
+2026-11-23T15:24:56+01:00	2	M3-frontend	build-gate	check:arch final2	0
+2026-11-23T15:24:58+01:00	0	M3-frontend	build-gate	check:unused final2	0
+2026-11-23T15:24:58+01:00	12	M3-frontend	build-gate	test final2	0
+2026-11-23T15:25:10+01:00	5	M3-frontend	build-gate	build final2	0
+2026-11-23T15:27:17+01:00	12	M3	infra	build image	0
+2026-11-23T15:27:53+01:00	32	M3-frontend	e2e	e2e real	1
+2026-11-23T15:28:39+01:00	25	M3-frontend	e2e	e2e real 2	0
+2026-11-23T15:30:32+01:00	45	M3	build-gate	mvnw verify (final)	0

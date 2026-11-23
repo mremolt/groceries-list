@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>{{ 'shell.items.dialog.title' | transloco }}</h2>
+<form novalidate (submit)="$event.preventDefault(); save()">
+  <mat-dialog-content>
+    <p class="text">{{ 'shell.items.dialog.text' | transloco }}</p>
+    <app-validated-field
+      [label]="'shell.items.dialog.field' | transloco"
+      autocomplete="off"
+      [formField]="textForm.text"
+      [errorMessages]="errorMessages()"
+    />
+    <p class="note" role="status">{{ note() }}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions class="actions">
+    <button matButton type="button" class="delete" [disabled]="busy()" (click)="remove()">
+      {{ 'shell.items.dialog.delete' | transloco }}
+    </button>
+    <button matButton type="button" mat-dialog-close>{{ 'shell.dialog.cancel' | transloco }}</button>
+    <button matButton="filled" type="submit" [disabled]="busy()">
+      {{ 'shell.items.dialog.submit' | transloco }}
+    </button>
+  </mat-dialog-actions>
+</form>
