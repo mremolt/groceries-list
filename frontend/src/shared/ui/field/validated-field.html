@@ -1,0 +1,25 @@
+<mat-form-field appearance="outline" class="field" [class.invalid]="showError()">
+  <mat-label>{{ label() }}</mat-label>
+  <input
+    matInput
+    #field
+    [type]="type()"
+    [value]="value()"
+    [disabled]="disabled()"
+    [attr.autocomplete]="autocomplete()"
+    [attr.inputmode]="inputmode()"
+    [attr.aria-invalid]="showError()"
+    [aria-describedby]="showError() ? errorId : ''"
+    (input)="onInput(field.value)"
+    (blur)="touch.emit()"
+  />
+  @if (hint()) {
+    <mat-hint>{{ hint() }}</mat-hint>
+  }
+</mat-form-field>
+@if (showError()) {
+  <p class="error-line" [id]="errorId">
+    <app-icon name="error" />
+    <span>{{ 'platform.field.errorPrefix' | transloco }} {{ message() }}</span>
+  </p>
+}

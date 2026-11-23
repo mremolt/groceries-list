@@ -35,8 +35,14 @@ services:
       default:
         aliases:
           - keycloak.localhost                      # other containers (compose.app.yaml) reach the same issuer URL
+    extra_hosts:
+      - "host.docker.internal:host-gateway"         # back-channel logout reaches the app on the host (Linux; Docker Desktop has it already)
+    depends_on:
+      mailpit: { condition: service_healthy }       # reset mails (FR-AUTH-04) need the mail catcher
     volumes:
-      - ./dev/keycloak:/opt/keycloak/data/import:ro # realm template: dev/keycloak/groceries-realm.json (SPRING-DEV-12)
+      # realm template: dev-only users and secrets, fictitious (SPRING-DEV-12, DP-ENV-01); mounted as a single file so the theme folder is not scanned for imports
+      - ./dev/keycloak/groceries-realm.json:/opt/keycloak/data/import/groceries-realm.json:ro
+      - ./dev/keycloak/theme/groceries:/opt/keycloak/themes/groceries:ro   # login and e-mail theme (ADR 0003)
     ports:
       - "127.0.0.1:8180:8180"
     healthcheck:                                    # the image has no curl: plain bash /dev/tcp against the management port
@@ -47,11 +53,16 @@ services:
       start_period: 10s
 
   mailpit:
-    profiles: [mail]
+    profiles: [mail, auth]                          # the auth profile needs it: Keycloak sends reset mails to mailpit:1025
     image: axllent/mailpit:v1.34
     ports:
       - "127.0.0.1:1025:1025"
       - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
 
 volumes:

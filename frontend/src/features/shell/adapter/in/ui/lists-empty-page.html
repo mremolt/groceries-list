@@ -1,0 +1,11 @@
+<app-empty-state
+  icon="cart"
+  [heading]="'shell.empty.lists.title' | transloco"
+  [text]="'shell.empty.lists.text' | transloco"
+>
+  <button matButton="filled" empty-action type="button" disabledInteractive [disabled]="true">
+    <app-icon name="add" />
+    {{ 'shell.empty.lists.action' | transloco }}
+  </button>
+  <p empty-hint>{{ 'shell.empty.lists.hint' | transloco }}</p>
+</app-empty-state>

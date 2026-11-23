@@ -1,3 +1,4 @@
 target/
 *.log
-dev/secrets/
+dev/secrets/*
+!dev/secrets/keycloak-client-secret

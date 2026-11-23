@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,13 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Every error category of ARCH-UC-13 reaches the client as problem+json with a stable code (SPRING-REST-13). */
 @WebMvcTest(controllers = RestExceptionHandlerTest.FailingController.class)
-@Import({
-    SecurityConfiguration.class,
-    I18nConfiguration.class,
-    RestExceptionHandler.class,
-    RestExceptionHandlerTest.FailingController.class
-})
+@SecuritySlice
+@Import(RestExceptionHandlerTest.FailingController.class)
 @Tag("problem-details")
+@WithMockUser
 class RestExceptionHandlerTest {
 
     @Autowired

@@ -15,7 +15,7 @@ import { RouteFocus } from './route-focus';
 async function setup() {
   const rendered = await render(TestShell, {
     routes: [
-      { path: 'a', component: TestPage, title: 'shell.title.home' },
+      { path: 'a', component: TestPage, title: 'platform.title.lists' },
       { path: 'b', component: TestPage },
     ],
     providers: [
@@ -36,7 +36,7 @@ describe('route title and focus (A11Y-21)', () => {
 
     await navigate('/a');
 
-    expect(TestBed.inject(Title).getTitle()).toBe('Start | Einkaufsliste');
+    expect(TestBed.inject(Title).getTitle()).toBe('Meine Listen | Einkaufsliste');
   });
 
   it('keeps the browser start on the first navigation', async () => {

@@ -12,7 +12,7 @@ export class AppTitleStrategy extends TitleStrategy {
 
   override updateTitle(snapshot: RouterStateSnapshot): void {
     const key = this.buildTitle(snapshot);
-    const app = this.transloco.translate('shell.appName');
+    const app = this.transloco.translate('platform.appName');
     this.title.setTitle(key ? `${this.transloco.translate(key)} | ${app}` : app);
   }
 }

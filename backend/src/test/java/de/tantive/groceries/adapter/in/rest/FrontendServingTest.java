@@ -15,7 +15,8 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
  * security headers of SPRING-SEC-13 (SPRING-REST-13, SPRING-TEST-12).
  */
 @WebMvcTest(controllers = FrontendController.class)
-@Import({SecurityConfiguration.class, FrontendConfiguration.class, I18nConfiguration.class, RestExceptionHandler.class})
+@SecuritySlice
+@Import(FrontendConfiguration.class)
 class FrontendServingTest {
 
     @Autowired
@@ -105,8 +106,11 @@ class FrontendServingTest {
 
     @Test
     void answersANotFoundProblemForAnUnknownApiPath() {
-        var result =
-                mvc.get().uri("/api/v1/unknown").accept(MediaType.TEXT_HTML).exchange();
+        var result = mvc.get()
+                .uri("/api/v1/unknown")
+                .with(AppSessions.alice())
+                .accept(MediaType.TEXT_HTML)
+                .exchange();
 
         assertThat(result).hasStatus(404);
         assertThat(result.getResponse().getContentType()).doesNotContain("text/html");

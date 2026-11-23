@@ -138,8 +138,6 @@ class ArchitectureTest {
     // (SPRING-ARCH-07), coarse @PreAuthorize checks (SPRING-SEC-02), logging (SPRING-LOG-06) and the Observation API
     // (SPRING-OBS-06). No EntityManager, KafkaTemplate, RestClient or any other adapter technology (ARCH-ADP-01,
     // ARCH-DEP-03). Widening this list is an ADR, not a quick fix (SEC-REV-02).
-    // allowEmptyShould: bootstrap exception as for jpaEntitiesStayInAdapter (ARCH-ENF-02): M0 has no application class
-    // yet. Remove it with the first @UseCase (M1, ProvisionUser).
     @ArchTest
     static final ArchRule applicationUsesOnlyAllowedTypes = classes()
             .that()
@@ -153,13 +151,10 @@ class ArchitectureTest {
                     "org.springframework.transaction..",
                     "org.springframework.security.access.prepost..",
                     "org.slf4j..",
-                    "io.micrometer.observation..")
-            .allowEmptyShould(true);
+                    "io.micrometer.observation..");
 
     // Use cases get language as data (a Language value object in the command), never from the request (SPRING-I18N-04).
     // applicationUsesOnlyAllowedTypes already excludes these types; this rule names them for a precise failure message.
-    // allowEmptyShould: bootstrap exception as for jpaEntitiesStayInAdapter (ARCH-ENF-02): M0 has no application class
-    // yet. Remove it with the first @UseCase (M1, ProvisionUser).
     @ArchTest
     static final ArchRule applicationHasNoJsonOrI18nTypes = noClasses()
             .that()
@@ -175,8 +170,7 @@ class ArchitectureTest {
             .haveFullyQualifiedName("org.springframework.context.i18n.LocaleContextHolder")
             .orShould()
             .dependOnClassesThat()
-            .haveFullyQualifiedName("org.springframework.web.servlet.LocaleResolver")
-            .allowEmptyShould(true);
+            .haveFullyQualifiedName("org.springframework.web.servlet.LocaleResolver");
 
     // Locale must not travel through the core (SPRING-I18N-04). Only fields and signatures are checked:
     // Locale.ROOT for case conversion (required by Error Prone's StringCaseLocaleUsage) stays possible.
@@ -237,8 +231,7 @@ class ArchitectureTest {
             .and()
             .haveNameMatching("(?i).*(password|secret|token|apikey|credential|privatekey).*")
             .should()
-            .haveRawType("de.tantive.groceries.config.Secret")
-            .allowEmptyShould(true);
+            .haveRawType("de.tantive.groceries.config.Secret");
 
     // One @Transactional: Spring's. jakarta.transaction.Transactional comes in with JPA and is easy to import by
     // mistake.
@@ -246,9 +239,6 @@ class ArchitectureTest {
     static final ArchRule onlySpringTransactional =
             noClasses().should().dependOnClassesThat().haveFullyQualifiedName("jakarta.transaction.Transactional");
 
-    // allowEmptyShould: the one bootstrap exception to ARCH-ENF-02 / JAVA-ARCH-08. A new service has no @Entity yet,
-    // and the rule would fail with "failed to check any classes". Remove allowEmptyShould with the first entity
-    // (a service without JPA removes the rule instead).
     @ArchTest
     static final ArchRule jpaEntitiesStayInAdapter = classes()
             .that()
@@ -256,8 +246,7 @@ class ArchitectureTest {
             .should()
             .resideInAPackage("..adapter.out.jpa..")
             .andShould()
-            .notBePublic()
-            .allowEmptyShould(true);
+            .notBePublic();
 
     // Scanned classes stay package-private: Spring instantiates them reflectively (JAVA-ARCH-01, SPRING-ARCH-04).
     @ArchTest
@@ -284,15 +273,9 @@ class ArchitectureTest {
             .notBePublic();
 
     // Use cases live in application (SPRING-ARCH-04).
-    // allowEmptyShould: bootstrap exception as for jpaEntitiesStayInAdapter (ARCH-ENF-02): M0 has no application class
-    // yet. Remove it with the first @UseCase (M1, ProvisionUser).
     @ArchTest
-    static final ArchRule useCasesLiveInApplication = classes()
-            .that()
-            .areAnnotatedWith(UseCase.class)
-            .should()
-            .resideInAPackage("..application..")
-            .allowEmptyShould(true);
+    static final ArchRule useCasesLiveInApplication =
+            classes().that().areAnnotatedWith(UseCase.class).should().resideInAPackage("..application..");
 
     // Outgoing HTTP clients live in adapter.out.http (SPRING-ARCH-04). allowEmptyShould: bootstrap exception as for
     // jpaEntitiesStayInAdapter; remove it with the first @HttpClientAdapter.
@@ -493,8 +476,10 @@ class ArchitectureTest {
     // create a new aggregate, act only on the caller's own row, or run without a caller (scheduled jobs, start-up
     // jobs, provider-initiated calls such as back-channel logout). Commas between entries, none after the last.
     private static final Set<String> NO_CALLER_SUPPLIED_ID = Set.of(
-            // "de.tantive.groceries.application.PlaceOrderService", // creates a new order, takes no id
-            // "de.tantive.groceries.application.DeliverQueuedMailService", // scheduled job: no caller, no id
+            "de.tantive.groceries.application.accounts.ProvideUserService", // login: no caller yet, identity from the
+            // IdP
+            "de.tantive.groceries.application.sessions.RegisterIdpSessionService", // login: records the new own session
+            "de.tantive.groceries.application.sessions.EndIdpSessionsService" // provider-initiated back-channel logout
             );
 
     @ArchTest

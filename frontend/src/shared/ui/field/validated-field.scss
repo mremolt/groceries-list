@@ -1,0 +1,40 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+}
+
+.field {
+  inline-size: 100%;
+}
+
+// FR-FB-04 AC2: a 2 px error border (the system token carries the error colour)
+.invalid {
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-width: 2px,
+      outlined-outline-color: var(--mat-sys-error),
+      outlined-hover-outline-color: var(--mat-sys-error),
+      outlined-focus-outline-color: var(--mat-sys-error),
+      outlined-label-text-color: var(--mat-sys-error),
+      outlined-focus-label-text-color: var(--mat-sys-error),
+      outlined-hover-label-text-color: var(--mat-sys-error),
+    )
+  );
+}
+
+.error-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--app-space-1);
+  margin: 0;
+  padding-inline: var(--app-space-4);
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-error);
+
+  app-icon {
+    inline-size: 1rem;
+    block-size: 1rem;
+    margin-block-start: 0.125rem;
+  }
+}

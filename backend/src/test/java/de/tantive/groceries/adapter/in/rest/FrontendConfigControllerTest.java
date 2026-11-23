@@ -10,7 +10,8 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 /** {@code /config.json} is public bootstrap data: anonymous, exact keys, never cached (SPRING-CFG-10). */
 @WebMvcTest(controllers = FrontendConfigController.class, properties = "info.release.version=1.2.3")
-@Import({SecurityConfiguration.class, I18nConfiguration.class, RestExceptionHandler.class, FrontendConfiguration.class})
+@SecuritySlice
+@Import(FrontendConfiguration.class)
 class FrontendConfigControllerTest {
 
     @Autowired

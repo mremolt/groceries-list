@@ -1,0 +1,65 @@
+:host {
+  display: block;
+  container-type: inline-size; // UI-07: reusable components respond to their container
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--app-space-4);
+  max-inline-size: 28rem;
+  margin-inline: auto;
+  padding: var(--app-space-6) var(--app-space-5);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-large);
+  background: var(--app-color-card);
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 6rem;
+  block-size: 6rem;
+  border-radius: 50%;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+
+  app-icon {
+    inline-size: 3rem;
+    block-size: 3rem;
+  }
+}
+
+.heading {
+  margin: 0;
+  font: var(--mat-sys-headline-small);
+  color: var(--mat-sys-on-surface);
+}
+
+.text {
+  margin: 0;
+  font: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.hint-area {
+  inline-size: 100%;
+  margin-block-start: var(--app-space-2);
+  padding-block-start: var(--app-space-4);
+  border-block-start: 1px solid var(--mat-sys-outline-variant);
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+
+  &:empty {
+    display: none;
+  }
+}
+
+@container (max-width: 24rem) {
+  .card {
+    padding-inline: var(--app-space-4);
+  }
+}

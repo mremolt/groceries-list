@@ -1,11 +1,16 @@
 {
-  "shell": {
+  "platform": {
     "appName": "Einkaufsliste",
     "title": {
-      "home": "Start"
-    }
-  },
-  "platform": {
+      "lists": "Meine Listen",
+      "settings": "Einstellungen"
+    },
+    "snackbar": {
+      "close": "Hinweis schließen"
+    },
+    "field": {
+      "errorPrefix": "Fehler:"
+    },
     "error": {
       "generic": "Das hat nicht geklappt. Bitte versuche es noch einmal."
     }

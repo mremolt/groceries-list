@@ -1,0 +1,21 @@
+<div class="region" role="status" aria-live="polite" aria-atomic="true">
+  @if (snackbar.message(); as message) {
+    <div
+      class="snackbar"
+      (mouseenter)="snackbar.pause()"
+      (mouseleave)="snackbar.resume()"
+      (focusin)="snackbar.pause()"
+      (focusout)="snackbar.resume()"
+    >
+      <span class="text">{{ message.text }}</span>
+      <button
+        matIconButton
+        type="button"
+        [attr.aria-label]="'platform.snackbar.close' | transloco"
+        (click)="snackbar.dismiss()"
+      >
+        <app-icon name="close" />
+      </button>
+    </div>
+  }
+</div>

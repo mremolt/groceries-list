@@ -1,0 +1,16 @@
+start	duration_s	milestone	category	label	exit
+2026-11-23T11:28:04+01:00	56	M0-design	read-docs	kickoff, rule indexes, requirements, templates	0
+2026-11-23T11:29:00+01:00	139	M0-design	design	arc42, 9 ADRs, security, data protection docs	0
+2026-11-23T11:32:17+01:00	20	M0-backend	infra	pom + maven wrapper	0
+2026-11-23T11:32:37+01:00	75	M0-backend	read-docs	docs read, resolving dependencies	0
+2026-11-23T11:33:52+01:00	162	M0-backend	code	main java	0
+2026-11-23T11:36:34+01:00	89	M0-backend	code	unit/web tests	0
+2026-11-23T11:38:03+01:00	182	M0-backend	code	config + IT tests	0
+2026-11-23T11:41:05+01:00	198	M0-backend	build-gate	first mvnw verify green (incl. fixes)	0
+2026-11-23T11:44:23+01:00	78	M0-backend	infra	compose + runtime check + verify-all	0
+2026-11-23T11:32:26+01:00	51	M0-frontend	infra	ng new + pinned install	0
+2026-11-23T11:33:30+01:00	30	M0-frontend	read-docs	arch/config docs	0
+2026-11-23T11:34:00+01:00	383	M0-frontend	code	theme, platform, shell, unit tests	0
+2026-11-23T11:40:05+01:00	324	M0-frontend	debug	lint/arch/knip fixes, build+test	0
+2026-11-23T11:45:41+01:00	108	M0-frontend	e2e	Playwright matrix + fixtures, verify green	0
+2026-11-23T11:47:30+01:00	240	M0-integration	other	config.json contract, real index.html test, IDE setup, both verifies	0

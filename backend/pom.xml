@@ -19,6 +19,7 @@
 		<errorprone.version>2.53.0</errorprone.version>
 		<nullaway.version>0.14.4</nullaway.version>
 		<findsecbugs.version>1.14.0</findsecbugs.version>
+		<bucket4j.version>8.17.0</bucket4j.version>
 		<archunit.version>1.5.1</archunit.version>
 		<spotless.version>3.11.0</spotless.version>
 		<spotbugs-plugin.version>4.10.5.0</spotbugs-plugin.version>
@@ -28,6 +29,11 @@
 		<project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
 	</properties>
 	<dependencies>
+		<dependency>
+			<!-- auto-configured RestClient.Builder with the client floor of spring.http.clients.* (SPRING-RES-01) -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-restclient</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -47,6 +53,20 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-oauth2-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-session-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<!-- rate limits of the app's own public endpoints (SPRING-SEC-21); not managed by Boot, pinned -->
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>${bucket4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -96,6 +116,16 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-flyway-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-oauth2-client-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-session-jdbc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

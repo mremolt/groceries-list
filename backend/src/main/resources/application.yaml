@@ -38,7 +38,20 @@ spring:
     # both mounted as config-tree files by the platform (SPRING-CFG-07; env variables only as fallback, SPRING-CFG-06);
     # locally one Compose user does both. Keys a deployment sets: configuration-keys.yaml (CFG-12).
 
+  session:
+    timeout: 30d                      # idle timeout of the BFF session, sliding (FR-AUTH-02 AC5, ADR 0002); the absolute lifetime is app.auth.session-absolute-lifetime
+    jdbc:
+      initialize-schema: never        # the tables come from a Flyway migration (SPRING-SEC-37)
+      cleanup-cron: "0 */10 * * * *"  # Spring Session removes expired sessions
+
 server:
+  servlet:
+    session:
+      cookie:
+        name: __Host-SESSION          # __Host- prefix: Secure, Path=/, no Domain (SPRING-SEC-24); the local profile drops it for http://localhost
+        secure: true
+        http-only: true
+        same-site: lax
   forward-headers-strategy: none     # explicit per deployment (SPRING-SEC-12): none until a validating reverse proxy sits in front
   max-http-request-header-size: 16KB # SPRING-SEC-15
   shutdown: graceful                 # OBS-04, SPRING-OBS-04

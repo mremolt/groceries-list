@@ -1,9 +1,32 @@
 {
-  "page": {
-    "heading": "Einkaufsliste",
-    "welcome": {
-      "title": "Willkommen",
-      "text": "Hier entsteht eure gemeinsame Einkaufsliste. Bald kannst du Listen anlegen, teilen und gemeinsam abhaken."
+  "heading": {
+    "lists": "Einkaufsliste",
+    "settings": "Einstellungen"
+  },
+  "nav": {
+    "drawer": "Navigation",
+    "label": "Hauptnavigation",
+    "open": "Navigation öffnen",
+    "close": "Navigation schließen",
+    "newList": "Neue Liste",
+    "myLists": "Meine Listen",
+    "noLists": "Noch keine Listen.",
+    "settings": "Einstellungen"
+  },
+  "menu": {
+    "more": "Weitere Optionen",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+  "empty": {
+    "lists": {
+      "title": "Noch keine Listen",
+      "text": "Lege deine erste Einkaufsliste an und teile sie mit Familie, Partner oder WG.",
+      "action": "Neue Liste",
+      "hint": "Du hast einen Teilen-Link bekommen? Öffne ihn einfach – die Liste erscheint dann hier."
     }
+  },
+  "settings": {
+    "placeholder": "Hier entstehen deine Einstellungen."
   }
 }

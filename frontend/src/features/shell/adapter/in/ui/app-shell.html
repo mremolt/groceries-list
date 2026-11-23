@@ -1,0 +1,79 @@
+<mat-sidenav-container class="container">
+  <mat-sidenav class="drawer" [mode]="expanded() ? 'side' : 'over'" [opened]="expanded()">
+    <nav [attr.aria-label]="'shell.nav.label' | transloco" class="nav">
+      <div class="drawer-head">
+        <button matButton="tonal" class="new-list" type="button" disabledInteractive [disabled]="true">
+          <app-icon name="add" />
+          {{ 'shell.nav.newList' | transloco }}
+        </button>
+        @if (!expanded()) {
+          <button
+            matIconButton
+            type="button"
+            [attr.aria-label]="'shell.nav.close' | transloco"
+            (click)="closeIfModal()"
+          >
+            <app-icon name="close" />
+          </button>
+        }
+      </div>
+      <h2 class="nav-heading">{{ 'shell.nav.myLists' | transloco }}</h2>
+      <p class="nav-empty">{{ 'shell.nav.noLists' | transloco }}</p>
+      <mat-divider />
+      <a
+        class="nav-item"
+        routerLink="/einstellungen"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        (click)="closeIfModal()"
+      >
+        <app-icon name="settings" />
+        <span>{{ 'shell.nav.settings' | transloco }}</span>
+      </a>
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <header class="app-bar">
+      <div class="bar-actions">
+        @if (!expanded()) {
+          <button
+            matIconButton
+            type="button"
+            class="menu-button"
+            [attr.aria-label]="'shell.nav.open' | transloco"
+            (click)="drawer().open()"
+          >
+            <app-icon name="menu" />
+          </button>
+        }
+        <button
+          matIconButton
+          type="button"
+          class="more-button"
+          [matMenuTriggerFor]="more"
+          [attr.aria-label]="'shell.menu.more' | transloco"
+        >
+          <app-icon name="moreVert" />
+        </button>
+      </div>
+      <h1 class="page-title">{{ headingKey() | transloco }}</h1>
+    </header>
+    <main class="page">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<mat-menu #more="matMenu" xPosition="before">
+  <a mat-menu-item routerLink="/einstellungen">
+    <app-icon name="settings" />
+    <span>{{ 'shell.menu.settings' | transloco }}</span>
+  </a>
+  <button mat-menu-item type="button" disabledInteractive [disabled]="store.loggingOut()" (click)="logout()">
+    <app-icon name="logout" />
+    <span>{{ 'shell.menu.logout' | transloco }}</span>
+  </button>
+</mat-menu>
+
+<app-snackbar-host />

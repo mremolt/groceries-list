@@ -6,14 +6,14 @@ import {
   type TranslocoLoader,
 } from '@jsverse/transloco';
 
-import home from '../features/shell/adapter/in/ui/i18n/de.json';
+import shell from '../features/shell/adapter/in/ui/i18n/de.json';
 import platform from '../platform/adapter/in/ui/i18n/de.json';
 import { IcuTranspiler } from '../platform/adapter/in/ui/icu-transpiler';
 
 /** TEST-I18N-01: components render with the real source catalogs; scopes are merged under their key prefix. */
 class RealCatalogLoader implements TranslocoLoader {
   getTranslation(): Promise<Translation> {
-    return Promise.resolve({ ...platform, home });
+    return Promise.resolve({ ...platform, shell });
   }
 }
 

@@ -33,6 +33,38 @@ keys:
     required: false
     secret: false
     description: Whether the SPA reports errors to the same-origin report path (default false).
+  - key: app.auth.issuer-uri
+    required: true
+    secret: false
+    description: Issuer URL of the identity provider (Keycloak realm), identical for browser, host and container (SPRING-DEV-11).
+  - key: app.auth.client-id
+    required: false
+    secret: false
+    description: Confidential OIDC client of the BFF (default groceries-bff).
+  - key: app.auth.client-secret
+    required: true
+    secret: true
+    description: Client secret of the BFF at the IdP, read from a mounted file (config tree).
+  - key: app.auth.session-absolute-lifetime
+    required: false
+    secret: false
+    description: A session never outlives this age, however active (default 30d).
+  - key: app.auth.connect-timeout
+    required: false
+    secret: false
+    description: Connect timeout of calls to the IdP (default 2s).
+  - key: app.auth.read-timeout
+    required: false
+    secret: false
+    description: Read timeout of calls to the IdP (default 5s).
+  - key: app.rate-limits.login-start-per-minute
+    required: false
+    secret: false
+    description: Requests per minute and client address to /oauth2/authorization/* (default 10).
+  - key: app.rate-limits.csp-reports-per-minute
+    required: false
+    secret: false
+    description: Requests per minute and client address to /csp-reports (default 60).
   - key: app.limits.max-body-size
     required: false
     secret: false

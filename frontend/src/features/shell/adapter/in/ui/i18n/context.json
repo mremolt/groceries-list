@@ -1,8 +1,74 @@
 {
-  "home.page.heading": { "description": "Main heading of the start page; the app name", "maxLength": 30 },
-  "home.page.welcome.title": { "description": "Title of the placeholder welcome card", "maxLength": 40 },
-  "home.page.welcome.text": {
-    "description": "Placeholder text of the welcome card (replaced by the lists in M1/M2)",
-    "maxLength": 160
+  "shell.heading.lists": {
+    "description": "Main heading (h1) of the lists start page; the app name (FR-NAV-04 AC1)",
+    "maxLength": 30
+  },
+  "shell.heading.settings": {
+    "description": "Main heading (h1) of the settings page",
+    "maxLength": 30
+  },
+  "shell.nav.drawer": {
+    "description": "Accessible name of the navigation drawer region",
+    "maxLength": 30
+  },
+  "shell.nav.label": {
+    "description": "Accessible name of the navigation landmark inside the drawer",
+    "maxLength": 30
+  },
+  "shell.nav.open": {
+    "description": "Accessible name of the app bar button that opens the modal drawer (FR-NAV-04 AC3)",
+    "maxLength": 34
+  },
+  "shell.nav.close": {
+    "description": "Accessible name of the drawer button that closes the modal drawer (FR-NAV-02 AC4)",
+    "maxLength": 40
+  },
+  "shell.nav.newList": {
+    "description": "UI text of the app shell: shell.nav.newList",
+    "maxLength": 30
+  },
+  "shell.nav.myLists": {
+    "description": "UI text of the app shell: shell.nav.myLists",
+    "maxLength": 30
+  },
+  "shell.nav.noLists": {
+    "description": "UI text of the app shell: shell.nav.noLists",
+    "maxLength": 36
+  },
+  "shell.nav.settings": {
+    "description": "UI text of the app shell: shell.nav.settings",
+    "maxLength": 30
+  },
+  "shell.menu.more": {
+    "description": "Accessible name of the three-dot menu button in the app bar (FR-NAV-05)",
+    "maxLength": 32
+  },
+  "shell.menu.settings": {
+    "description": "UI text of the app shell: shell.menu.settings",
+    "maxLength": 30
+  },
+  "shell.menu.logout": {
+    "description": "UI text of the app shell: shell.menu.logout",
+    "maxLength": 30
+  },
+  "shell.empty.lists.title": {
+    "description": "UI text of the app shell: shell.empty.lists.title",
+    "maxLength": 34
+  },
+  "shell.empty.lists.text": {
+    "description": "UI text of the app shell: shell.empty.lists.text",
+    "maxLength": 154
+  },
+  "shell.empty.lists.action": {
+    "description": "UI text of the app shell: shell.empty.lists.action",
+    "maxLength": 30
+  },
+  "shell.empty.lists.hint": {
+    "description": "UI text of the app shell: shell.empty.lists.hint",
+    "maxLength": 172
+  },
+  "shell.settings.placeholder": {
+    "description": "UI text of the app shell: shell.settings.placeholder",
+    "maxLength": 70
   }
 }

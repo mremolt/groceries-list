@@ -1,0 +1,48 @@
+:host {
+  display: contents;
+}
+
+.region {
+  position: fixed;
+  z-index: 1000;
+  inset-inline: 0.75rem;
+  inset-block-end: calc(0.75rem + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.snackbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space-2);
+  min-block-size: 3rem;
+  padding-block: var(--app-space-1);
+  padding-inline: var(--app-space-4) var(--app-space-1);
+  border-radius: var(--mat-sys-corner-extra-small);
+  background: var(--mat-sys-inverse-surface);
+  color: var(--mat-sys-inverse-on-surface);
+  box-shadow: var(--mat-sys-level3);
+  pointer-events: auto;
+  --mat-icon-button-icon-color: var(--mat-sys-inverse-on-surface);
+  --mat-icon-button-state-layer-color: var(--mat-sys-inverse-on-surface);
+}
+
+.text {
+  font: var(--mat-sys-body-medium);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 600px) {
+  .region {
+    inset-inline: 1rem auto;
+    inset-block-end: calc(1rem + env(safe-area-inset-bottom));
+    min-inline-size: 21.5rem;
+    max-inline-size: 35rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .snackbar {
+    border: 1px solid CanvasText;
+  }
+}

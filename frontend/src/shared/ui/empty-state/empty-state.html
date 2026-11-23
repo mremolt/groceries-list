@@ -1,0 +1,7 @@
+<section class="card">
+  <span class="badge"><app-icon [name]="icon()" /></span>
+  <h2 class="heading">{{ heading() }}</h2>
+  <p class="text">{{ text() }}</p>
+  <ng-content select="[empty-action]" />
+  <div class="hint-area"><ng-content select="[empty-hint]" /></div>
+</section>

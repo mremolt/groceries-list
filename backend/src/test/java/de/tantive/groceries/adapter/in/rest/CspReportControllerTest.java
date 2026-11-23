@@ -8,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 @WebMvcTest(controllers = CspReportController.class, properties = "app.limits.max-body-size=1KB")
-@Import({SecurityConfiguration.class, I18nConfiguration.class, RestExceptionHandler.class})
+@SecuritySlice
 @ExtendWith(OutputCaptureExtension.class)
 class CspReportControllerTest {
 

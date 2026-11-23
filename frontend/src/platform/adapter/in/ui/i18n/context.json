@@ -1,9 +1,24 @@
 {
-  "shell.appName": {
-    "description": "Name of the app; suffix of every document title and heading of the top bar",
+  "platform.appName": {
+    "description": "Name of the app; suffix of every document title",
     "maxLength": 30
   },
-  "shell.title.home": { "description": "Document title of the start page (route title)", "maxLength": 40 },
+  "platform.title.lists": {
+    "description": "Document title of the lists start page (route title)",
+    "maxLength": 40
+  },
+  "platform.title.settings": {
+    "description": "Document title of the settings page (route title)",
+    "maxLength": 40
+  },
+  "platform.snackbar.close": {
+    "description": "Accessible name of the close button of a snackbar (FR-FB-02)",
+    "maxLength": 30
+  },
+  "platform.field.errorPrefix": {
+    "description": "Word before every field error text (FR-FB-04 AC2)",
+    "maxLength": 15
+  },
   "platform.error.generic": {
     "description": "Generic error text shown when an action fails (FR-FB-05)",
     "maxLength": 80
