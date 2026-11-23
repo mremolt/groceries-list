@@ -13,7 +13,7 @@
 | M2 Lists | done | 0eba963 | m2-done |
 | M3 Items | done | 9a65f1a | m3-done |
 | M4 Sharing and joining | done | 90fc5a7 | m4-done |
-| M5 Synchronisation | done | PENDING | m5-done |
+| M5 Synchronisation | done | ae98bc7 | m5-done |
 | M6 Settings and account | not started | | |
 | M7 Internal test readiness | not started | | |
 
