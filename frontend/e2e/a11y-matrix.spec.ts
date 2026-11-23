@@ -4,6 +4,7 @@ import type { ListResponse } from '../src/features/lists/adapter/out/http/genera
 import { expect, test } from './fixtures';
 import { item } from './fixtures/items';
 import { BBQ, WEEK } from './fixtures/lists';
+import type { Pages } from './pages';
 
 // M7 accessibility matrix (docs/accessibility.md, A11Y-27): every screen and state under the same five checks, in every
 // Chromium project of the matrix (expanded, compact, medium, 320 px, dark, high contrast, forced colors):
@@ -114,17 +115,7 @@ async function scaleText(page: Page): Promise<void> {
   });
 }
 
-async function expandCartCardIfFolded(page: Page): Promise<void> {
-  const toggle = page.getByRole('button', { name: /^Im Wagen/ });
-  const folded = (await toggle.count()) > 0 && (await toggle.getAttribute('aria-expanded')) === 'false';
-  if (folded) await toggle.click();
-}
-
-async function openModalDrawerIfNeeded(page: Page): Promise<void> {
-  if ((page.viewportSize()?.width ?? 1280) < 840) await page.getByRole('button', { name: 'Navigation öffnen' }).click();
-}
-
-interface Context {
+interface Context extends Pages {
   page: Page;
   sharingApi: { tokenOf: (listId: string) => string };
 }
@@ -134,7 +125,7 @@ interface Screen {
   /** Opens the screen: navigation and clicks only; the assertions live in the test of `screen`. */
   open: (context: Context) => Promise<void>;
   /** The element that proves the screen is up, and how many of it there are. */
-  ready: (page: Page) => Locator;
+  ready: (context: Context) => Locator;
   count?: number;
   /** Label of the axe run, and the Tab stops of the focus walk (0 skips it). */
   label: string;
@@ -176,28 +167,35 @@ function screen(definition: Screen): void {
     },
   ];
   for (const run of runs) {
-    test(run.name, async ({ page, expectErrors, sharingApi, expectAccessible, expectReflowAndTextSpacing }) => {
-      // eslint-disable-next-line playwright/no-skipped-test -- by design: the 200 % run starts at 768 x 500 px (see skipsScaledRun)
-      test.skip(run.scaled && skipsScaledRun(page), 'text size is checked from 768 x 500 px up');
-      expectErrors(errors ?? NO_EXPECTED_ERRORS);
-      await run.prepare(page);
-      await open({ page, sharingApi });
-      await expect(ready(page).first()).toBeVisible();
-      await expect(ready(page)).toHaveCount(count);
-      await run.check(page, expectAccessible, () => expectReflowAndTextSpacing());
-    });
+    test(
+      run.name,
+      async ({
+        page,
+        expectErrors,
+        sharingApi,
+        shell,
+        lists,
+        items,
+        sharing,
+        settings,
+        join,
+        auth,
+        expectAccessible,
+        expectReflowAndTextSpacing,
+      }) => {
+        const context: Context = { page, sharingApi, shell, lists, items, sharing, settings, join, auth };
+        // eslint-disable-next-line playwright/no-skipped-test -- by design: the 200 % run starts at 768 x 500 px (see skipsScaledRun)
+        test.skip(run.scaled && skipsScaledRun(page), 'text size is checked from 768 x 500 px up');
+        expectErrors(errors ?? NO_EXPECTED_ERRORS);
+        await run.prepare(page);
+        await open(context);
+        await expect(ready(context).first()).toBeVisible();
+        await expect(ready(context)).toHaveCount(count);
+        await run.check(page, expectAccessible, () => expectReflowAndTextSpacing());
+      },
+    );
   }
 }
-
-const openSection = (page: Page): Locator => page.getByRole('region', { name: 'Noch zu kaufen' });
-const dialogNamed =
-  (name: string) =>
-  (page: Page): Locator =>
-    page.getByRole('dialog', { name });
-const menu = async (page: Page, item?: string): Promise<void> => {
-  await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-  if (item !== undefined) await page.getByRole('menuitem', { name: item }).click();
-};
 
 test.describe('list screens @responsive @theme @shell @a11y-matrix', () => {
   test.use({ initialLists: { lists: [SHOP, BBQ] }, initialItems: SHOP_ITEMS });
@@ -205,107 +203,108 @@ test.describe('list screens @responsive @theme @shell @a11y-matrix', () => {
   screen({
     title: 'list with items',
     open: ({ page }) => page.goto(URL).then(nothing),
-    ready: (page) => openSection(page).getByRole('checkbox'),
+    ready: ({ items }) => items.openItems,
     count: 3,
     label: 'list with items',
   });
 
   screen({
     title: 'edit item dialog',
-    open: async ({ page }) => {
+    open: async ({ page, items }) => {
       await page.goto(URL);
-      await page.getByRole('button', { name: '„Vollkornbrot“ bearbeiten' }).click();
+      await items.editButton('Vollkornbrot').click();
     },
-    ready: dialogNamed('Artikel bearbeiten'),
+    ready: ({ items }) => items.editDialog.root,
     label: 'edit item dialog',
     tabStops: 6,
   });
 
   screen({
     title: 'clear checked dialog',
-    open: async ({ page }) => {
+    open: async ({ page, items }) => {
       await page.goto(URL);
-      await openSection(page).waitFor(); // the cards appear with the items
-      await expandCartCardIfFolded(page);
-      await page.getByRole('button', { name: 'Erledigte entfernen' }).click();
+      await items.openCart();
+      await items.clearCheckedButton.click();
     },
-    ready: dialogNamed('Erledigte entfernen?'),
+    ready: ({ items }) => items.clearCheckedDialog.root,
     label: 'clear checked dialog',
     tabStops: 6,
   });
 
   screen({
     title: 'list menu',
-    open: async ({ page }) => {
+    open: async ({ page, shell }) => {
       await page.goto(URL);
-      await menu(page);
+      await shell.openOptions();
     },
-    ready: (page) => page.getByRole('menu'),
+    ready: ({ shell }) => shell.optionsMenu,
     label: 'list menu',
     tabStops: 0,
   });
 
   screen({
     title: 'rename dialog',
-    open: async ({ page }) => {
+    open: async ({ page, shell }) => {
       await page.goto(URL);
-      await menu(page, 'Liste umbenennen');
+      await shell.chooseOption('Liste umbenennen');
     },
-    ready: dialogNamed('Liste umbenennen'),
+    ready: ({ lists }) => lists.renameDialog.root,
     label: 'rename dialog',
     tabStops: 6,
   });
 
   screen({
     title: 'delete list dialog',
-    open: async ({ page }) => {
+    open: async ({ page, shell }) => {
       await page.goto(URL);
-      await menu(page, 'Liste löschen');
+      await shell.chooseOption('Liste löschen');
     },
-    ready: (page) => page.getByRole('dialog'),
+    ready: ({ shell }) => shell.anyDialog,
     label: 'delete list dialog',
     tabStops: 6,
   });
 
   screen({
     title: 'share dialog',
-    open: async ({ page }) => {
+    open: async ({ page, sharing }) => {
       await page.goto(URL);
-      await page.getByRole('button', { name: 'Liste teilen' }).click();
+      await sharing.shareButton.click();
     },
-    ready: dialogNamed(`„${SHOP.name}“ teilen`),
+    ready: ({ sharing }) => sharing.shareDialog(SHOP.name).root,
     label: 'share dialog',
     tabStops: 6,
   });
 
   screen({
     title: 'renew link confirmation',
-    open: async ({ page }) => {
+    open: async ({ page, shell }) => {
       await page.goto(URL);
-      await menu(page, 'Teilen-Link erneuern');
+      await shell.chooseOption('Teilen-Link erneuern');
     },
-    ready: dialogNamed('Teilen-Link erneuern?'),
+    ready: ({ sharing }) => sharing.renewDialog.root,
     label: 'renew confirmation',
     tabStops: 6,
   });
 
   screen({
     title: 'modal or permanent drawer',
-    open: async ({ page }) => {
+    open: async ({ page, shell }) => {
       await page.goto(URL);
-      await openModalDrawerIfNeeded(page);
+      await shell.openDrawer();
     },
-    ready: (page) => page.getByRole('navigation', { name: 'Hauptnavigation' }),
+    ready: ({ shell }) => shell.navigation,
     label: 'drawer',
     tabStops: 8,
   });
 
   test('reduced motion: opening a dialog starts no running animation of noticeable length (NFR-A11Y-09)', async ({
     page,
+    shell,
+    lists,
   }) => {
     await page.goto(URL);
-    await menu(page, 'Liste umbenennen');
-    await expect(page.getByRole('dialog', { name: 'Liste umbenennen' })).toBeVisible();
+    await shell.chooseOption('Liste umbenennen');
+    await expect(lists.renameDialog.root).toBeVisible();
 
     const longAnimations = await page.evaluate(() =>
       document
@@ -324,17 +323,17 @@ test.describe('empty and not-found screens @responsive @theme @shell @a11y-matri
   screen({
     title: 'empty state',
     open: ({ page }) => page.goto('/').then(nothing),
-    ready: (page) => page.getByRole('heading', { level: 2, name: 'Noch keine Listen' }),
+    ready: ({ lists }) => lists.emptyStateHeading,
     label: 'empty state',
   });
 
   screen({
     title: 'create list dialog',
-    open: async ({ page }) => {
+    open: async ({ page, lists }) => {
       await page.goto('/');
-      await page.getByRole('main').getByRole('button', { name: 'Neue Liste' }).click();
+      await lists.emptyStateCreateButton.click();
     },
-    ready: dialogNamed('Neue Liste'),
+    ready: ({ lists }) => lists.createDialog.root,
     label: 'create list dialog',
     tabStops: 6,
   });
@@ -345,7 +344,7 @@ test.describe('empty and not-found screens @responsive @theme @shell @a11y-matri
     screen({
       title: 'list that does not exist',
       open: ({ page }) => page.goto('/listen/00000000-0000-4000-8000-00000000dead').then(nothing),
-      ready: (page) => page.getByRole('heading', { level: 1 }),
+      ready: ({ shell }) => shell.heading(),
       label: 'list not found',
       errors: /status of 404/, // the stubbed 404 of the list read
     });
@@ -357,7 +356,7 @@ test.describe('empty and not-found screens @responsive @theme @shell @a11y-matri
       await page.route('**/config.json', (route) => route.fulfill({ json: { environment: '' } }));
       await page.goto('/');
     },
-    ready: (page) => page.getByRole('alert').filter({ hasText: 'konnte nicht gestartet werden' }),
+    ready: ({ page }) => page.getByRole('alert').filter({ hasText: 'konnte nicht gestartet werden' }),
     label: 'start-up failure',
     tabStops: 0,
     errors: /Bootstrap failed/,
@@ -368,17 +367,17 @@ test.describe('settings and account @responsive @theme @shell @a11y-matrix', () 
   screen({
     title: 'settings page',
     open: ({ page }) => page.goto('/einstellungen').then(nothing),
-    ready: (page) => page.getByRole('heading', { level: 1, name: 'Einstellungen' }),
+    ready: ({ shell }) => shell.heading('Einstellungen'),
     label: 'settings page',
   });
 
   screen({
     title: 'delete account dialog',
-    open: async ({ page }) => {
+    open: async ({ page, settings }) => {
       await page.goto('/einstellungen');
-      await page.getByRole('button', { name: 'Konto löschen' }).click();
+      await settings.deleteAccountButton.click();
     },
-    ready: dialogNamed('Konto löschen?'),
+    ready: ({ settings }) => settings.deleteAccountDialog.root,
     label: 'delete account dialog',
     tabStops: 6,
   });
@@ -391,7 +390,7 @@ test.describe('join pages @responsive @theme @shell @a11y-matrix', () => {
     screen({
       title: 'invitation page',
       open: ({ page, sharingApi }) => page.goto(`/j/${sharingApi.tokenOf(BBQ.id)}`).then(nothing),
-      ready: (page) => page.getByRole('heading', { level: 1, name: 'Liste beitreten' }),
+      ready: ({ join }) => join.heading,
       label: 'invitation page',
       tabStops: 6,
       errors: /status of 401/,
@@ -400,7 +399,7 @@ test.describe('join pages @responsive @theme @shell @a11y-matrix', () => {
     screen({
       title: 'invalid link page',
       open: ({ page }) => page.goto('/j/' + 'x'.repeat(43)).then(nothing),
-      ready: (page) => page.getByRole('heading', { level: 2, name: 'Dieser Link funktioniert nicht mehr' }),
+      ready: ({ join }) => join.invalidLinkHeading,
       label: 'invalid link (signed out)',
       tabStops: 6,
       errors: /status of 401|status of 404/,

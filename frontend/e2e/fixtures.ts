@@ -1,5 +1,5 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { expect, type Page, test as base } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import type { ItemResponse } from '../src/features/items/adapter/out/http/generated/model/itemResponse';
 import type { ListResponse } from '../src/features/lists/adapter/out/http/generated/model/listResponse';
@@ -9,6 +9,7 @@ import { type ListsStub, stubLists } from './fixtures/lists';
 import { type ProfileStub, stubProfile } from './fixtures/profile';
 import { stubSession } from './fixtures/session';
 import { type SharingStub, stubSharing } from './fixtures/sharing';
+import { test as base } from './pages/fixtures';
 
 const AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const AAA = ['wcag2aaa']; // axe has no wcag21aaa / wcag22aaa tag

@@ -1,5 +1,6 @@
-import { expect, request as playwrightRequest, test } from '@playwright/test';
+import { request as playwrightRequest } from '@playwright/test';
 
+import { expect, test } from './fixtures';
 import {
   APP,
   expectNoAxeViolations,
@@ -41,11 +42,8 @@ test.describe('@real accounts', () => {
     const other = await newDevice(browser);
 
     await other.page.goto('/');
-    await other.page.getByRole('link', { name: 'Konto erstellen' }).click();
-    await other.page.getByLabel('Anzeigename').fill('Zweites Konto');
-    await other.page.getByLabel('E-Mail-Adresse').fill(user.email);
-    await other.page.getByLabel('Passwort', { exact: true }).fill(PASSWORD);
-    await other.page.getByRole('button', { name: 'Konto erstellen' }).click();
+    await other.auth.createAccountLink.click();
+    await other.auth.register('Zweites Konto', user.email, PASSWORD);
 
     await expect(
       other.page.getByText(
@@ -56,20 +54,17 @@ test.describe('@real accounts', () => {
     await other.context.close();
   });
 
-  test('FR-AUTH-01 AC4: seven characters are rejected, eight are accepted', async ({ page }) => {
+  test('FR-AUTH-01 AC4: seven characters are rejected, eight are accepted', async ({ page, auth }) => {
     const user = newUser('pw8');
     await page.goto('/');
-    await page.getByRole('link', { name: 'Konto erstellen' }).click();
-    await page.getByLabel('Anzeigename').fill(user.displayName);
-    await page.getByLabel('E-Mail-Adresse').fill(user.email);
-    await page.getByLabel('Passwort', { exact: true }).fill('Abcdef7');
-    await page.getByRole('button', { name: 'Konto erstellen' }).click();
+    await auth.createAccountLink.click();
+    await auth.register(user.displayName, user.email, 'Abcdef7');
     await expect(page.getByText(/Fehler:/).first()).toBeVisible();
     await expect(page).toHaveURL(/keycloak\.localhost/);
 
-    await page.getByLabel('Passwort', { exact: true }).fill('Abcdefg8');
+    await auth.passwordField.fill('Abcdefg8');
     recordSecret('Abcdefg8');
-    await page.getByRole('button', { name: 'Konto erstellen' }).click();
+    await auth.createAccountButton.click();
 
     await expectSignedInShell(page);
   });
@@ -77,6 +72,7 @@ test.describe('@real accounts', () => {
   test('FR-AUTH-02 AC2/AC3: login works; a wrong password and an unknown e-mail give the same message', async ({
     page,
     browser,
+    auth,
   }) => {
     const user = newUser('login');
     await registerThroughUi(page, user);
@@ -90,8 +86,8 @@ test.describe('@real accounts', () => {
     await expect(stranger.page.getByText(message)).toBeVisible();
     await stranger.context.close();
 
-    await page.getByLabel('Passwort', { exact: true }).fill(PASSWORD);
-    await page.getByRole('button', { name: 'Anmelden' }).click();
+    await auth.passwordField.fill(PASSWORD);
+    await auth.signInButton.click();
     await expectSignedInShell(page);
   });
 
@@ -132,7 +128,7 @@ test.describe('@real accounts', () => {
     expect(days).toBeLessThan(31);
   });
 
-  test('FR-AUTH-03: logout ends the session here and at the identity provider', async ({ page, request }) => {
+  test('FR-AUTH-03: logout ends the session here and at the identity provider', async ({ page, request, auth }) => {
     await registerThroughUi(page, newUser('logout'));
 
     await logoutThroughMenu(page);
@@ -140,26 +136,23 @@ test.describe('@real accounts', () => {
     expect(await meStatus(page.request)).toBe(401);
     await page.goto('/');
     await expect(page).toHaveURL(/keycloak\.localhost/);
-    await expect(page.getByLabel('E-Mail-Adresse')).toBeVisible(); // no silent re-login: the Keycloak session ended too
+    await expect(auth.emailField).toBeVisible(); // no silent re-login: the Keycloak session ended too
     expect(await meStatus(request)).toBe(401);
   });
 
-  test('FR-AUTH-04/05: reset request, mail, new password, old link expired', async ({ page, request }) => {
+  test('FR-AUTH-04/05: reset request, mail, new password, old link expired', async ({ page, request, auth }) => {
     const user = newUser('reset');
     await registerThroughUi(page, user);
     await logoutThroughMenu(page);
     await page.goto('/');
-    await page.getByRole('link', { name: 'Passwort vergessen?' }).click();
-    await page.getByLabel('E-Mail-Adresse').fill(user.email);
-    await page.getByRole('button', { name: 'Link senden' }).click();
-    await expect(page.getByRole('heading', { name: 'Prüfe dein Postfach' })).toBeVisible();
+    await auth.requestPasswordReset(user.email);
+    await expect(auth.mailboxHeading).toBeVisible();
     const link = resetLink(await mailTextTo(request, user.email));
 
     await page.goto(link);
     await expect(page.getByRole('heading', { name: 'Neues Passwort festlegen' })).toBeVisible();
     recordSecret(NEW_PASSWORD);
-    await page.getByLabel('Neues Passwort').fill(NEW_PASSWORD);
-    await page.getByRole('button', { name: 'Passwort speichern und anmelden' }).click();
+    await auth.setNewPassword(NEW_PASSWORD);
     await expectSignedInShell(page);
 
     await logoutThroughMenu(page);
@@ -171,14 +164,13 @@ test.describe('@real accounts', () => {
   test('FR-AUTH-04 AC2: the reset answer is the same for an unknown account and no mail is sent', async ({
     page,
     request,
+    auth,
   }) => {
     const unknown = newUser('ghost');
     await page.goto('/');
-    await page.getByRole('link', { name: 'Passwort vergessen?' }).click();
-    await page.getByLabel('E-Mail-Adresse').fill(unknown.email);
-    await page.getByRole('button', { name: 'Link senden' }).click();
+    await auth.requestPasswordReset(unknown.email);
 
-    await expect(page.getByRole('heading', { name: 'Prüfe dein Postfach' })).toBeVisible();
+    await expect(auth.mailboxHeading).toBeVisible();
     await expect(page.getByText(unknown.email)).toBeVisible();
     const search = await request.get('http://localhost:8025/api/v1/search', {
       params: { query: `to:${unknown.email}` },
@@ -195,22 +187,17 @@ test.describe('@real accounts', () => {
     await registerThroughUi(page, user); // device A
     const deviceB = await newDevice(browser);
     await deviceB.page.goto('/');
-    await deviceB.page.getByLabel('E-Mail-Adresse').fill(user.email);
-    await deviceB.page.getByLabel('Passwort', { exact: true }).fill(PASSWORD);
-    await deviceB.page.getByRole('button', { name: 'Anmelden' }).click();
+    await deviceB.auth.signIn(user.email, PASSWORD);
     await expectSignedInShell(deviceB.page);
     expect(await meStatus(page.request)).toBe(200);
 
     const deviceC = await newDevice(browser); // the person resets the password on a third device
     await deviceC.page.goto('/');
-    await deviceC.page.getByRole('link', { name: 'Passwort vergessen?' }).click();
-    await deviceC.page.getByLabel('E-Mail-Adresse').fill(user.email);
-    await deviceC.page.getByRole('button', { name: 'Link senden' }).click();
+    await deviceC.auth.requestPasswordReset(user.email);
     const link = resetLink(await mailTextTo(request, user.email));
     await deviceC.page.goto(link);
     recordSecret(NEW_PASSWORD);
-    await deviceC.page.getByLabel('Neues Passwort').fill(NEW_PASSWORD);
-    await deviceC.page.getByRole('button', { name: 'Passwort speichern und anmelden' }).click();
+    await deviceC.auth.setNewPassword(NEW_PASSWORD);
     await expectSignedInShell(deviceC.page);
 
     await expect.poll(() => meStatus(page.request), { message: 'device A after back-channel logout' }).toBe(401);
@@ -239,18 +226,22 @@ test.describe('@real security', () => {
     expect(await meStatus(page.request)).toBe(200);
   });
 
-  test('the session id from before the login is not valid after it (session fixation)', async ({ page, context }) => {
+  test('the session id from before the login is not valid after it (session fixation)', async ({
+    page,
+    context,
+    auth,
+  }) => {
     const user = newUser('fix');
     await page.goto('/');
     await expect(page).toHaveURL(/keycloak\.localhost/);
     const before = (await context.cookies(APP)).find((cookie) => cookie.name === 'SESSION');
     expect(before, 'login start creates the pre-login session').toBeDefined();
-    await page.getByRole('link', { name: 'Konto erstellen' }).click();
-    await page.getByLabel('Anzeigename').fill(user.displayName);
-    await page.getByLabel('E-Mail-Adresse').fill(user.email);
-    await page.getByLabel('Passwort', { exact: true }).fill(PASSWORD);
+    await auth.createAccountLink.click();
+    await auth.displayNameField.fill(user.displayName);
+    await auth.emailField.fill(user.email);
+    await auth.passwordField.fill(PASSWORD);
     recordSecret(PASSWORD);
-    await page.getByRole('button', { name: 'Konto erstellen' }).click();
+    await auth.createAccountButton.click();
     await expectSignedInShell(page);
 
     const after = (await context.cookies(APP)).find((cookie) => cookie.name === 'SESSION');
@@ -295,22 +286,23 @@ test.describe('@real security', () => {
 test.describe('@real themed identity provider pages @a11y-auth', () => {
   test('login, register, reset request and the check-your-mailbox page have no WCAG 2.2 AA violations', async ({
     page,
+    auth,
   }) => {
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Anmelden' })).toBeVisible();
+    await expect(auth.signInButton).toBeVisible();
     await expectNoAxeViolations(page, 'Keycloak login');
-    await page.getByRole('link', { name: 'Konto erstellen' }).click();
-    await expect(page.getByRole('button', { name: 'Konto erstellen' })).toBeVisible();
+    await auth.createAccountLink.click();
+    await expect(auth.createAccountButton).toBeVisible();
     await expectNoAxeViolations(page, 'Keycloak register');
-    await page.getByRole('button', { name: 'Konto erstellen' }).click(); // empty submit: error state (FR-FB-04)
+    await auth.createAccountButton.click(); // empty submit: error state (FR-FB-04)
     await expect(page.getByText(/Fehler:/).first()).toBeVisible();
     await expectNoAxeViolations(page, 'Keycloak register with errors');
     await page.goto('/');
-    await page.getByRole('link', { name: 'Passwort vergessen?' }).click();
+    await auth.forgotPasswordLink.click();
     await expectNoAxeViolations(page, 'Keycloak reset request');
-    await page.getByLabel('E-Mail-Adresse').fill(newUser('axe').email);
-    await page.getByRole('button', { name: 'Link senden' }).click();
-    await expect(page.getByRole('heading', { name: 'Prüfe dein Postfach' })).toBeVisible();
+    await auth.emailField.fill(newUser('axe').email);
+    await auth.sendLinkButton.click();
+    await expect(auth.mailboxHeading).toBeVisible();
     await expectNoAxeViolations(page, 'Keycloak check your mailbox');
   });
 });

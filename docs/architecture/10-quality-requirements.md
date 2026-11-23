@@ -18,6 +18,10 @@ PR-tier wall-clock budget for E2E (TS-TEST-30): to be recorded in M0 once measur
 - Frontend initial bundle budget (NG-TOOL-05): warn 810 kB / error 970 kB raw (measured 737 kB + 10 %); first measurement, to be tightened.
 - E2E stubbed tier runs Chromium and Firefox here; WebKit needs host libraries missing on the development machine (`E2E_SKIP_WEBKIT=1`, explicit switch, see implementation log). PR-tier wall clock budget (TS-TEST-30): the M0 e2e run takes ~10 s.
 
+## E2E page objects (TS-TEST-42)
+
+Locators and flows that two places use live in page and component objects under `frontend/e2e/pages/` (`ShellPage`, `ListsPage`, `ItemsPage`, `SharingPage`, `SettingsPage`, `JoinPage`, `AuthPage`; dialogs are `Dialog` / `ConfirmDialog` objects scoped to their dialog). Both tiers get them as Playwright fixtures (`pages/fixtures.ts`, `real/fixtures.ts`); a second browser profile in a real-tier test gets them through `pagesOf(page)` (`newDevice` returns them). Locators are lazy getters in the role-plus-name form (TS-TEST-11), actions are intent level (`lists.rename(name)`), and the objects hold no `expect`: assertions stay in the specs. A one-off locator stays inline until its second use.
+
 ## Real-backend E2E tier (M1)
 
 `cd frontend && npm run e2e:real` (Playwright project `real`, Chromium, tag `@real`, one worker) runs against the Compose stack of chapter 7 and never starts it; a missing stack fails with the start command (REPO-CI-04, SPRING-DEV-10, TS-TEST-10). `npm run verify:full` = `verify` + `e2e:real`. Every scenario creates its own person with a unique e-mail address (TS-TEST-34) and reads reset mails from Mailpit's HTTP API (no fixed waits, TS-TEST-15). 16 scenarios, about 15 s per run:

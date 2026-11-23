@@ -1,5 +1,3 @@
-import type { Page } from '@playwright/test';
-
 import { expect, test } from './fixtures';
 import { BBQ, WEEK, WG } from './fixtures/lists';
 
@@ -8,33 +6,21 @@ import { BBQ, WEEK, WG } from './fixtures/lists';
 // size class. Compact and medium open the drawer first; the helpers below do that, so the scenarios run unchanged in
 // every viewport project.
 
-async function openDrawer(page: Page): Promise<void> {
-  const modal = (page.viewportSize()?.width ?? 1280) < 840; // below the expanded breakpoint the drawer is modal
-  if (modal) await page.getByRole('button', { name: 'Navigation öffnen' }).click();
-  await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toBeVisible();
-}
-
-async function startCreateList(page: Page): Promise<void> {
-  await openDrawer(page);
-  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('button', { name: 'Neue Liste' }).click();
-  await expect(page.getByRole('dialog', { name: 'Neue Liste' })).toBeVisible();
-}
-
 test.describe('start screen and deep links @responsive @shell @a11y-lists', () => {
   test.use({ initialLists: { lists: [WEEK, BBQ, WG] } });
 
-  test('opens the first list when nothing was opened before (FR-NAV-03 AC1)', async ({ page, listsApi }) => {
+  test('opens the first list when nothing was opened before (FR-NAV-03 AC1)', async ({ page, listsApi, shell }) => {
     await page.goto('/');
 
     await expect(page).toHaveURL(new RegExp(`/listen/${WEEK.id}$`));
-    await expect(page.getByRole('heading', { level: 1, name: WEEK.name })).toBeVisible();
+    await expect(shell.heading(WEEK.name)).toBeVisible();
     await expect(page).toHaveTitle(`${WEEK.name} | Einkaufsliste`);
     expect(listsApi.listCalls(), 'request budget: one call for all drawer counts (API-N1-01)').toBe(1);
   });
 
-  test('opens the list opened last on this device', async ({ page }) => {
+  test('opens the list opened last on this device', async ({ page, shell }) => {
     await page.goto(`/listen/${BBQ.id}`);
-    await expect(page.getByRole('heading', { level: 1, name: BBQ.name })).toBeVisible();
+    await expect(shell.heading(BBQ.name)).toBeVisible();
 
     await page.goto('/');
 
@@ -44,16 +30,16 @@ test.describe('start screen and deep links @responsive @shell @a11y-lists', () =
   test('a list URL survives a reload and shows the drawer entries with counts (FR-NAV-06 AC1, FR-LIST-05)', async ({
     page,
     expectAccessible,
+    shell,
   }) => {
     await page.goto(`/listen/${WG.id}`);
     await page.reload();
 
-    await expect(page.getByRole('heading', { level: 1, name: WG.name })).toBeVisible();
-    await openDrawer(page);
-    const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
-    await expect(nav.getByRole('link', { name: 'Wocheneinkauf, 7 offen' })).toBeVisible();
-    await expect(nav.getByRole('link', { name: 'Grillabend Samstag, 0 offen' })).toBeVisible();
-    await expect(nav.getByRole('link', { name: 'WG-Vorrat, 12 offen' })).toHaveAttribute('aria-current', 'page');
+    await expect(shell.heading(WG.name)).toBeVisible();
+    await shell.openDrawer();
+    await expect(shell.listLink('Wocheneinkauf, 7 offen')).toBeVisible();
+    await expect(shell.listLink('Grillabend Samstag, 0 offen')).toBeVisible();
+    await expect(shell.listLink('WG-Vorrat, 12 offen')).toHaveAttribute('aria-current', 'page');
     await expectAccessible('list page with drawer');
   });
 
@@ -61,31 +47,36 @@ test.describe('start screen and deep links @responsive @shell @a11y-lists', () =
     page,
     expectAccessible,
     expectErrors,
+    shell,
+    lists,
   }) => {
     expectErrors(/status of 404/); // the browser logs the stubbed 404 of the unknown list
     await page.goto('/listen/00000000-0000-4000-8000-00000000ffff');
 
     await expect(page.getByText('Diese Liste gibt es nicht oder du hast keinen Zugriff.')).toBeVisible();
-    await expect(page.getByRole('heading', { level: 1, name: 'Einkaufsliste' })).toBeVisible();
+    await expect(shell.heading('Einkaufsliste')).toBeVisible();
     await expectAccessible('list not found');
-    await page.getByRole('link', { name: 'Zu meinen Listen' }).click();
+    await lists.notFoundLink.click();
     await expect(page).toHaveURL(new RegExp(`/listen/${WEEK.id}$`));
   });
 
-  test('reflows and survives text spacing overrides', async ({ page, expectReflowAndTextSpacing }) => {
+  test('reflows and survives text spacing overrides', async ({ page, expectReflowAndTextSpacing, shell }) => {
     await page.goto(`/listen/${WEEK.id}`);
-    await expect(page.getByRole('heading', { level: 1, name: WEEK.name })).toBeVisible();
+    await expect(shell.heading(WEEK.name)).toBeVisible();
 
     await expectReflowAndTextSpacing();
   });
 
-  test('choosing a list in the drawer opens it, moves focus to its heading and sets the title', async ({ page }) => {
+  test('choosing a list in the drawer opens it, moves focus to its heading and sets the title', async ({
+    page,
+    shell,
+  }) => {
     await page.goto(`/listen/${WEEK.id}`);
-    await openDrawer(page);
+    await shell.openDrawer();
 
-    await page.getByRole('link', { name: 'Grillabend Samstag, 0 offen' }).click();
+    await shell.listLink('Grillabend Samstag, 0 offen').click();
 
-    await expect(page.getByRole('heading', { level: 1, name: BBQ.name })).toBeFocused();
+    await expect(shell.heading(BBQ.name)).toBeFocused();
     await expect(page).toHaveTitle(`${BBQ.name} | Einkaufsliste`);
   });
 });
@@ -95,100 +86,105 @@ test.describe('empty state and create list @responsive @shell @a11y-lists', () =
     page,
     listsApi,
     expectAccessible,
+    shell,
+    lists,
   }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 2, name: 'Noch keine Listen' })).toBeVisible();
+    await expect(lists.emptyStateHeading).toBeVisible();
 
-    await page.getByRole('main').getByRole('button', { name: 'Neue Liste' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Neue Liste' });
-    await expect(dialog.getByLabel('Name der Liste')).toBeFocused();
+    await lists.emptyStateCreateButton.click();
+    const dialog = lists.createDialog;
+    await expect(dialog.nameField).toBeFocused();
     await expectAccessible('create list dialog');
     await page.keyboard.type('Wocheneinkauf');
     await page.keyboard.press('Enter');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Wocheneinkauf' })).toBeVisible();
-    await expect(page.getByRole('status')).toContainText('Liste erstellt');
+    await expect(shell.heading('Wocheneinkauf')).toBeVisible();
+    await expect(shell.status).toContainText('Liste erstellt');
     expect(listsApi.sent.created).toEqual([{ name: 'Wocheneinkauf' }]);
-    await openDrawer(page);
-    await expect(page.getByRole('link', { name: 'Wocheneinkauf, 0 offen' })).toHaveAttribute('aria-current', 'page');
+    await shell.openDrawer();
+    await expect(shell.listLink('Wocheneinkauf, 0 offen')).toHaveAttribute('aria-current', 'page');
   });
 
   test('refuses an empty name with the field error and keeps the dialog (FR-LIST-01 AC3, FR-FB-04)', async ({
     page,
     expectAccessible,
+    lists,
   }) => {
     await page.goto('/');
-    await startCreateList(page);
-    const dialog = page.getByRole('dialog', { name: 'Neue Liste' });
+    await lists.startCreate();
+    const dialog = lists.createDialog;
 
-    await dialog.getByRole('button', { name: 'Erstellen' }).click();
+    await dialog.createButton.click();
 
-    await expect(dialog.getByText('Fehler: Bitte gib einen Namen ein.')).toBeVisible();
-    await expect(dialog.getByLabel('Name der Liste')).toBeFocused();
-    await expect(dialog.getByLabel('Name der Liste')).toHaveAttribute('aria-invalid', 'true');
+    await expect(dialog.root.getByText('Fehler: Bitte gib einen Namen ein.')).toBeVisible();
+    await expect(dialog.nameField).toBeFocused();
+    await expect(dialog.nameField).toHaveAttribute('aria-invalid', 'true');
     await expectAccessible('create list dialog with error');
   });
 
-  test('refuses a name over 80 characters', async ({ page }) => {
+  test('refuses a name over 80 characters', async ({ page, lists }) => {
     await page.goto('/');
-    await startCreateList(page);
-    const dialog = page.getByRole('dialog', { name: 'Neue Liste' });
+    await lists.startCreate();
+    const dialog = lists.createDialog;
 
-    await dialog.getByLabel('Name der Liste').fill('x'.repeat(81));
+    await dialog.nameField.fill('x'.repeat(81));
     await page.keyboard.press('Enter');
 
-    await expect(dialog.getByText('Fehler: Der Name darf höchstens 80 Zeichen lang sein.')).toBeVisible();
+    await expect(dialog.root.getByText('Fehler: Der Name darf höchstens 80 Zeichen lang sein.')).toBeVisible();
   });
 
   test('Esc closes the empty dialog, but keeps typed text and says so; „Abbrechen“ discards (UI-21)', async ({
     page,
+    lists,
   }) => {
     await page.goto('/');
-    await startCreateList(page);
-    const dialog = page.getByRole('dialog', { name: 'Neue Liste' });
+    await lists.startCreate();
+    const dialog = lists.createDialog;
     await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden();
+    await expect(dialog.root).toBeHidden();
 
-    await startCreateList(page);
+    await lists.startCreate();
     await page.keyboard.type('Par');
     await page.keyboard.press('Escape');
 
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByText(/Du hast eine Eingabe gemacht/)).toBeVisible();
-    await dialog.getByRole('button', { name: 'Abbrechen' }).click();
-    await expect(dialog).toBeHidden();
+    await expect(dialog.root).toBeVisible();
+    await expect(dialog.root.getByText(/Du hast eine Eingabe gemacht/)).toBeVisible();
+    await dialog.cancelButton.click();
+    await expect(dialog.root).toBeHidden();
   });
 
   test('a server error keeps the typed name and shows the error snackbar (FR-FB-05)', async ({
     page,
     listsApi,
     expectErrors,
+    lists,
   }) => {
     expectErrors(/status of 500/);
     await page.goto('/');
-    await startCreateList(page);
-    const dialog = page.getByRole('dialog', { name: 'Neue Liste' });
+    await lists.startCreate();
+    const dialog = lists.createDialog;
     listsApi.failNextWrite(500);
 
-    await dialog.getByLabel('Name der Liste').fill('Party');
+    await dialog.nameField.fill('Party');
     await page.keyboard.press('Enter');
 
-    await expect(dialog.getByRole('status')).toContainText('Das hat nicht geklappt. Bitte versuche es noch einmal.');
-    await expect(dialog.getByLabel('Name der Liste')).toHaveValue('Party');
+    await expect(dialog.status).toContainText('Das hat nicht geklappt. Bitte versuche es noch einmal.');
+    await expect(dialog.nameField).toHaveValue('Party');
   });
 
-  test('the whole create journey works with the keyboard alone', async ({ page }) => {
+  test('the whole create journey works with the keyboard alone', async ({ page, shell, lists }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 2, name: 'Noch keine Listen' })).toBeVisible();
-    const emptyStateButton = page.getByRole('main').getByRole('button', { name: 'Neue Liste' });
+    await expect(lists.emptyStateHeading).toBeVisible();
+    const emptyStateButton = lists.emptyStateCreateButton;
 
     await emptyStateButton.focus();
     await page.keyboard.press('Enter');
-    await expect(page.getByRole('dialog', { name: 'Neue Liste' }).getByLabel('Name der Liste')).toBeFocused();
+    await expect(lists.createDialog.nameField).toBeFocused();
     await page.keyboard.type('Grillabend');
     await page.keyboard.press('Enter');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Grillabend' })).toBeFocused();
+    await expect(shell.heading('Grillabend')).toBeFocused();
   });
 });
 
@@ -198,17 +194,18 @@ test.describe('list commands in the ⋮ menu @responsive @shell @a11y-lists', ()
   test('lists the commands and works with Down, Up, Home, End and Esc (FR-NAV-05, NFR-A11Y-04)', async ({
     page,
     expectAccessible,
+    shell,
   }) => {
     await page.goto(`/listen/${WEEK.id}`);
-    await expect(page.getByRole('heading', { level: 1, name: WEEK.name })).toBeVisible();
-    const button = page.getByRole('button', { name: 'Weitere Optionen' });
+    await expect(shell.heading(WEEK.name)).toBeVisible();
+    const button = shell.optionsButton;
     await button.focus();
 
     await page.keyboard.press('Enter');
 
     await expect(button).toHaveAttribute('aria-expanded', 'true');
-    const items = page.getByRole('menuitem');
-    await expect(items).toHaveText([
+    const menuItems = shell.menuItems;
+    await expect(menuItems).toHaveText([
       /Liste umbenennen/,
       /Teilen-Link erneuern/,
       /Liste verlassen/,
@@ -216,18 +213,18 @@ test.describe('list commands in the ⋮ menu @responsive @shell @a11y-lists', ()
       /Einstellungen/,
       /Abmelden/,
     ]);
-    await expect(items.nth(0)).toBeFocused();
+    await expect(menuItems.nth(0)).toBeFocused();
     await expectAccessible('list menu open');
     await page.keyboard.press('ArrowDown');
-    await expect(items.nth(1)).toBeFocused();
+    await expect(menuItems.nth(1)).toBeFocused();
     await page.keyboard.press('End');
-    await expect(items.nth(5)).toBeFocused();
+    await expect(menuItems.nth(5)).toBeFocused();
     await page.keyboard.press('Home');
-    await expect(items.nth(0)).toBeFocused();
+    await expect(menuItems.nth(0)).toBeFocused();
     await page.keyboard.press('ArrowUp');
-    await expect(items.nth(5)).toBeFocused();
+    await expect(menuItems.nth(5)).toBeFocused();
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('menu')).toBeHidden();
+    await expect(shell.optionsMenu).toBeHidden();
     await expect(button).toBeFocused();
     await expect(button).toHaveAttribute('aria-expanded', 'false');
   });
@@ -236,103 +233,105 @@ test.describe('list commands in the ⋮ menu @responsive @shell @a11y-lists', ()
     page,
     listsApi,
     expectAccessible,
+    shell,
+    lists,
   }) => {
     await page.goto(`/listen/${WEEK.id}`);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste umbenennen' }).click();
+    await shell.chooseOption('Liste umbenennen');
 
-    const dialog = page.getByRole('dialog', { name: 'Liste umbenennen' });
-    await expect(dialog.getByText('Der neue Name ist für alle Mitglieder sichtbar.')).toBeVisible();
-    await expect(dialog.getByLabel('Name der Liste')).toHaveValue('Wocheneinkauf');
-    await expect(dialog.getByLabel('Name der Liste')).toBeFocused();
+    const dialog = lists.renameDialog;
+    await expect(dialog.root.getByText('Der neue Name ist für alle Mitglieder sichtbar.')).toBeVisible();
+    await expect(dialog.nameField).toHaveValue('Wocheneinkauf');
+    await expect(dialog.nameField).toBeFocused();
     await expectAccessible('rename dialog');
-    await dialog.getByLabel('Name der Liste').fill('Großeinkauf');
-    await dialog.getByRole('button', { name: 'Speichern' }).click();
+    await dialog.nameField.fill('Großeinkauf');
+    await dialog.saveButton.click();
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Großeinkauf' })).toBeVisible();
-    await expect(page.getByRole('status')).toContainText('Gespeichert');
-    await expect(page.getByRole('button', { name: 'Weitere Optionen' })).toBeFocused();
+    await expect(shell.heading('Großeinkauf')).toBeVisible();
+    await expect(shell.status).toContainText('Gespeichert');
+    await expect(shell.optionsButton).toBeFocused();
     expect(listsApi.sent.renamed).toEqual([{ name: 'Großeinkauf' }]);
-    await openDrawer(page);
-    await expect(page.getByRole('link', { name: 'Großeinkauf, 7 offen' })).toBeVisible();
+    await shell.openDrawer();
+    await expect(shell.listLink('Großeinkauf, 7 offen')).toBeVisible();
   });
 
   test('cancelling a dialog returns focus to the ⋮ button because the menu item is gone (NG-UI-33)', async ({
     page,
+    shell,
+    lists,
   }) => {
     await page.goto(`/listen/${WEEK.id}`);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste umbenennen' }).click();
+    await shell.chooseOption('Liste umbenennen');
 
-    await page.getByRole('dialog', { name: 'Liste umbenennen' }).getByRole('button', { name: 'Abbrechen' }).click();
+    await lists.renameDialog.cancelButton.click();
 
-    await expect(page.getByRole('button', { name: 'Weitere Optionen' })).toBeFocused();
+    await expect(shell.optionsButton).toBeFocused();
   });
 
   test('asks before deleting, then deletes for everyone and opens the next list (FR-LIST-03, BR-11)', async ({
     page,
     listsApi,
     expectAccessible,
+    shell,
+    lists,
   }) => {
     await page.goto(`/listen/${WEEK.id}`);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste löschen' }).click();
+    await shell.chooseOption('Liste löschen');
 
-    const dialog = page.getByRole('dialog', { name: '„Wocheneinkauf“ löschen?' });
+    const dialog = lists.deleteDialog('Wocheneinkauf');
     await expect(
-      dialog.getByText('Die Liste wird für alle Mitglieder gelöscht. Das kann nicht rückgängig gemacht werden.'),
+      dialog.root.getByText('Die Liste wird für alle Mitglieder gelöscht. Das kann nicht rückgängig gemacht werden.'),
     ).toBeVisible();
-    await expect(dialog.getByRole('button', { name: 'Abbrechen' })).toBeFocused();
+    await expect(dialog.cancelButton).toBeFocused();
     await expectAccessible('delete dialog');
     expect(listsApi.sent.deleted).toEqual([]);
-    await dialog.getByRole('button', { name: 'Löschen' }).click();
+    await dialog.confirmButton.click();
 
     await expect(page).toHaveURL(new RegExp(`/listen/${BBQ.id}$`));
-    await expect(page.getByRole('heading', { level: 1, name: BBQ.name })).toBeVisible();
-    await expect(page.getByRole('status')).toContainText('Liste gelöscht');
+    await expect(shell.heading(BBQ.name)).toBeVisible();
+    await expect(shell.status).toContainText('Liste gelöscht');
     expect(listsApi.sent.deleted).toEqual([WEEK.id]);
   });
 
-  test('leaves the list after asking and shows the next one (FR-LIST-04)', async ({ page, listsApi }) => {
+  test('leaves the list after asking and shows the next one (FR-LIST-04)', async ({ page, listsApi, shell, lists }) => {
     await page.goto(`/listen/${WEEK.id}`);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste verlassen' }).click();
+    await shell.chooseOption('Liste verlassen');
 
-    const dialog = page.getByRole('dialog', { name: '„Wocheneinkauf“ verlassen?' });
-    await expect(dialog.getByText(/Wenn du das letzte Mitglied bist, wird sie gelöscht/)).toBeVisible();
-    await dialog.getByRole('button', { name: 'Verlassen' }).click();
+    const dialog = lists.leaveDialog('Wocheneinkauf');
+    await expect(dialog.root.getByText(/Wenn du das letzte Mitglied bist, wird sie gelöscht/)).toBeVisible();
+    await dialog.confirmButton.click();
 
     await expect(page).toHaveURL(new RegExp(`/listen/${BBQ.id}$`));
-    await expect(page.getByRole('status')).toContainText('Du hast die Liste verlassen');
+    await expect(shell.status).toContainText('Du hast die Liste verlassen');
     expect(listsApi.sent.left).toEqual([WEEK.id]);
   });
 
-  test('leaving the last list shows the empty state', async ({ page, listsApi }) => {
+  test('leaving the last list shows the empty state', async ({ page, listsApi, shell, lists }) => {
     listsApi.lists.splice(1, 1); // only WEEK remains on the stubbed server
     await page.goto(`/listen/${WEEK.id}`);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste verlassen' }).click();
+    await shell.chooseOption('Liste verlassen');
 
-    await page.getByRole('dialog').getByRole('button', { name: 'Verlassen' }).click();
+    await lists.leaveDialog().confirmButton.click();
 
-    await expect(page.getByRole('heading', { level: 2, name: 'Noch keine Listen' })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 1, name: 'Einkaufsliste' })).toBeFocused();
+    await expect(lists.emptyStateHeading).toBeVisible();
+    await expect(shell.heading('Einkaufsliste')).toBeFocused();
   });
 
   test('a failed delete keeps the list and shows the error snackbar (FR-FB-05)', async ({
     page,
     listsApi,
     expectErrors,
+    shell,
+    lists,
   }) => {
     expectErrors(/status of 500/);
     await page.goto(`/listen/${WEEK.id}`);
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Liste löschen' }).click();
+    await shell.chooseOption('Liste löschen');
     listsApi.failNextWrite(500);
 
-    await page.getByRole('dialog').getByRole('button', { name: 'Löschen' }).click();
+    await lists.deleteDialog().confirmButton.click();
 
-    await expect(page.getByRole('status')).toContainText('Das hat nicht geklappt');
-    await expect(page.getByRole('heading', { level: 1, name: WEEK.name })).toBeVisible();
+    await expect(shell.status).toContainText('Das hat nicht geklappt');
+    await expect(shell.heading(WEEK.name)).toBeVisible();
   });
 });

@@ -4,6 +4,8 @@ import { appendFileSync, mkdirSync } from 'node:fs';
 import { AxeBuilder } from '@axe-core/playwright';
 import { type APIRequestContext, type Browser, type BrowserContext, expect, type Page } from '@playwright/test';
 
+import { type Pages, pagesOf } from '../pages';
+
 /** Real-backend tier: every helper arranges its own data through the real stack (TS-TEST-34, TS-TEST-35). */
 export const APP = 'http://localhost:8080';
 export const MAILPIT = 'http://localhost:8025/api/v1';
@@ -33,39 +35,51 @@ export function recordSecret(value: string): void {
 }
 
 export async function registerThroughUi(page: Page, user: TestUser, password = PASSWORD): Promise<void> {
+  const { auth } = pagesOf(page);
   recordSecret(password);
   await page.goto('/');
-  await page.getByRole('link', { name: 'Konto erstellen' }).click();
-  await page.getByLabel('Anzeigename').fill(user.displayName);
-  await page.getByLabel('E-Mail-Adresse').fill(user.email);
-  await page.getByLabel('Passwort', { exact: true }).fill(password);
-  await page.getByRole('button', { name: 'Konto erstellen' }).click();
+  await auth.createAccountLink.click();
+  await auth.register(user.displayName, user.email, password);
   await expectSignedInShell(page);
 }
 
 export async function expectSignedInShell(page: Page): Promise<void> {
   await expect(page).toHaveURL(new RegExp(`^${APP}/`));
-  await expect(page.getByRole('heading', { level: 1, name: 'Einkaufsliste' })).toBeVisible();
+  await expect(pagesOf(page).shell.heading('Einkaufsliste')).toBeVisible();
 }
 
 export async function loginThroughUi(page: Page, user: TestUser, password = PASSWORD): Promise<void> {
   recordSecret(password);
   await page.goto('/');
-  await page.getByLabel('E-Mail-Adresse').fill(user.email);
-  await page.getByLabel('Passwort', { exact: true }).fill(password);
-  await page.getByRole('button', { name: 'Anmelden' }).click();
+  await pagesOf(page).auth.signIn(user.email, password);
 }
 
 export async function logoutThroughMenu(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-  await page.getByRole('menuitem', { name: 'Abmelden' }).click();
+  await pagesOf(page).shell.signOut();
   await expect(page).toHaveURL(new RegExp(KEYCLOAK_HOST.replace('.', '\\.')));
 }
 
+/** Creates a list from the empty state or the drawer and waits until its page is open; answers the list id. */
+export async function createListThroughUi(page: Page, name: string): Promise<string> {
+  const { lists, shell } = pagesOf(page);
+  await lists.create(name);
+  await expect(shell.heading(name)).toBeVisible();
+  return page.url().slice(page.url().lastIndexOf('/') + 1);
+}
+
+/** Opens the share dialog of the open list, answers the link and closes it again; the token is a secret (ADR 0008). */
+export async function readShareLinkThroughUi(page: Page, listName: string): Promise<string> {
+  const link = await pagesOf(page).sharing.readShareLink(listName);
+  recordSecret(link.slice(link.lastIndexOf('/') + 1));
+  return link;
+}
+
 /** A new browser context is a new browser profile: its own cookies, as a second device. */
-export async function newDevice(browser: Browser): Promise<{ context: BrowserContext; page: Page }> {
+export type Device = Pages & { context: BrowserContext; page: Page };
+export async function newDevice(browser: Browser): Promise<Device> {
   const context = await browser.newContext({ baseURL: APP, reducedMotion: 'reduce' });
-  return { context, page: await context.newPage() };
+  const page = await context.newPage();
+  return { context, page, ...pagesOf(page) };
 }
 
 export async function meStatus(request: APIRequestContext): Promise<number> {
@@ -117,8 +131,7 @@ export async function expectNoAxeViolations(page: Page, label: string): Promise<
  * Returns the attempt that was answered with the lockout, or 0 when none was (FR-AUTH-02 AC4).
  */
 export async function failLoginUntilLockout(page: Page, user: TestUser, maxAttempts = 6): Promise<number> {
-  const generic = page.getByText('E-Mail-Adresse oder Passwort ist falsch.');
-  const lockout = page.getByText('Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.');
+  const { wrongCredentialsMessage: generic, lockoutMessage: lockout } = pagesOf(page).auth;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     await loginThroughUi(page, user, `Falsch-Passwort-${String(attempt)}x`);
     await expect(generic.or(lockout)).toBeVisible();

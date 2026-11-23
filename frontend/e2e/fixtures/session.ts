@@ -26,3 +26,12 @@ export async function stubSession(page: Page, signedIn: boolean): Promise<{ call
   });
   return { calls: () => calls };
 }
+
+const LOGIN = /\/oauth2\/authorization\/keycloak/;
+
+/** The BFF login is a whole-page navigation; the stubbed tier answers it with a plain page. */
+export async function stubLogin(page: Page): Promise<void> {
+  await page.route(LOGIN, (route) =>
+    route.fulfill({ contentType: 'text/html', body: '<title>Login</title><h1>Keycloak</h1>' }),
+  );
+}

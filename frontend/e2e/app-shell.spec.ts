@@ -9,22 +9,28 @@ import { END_SESSION_URL } from './fixtures/session';
 // the wide ones (playwright.config.ts), so no test is skipped.
 
 test.describe('lists start page @responsive @theme @shell @a11y-shell', () => {
-  test('renders the German empty state with its landmarks and title', async ({ page, expectAccessible, meCalls }) => {
+  test('renders the German empty state with its landmarks and title', async ({
+    page,
+    expectAccessible,
+    meCalls,
+    shell,
+    lists,
+  }) => {
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Einkaufsliste' })).toBeVisible();
-    await expect(page.getByRole('main')).toBeVisible();
-    await expect(page.getByRole('heading', { level: 2, name: 'Noch keine Listen' })).toBeVisible();
+    await expect(shell.heading('Einkaufsliste')).toBeVisible();
+    await expect(shell.main).toBeVisible();
+    await expect(lists.emptyStateHeading).toBeVisible();
     await expect(page).toHaveTitle('Meine Listen | Einkaufsliste');
-    await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+    await expect(shell.html).toHaveAttribute('lang', 'de');
     expect(meCalls(), 'request budget of the start page (TS-TEST-14)').toBe(1);
 
     await expectAccessible('lists start page');
   });
 
-  test('reflows and survives text spacing overrides', async ({ page, expectReflowAndTextSpacing }) => {
+  test('reflows and survives text spacing overrides', async ({ page, expectReflowAndTextSpacing, shell }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(shell.heading()).toBeVisible();
 
     await expectReflowAndTextSpacing();
   });
@@ -50,19 +56,21 @@ test.describe('navigation drawer @responsive @shell @a11y-shell', () => {
   test('modal drawer: opens, keeps keyboard focus inside, closes with Esc and returns focus @modal', async ({
     page,
     expectAccessible,
+    shell,
+    lists,
   }) => {
     await page.goto('/');
-    const menuButton = page.getByRole('button', { name: 'Navigation öffnen' });
+    const menuButton = shell.menuButton;
 
     await menuButton.focus();
     await page.keyboard.press('Enter');
 
-    const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
+    const nav = shell.navigation;
     await expect(nav).toBeVisible();
     await expect(nav.getByRole('heading', { name: 'Meine Listen' })).toBeVisible();
     await expect(nav.getByText('Noch keine Listen.')).toBeVisible();
-    await expect(nav.getByRole('link', { name: 'Einstellungen' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Neue Liste' }).first()).toBeEnabled();
+    await expect(shell.settingsLink).toBeVisible();
+    await expect(lists.newListButton).toBeEnabled();
     await expectAccessible('modal drawer open');
 
     for (let i = 0; i < 6; i++) {
@@ -79,62 +87,64 @@ test.describe('navigation drawer @responsive @shell @a11y-shell', () => {
 
   test('modal drawer closes with the close button, the backdrop and after choosing an entry @modal', async ({
     page,
+    shell,
   }) => {
     await page.goto('/');
-    const menuButton = page.getByRole('button', { name: 'Navigation öffnen' });
-    const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
+    const menuButton = shell.menuButton;
+    const nav = shell.navigation;
 
     await menuButton.click();
-    await page.getByRole('button', { name: 'Navigation schließen' }).click();
+    await shell.closeNavigationButton.click();
     await expect(nav).toBeHidden();
     await expect(menuButton).toBeFocused();
 
     await menuButton.click();
-    await page.locator('.mat-drawer-backdrop').click({ position: { x: page.viewportSize()!.width - 10, y: 300 } });
+    await shell.drawerBackdrop.click({ position: { x: page.viewportSize()!.width - 10, y: 300 } });
     await expect(nav).toBeHidden();
 
     await menuButton.click();
-    await nav.getByRole('link', { name: 'Einstellungen' }).click();
+    await shell.settingsLink.click();
     await expect(nav).toBeHidden();
-    await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible();
+    await expect(shell.heading('Einstellungen')).toBeVisible();
   });
 
   test('permanent drawer on expanded: visible at once, 360 px wide, no menu or close button @permanent', async ({
     page,
     expectAccessible,
+    shell,
   }) => {
     await page.goto('/');
 
-    const nav = page.getByRole('navigation', { name: 'Hauptnavigation' });
+    const nav = shell.navigation;
     await expect(nav).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Navigation öffnen' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Navigation schließen' })).toHaveCount(0);
-    const width = await page.locator('mat-sidenav').evaluate((el) => el.getBoundingClientRect().width);
+    await expect(shell.menuButton).toHaveCount(0);
+    await expect(shell.closeNavigationButton).toHaveCount(0);
+    const width = await shell.drawer.evaluate((el) => el.getBoundingClientRect().width);
     expect(width).toBe(360);
     await expectAccessible('permanent drawer');
   });
 
-  test('keeps the page when the window is resized across the breakpoint (TS-TEST-20)', async ({ page }) => {
+  test('keeps the page when the window is resized across the breakpoint (TS-TEST-20)', async ({ page, shell }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto('/einstellungen');
-    await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toBeVisible();
+    await expect(shell.navigation).toBeVisible();
 
     await page.setViewportSize({ width: 390, height: 844 });
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Navigation öffnen' })).toBeVisible();
-    await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toBeHidden();
+    await expect(shell.heading('Einstellungen')).toBeVisible();
+    await expect(shell.menuButton).toBeVisible();
+    await expect(shell.navigation).toBeHidden();
 
     await page.setViewportSize({ width: 1024, height: 768 });
 
-    await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Navigation öffnen' })).toHaveCount(0);
+    await expect(shell.navigation).toBeVisible();
+    await expect(shell.menuButton).toHaveCount(0);
   });
 
-  test('marks the current page in the drawer @permanent', async ({ page }) => {
+  test('marks the current page in the drawer @permanent', async ({ page, shell }) => {
     await page.goto('/einstellungen');
 
-    await expect(page.getByRole('link', { name: 'Einstellungen' }).first()).toHaveAttribute('aria-current', 'page');
+    await expect(shell.settingsLink).toHaveAttribute('aria-current', 'page');
   });
 });
 
@@ -142,21 +152,22 @@ test.describe('„Weitere Optionen“ menu and sign-out @shell @a11y-shell', () 
   test('opens with the keyboard, moves with the arrow keys, closes with Esc and returns focus', async ({
     page,
     expectAccessible,
+    shell,
   }) => {
     await page.goto('/');
-    const button = page.getByRole('button', { name: 'Weitere Optionen' });
+    const button = shell.optionsButton;
     await button.focus();
 
     await page.keyboard.press('Enter');
 
     await expect(button).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.getByRole('menuitem', { name: 'Einstellungen' })).toBeFocused();
+    await expect(shell.menuItem('Einstellungen')).toBeFocused();
     await expectAccessible('menu open');
     await page.keyboard.press('ArrowDown');
-    await expect(page.getByRole('menuitem', { name: 'Abmelden' })).toBeFocused();
+    await expect(shell.menuItem('Abmelden')).toBeFocused();
     await page.keyboard.press('Escape');
 
-    await expect(page.getByRole('menu')).toBeHidden();
+    await expect(shell.optionsMenu).toBeHidden();
     await expect(button).toBeFocused();
     await expect(button).toHaveAttribute('aria-expanded', 'false');
   });
@@ -164,6 +175,7 @@ test.describe('„Weitere Optionen“ menu and sign-out @shell @a11y-shell', () 
   test('signs out with the XSRF header and navigates the whole page to the IdP end-session address', async ({
     page,
     context,
+    shell,
   }) => {
     await context.addCookies([{ name: 'XSRF-TOKEN', value: 'xsrf-e2e', url: 'http://localhost:4200' }]);
     let xsrf: string | undefined;
@@ -176,8 +188,7 @@ test.describe('„Weitere Optionen“ menu and sign-out @shell @a11y-shell', () 
     );
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Abmelden' }).click();
+    await shell.chooseOption('Abmelden');
 
     await expect(page).toHaveURL(END_SESSION_URL);
     expect(xsrf).toBe('xsrf-e2e');
@@ -186,18 +197,18 @@ test.describe('„Weitere Optionen“ menu and sign-out @shell @a11y-shell', () 
   test('a failed sign-out shows the error snackbar, keeps the page and allows a second try', async ({
     page,
     expectErrors,
+    shell,
   }) => {
     expectErrors(/status of 500/); // the browser logs the stubbed 500
     await page.route('**/logout', (route) => route.fulfill({ status: 500, json: { title: 'Server error' } }));
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Abmelden' }).click();
+    await shell.chooseOption('Abmelden');
 
-    await expect(page.getByRole('status')).toContainText('Das hat nicht geklappt. Bitte versuche es noch einmal.');
-    await expect(page.getByRole('heading', { level: 1, name: 'Einkaufsliste' })).toBeVisible();
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await expect(page.getByRole('menuitem', { name: 'Abmelden' })).toBeEnabled();
+    await expect(shell.status).toContainText('Das hat nicht geklappt. Bitte versuche es noch einmal.');
+    await expect(shell.heading('Einkaufsliste')).toBeVisible();
+    await shell.optionsButton.click();
+    await expect(shell.menuItem('Abmelden')).toBeEnabled();
   });
 });
 
@@ -206,14 +217,14 @@ test.describe('snackbar timing @shell', () => {
     page,
     expectAccessible,
     expectErrors,
+    shell,
   }) => {
     expectErrors(/status of 500/);
     await page.clock.install();
     await page.route('**/logout', (route) => route.fulfill({ status: 500, json: { title: 'Server error' } }));
     await page.goto('/');
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Abmelden' }).click();
-    const snackbar = page.getByRole('status');
+    await shell.chooseOption('Abmelden');
+    const snackbar = shell.status;
     await expect(snackbar).toContainText('Das hat nicht geklappt');
     await expectAccessible('snackbar visible');
 
@@ -228,35 +239,37 @@ test.describe('snackbar timing @shell', () => {
     await expect(snackbar).not.toContainText('Das hat nicht geklappt');
   });
 
-  test('closes with „Hinweis schließen“ and does not take keyboard focus away', async ({ page, expectErrors }) => {
+  test('closes with „Hinweis schließen“ and does not take keyboard focus away', async ({
+    page,
+    expectErrors,
+    shell,
+  }) => {
     expectErrors(/status of 500/);
     await page.route('**/logout', (route) => route.fulfill({ status: 500, json: { title: 'Server error' } }));
     await page.goto('/');
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Abmelden' }).click();
-    await expect(page.getByRole('status')).toContainText('Das hat nicht geklappt');
+    await shell.chooseOption('Abmelden');
+    await expect(shell.status).toContainText('Das hat nicht geklappt');
 
-    await page.getByRole('button', { name: 'Hinweis schließen' }).click();
+    await shell.closeSnackbarButton.click();
 
-    await expect(page.getByRole('status')).not.toContainText('Das hat nicht geklappt');
+    await expect(shell.status).not.toContainText('Das hat nicht geklappt');
   });
 });
 
 test.describe('route title and focus (A11Y-21) @shell @a11y-shell', () => {
-  test('navigating to the settings page sets the title and moves focus to the new h1', async ({ page }) => {
+  test('navigating to the settings page sets the title and moves focus to the new h1', async ({ page, shell }) => {
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Weitere Optionen' }).click();
-    await page.getByRole('menuitem', { name: 'Einstellungen' }).click();
+    await shell.chooseOption('Einstellungen');
 
     await expect(page).toHaveTitle('Einstellungen | Einkaufsliste');
     await expect(page).toHaveURL(/\/einstellungen$/);
-    await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeFocused();
+    await expect(shell.heading('Einstellungen')).toBeFocused();
   });
 
-  test('the settings page has no accessibility violations', async ({ page, expectAccessible }) => {
+  test('the settings page has no accessibility violations', async ({ page, expectAccessible, shell }) => {
     await page.goto('/einstellungen');
-    await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible();
+    await expect(shell.heading('Einstellungen')).toBeVisible();
 
     await expectAccessible('settings page');
   });
@@ -265,9 +278,10 @@ test.describe('route title and focus (A11Y-21) @shell @a11y-shell', () => {
 test.describe('keyboard journey (A11Y layer L5) @shell @a11y-shell', () => {
   test('every control is reachable with Tab in reading order and shows a focus indicator @permanent', async ({
     page,
+    shell,
   }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(shell.heading()).toBeVisible();
 
     const order: string[] = [];
     for (let i = 0; i < 4; i++) {
@@ -302,10 +316,10 @@ test.describe('theme', () => {
   };
   const pageBackground = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
-  test('System follows prefers-color-scheme and switches live', async ({ page }) => {
+  test('System follows prefers-color-scheme and switches live', async ({ page, shell }) => {
     await page.emulateMedia({ colorScheme: 'light', contrast: 'no-preference' });
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(shell.heading()).toBeVisible();
     expect(await pageBackground(page)).toBe(rgb('#EDEDF4')); // design-tokens.json color.light.pageBg
 
     await page.emulateMedia({ colorScheme: 'dark' });
@@ -313,22 +327,22 @@ test.describe('theme', () => {
     await expect.poll(() => pageBackground(page)).toBe(rgb('#111318')); // color.dark.pageBg
   });
 
-  test('a stored per-device choice wins over the system setting', async ({ page }) => {
+  test('a stored per-device choice wins over the system setting', async ({ page, shell }) => {
     await page.emulateMedia({ colorScheme: 'light', contrast: 'no-preference' });
     await page.addInitScript(() => {
       localStorage.setItem('theme', 'dark');
     });
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(shell.heading()).toBeVisible();
 
-    await expect(page.locator('html')).toHaveAttribute('data-color-scheme', 'dark');
+    await expect(shell.html).toHaveAttribute('data-color-scheme', 'dark');
     expect(await pageBackground(page)).toBe(rgb('#111318'));
   });
 
-  test('the heading uses the token colour', async ({ page }) => {
+  test('the heading uses the token colour', async ({ page, shell }) => {
     await page.emulateMedia({ colorScheme: 'light', contrast: 'no-preference' });
     await page.goto('/');
-    const heading = page.getByRole('heading', { level: 1 });
+    const heading = shell.heading();
     await expect(heading).toBeVisible();
 
     expect(await heading.evaluate((el) => getComputedStyle(el).color)).toBe(rgb('#191C20')); // onSurface
@@ -347,11 +361,11 @@ test.describe('start-up failure', () => {
 });
 
 test.describe('forced colors @shell', () => {
-  test('keeps the drawer, the current page and the text visible', async ({ page, expectAccessible }) => {
+  test('keeps the drawer, the current page and the text visible', async ({ page, expectAccessible, shell }) => {
     await page.goto('/einstellungen');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible();
-    const color = await page.getByRole('heading', { level: 1 }).evaluate((el) => getComputedStyle(el).color);
+    await expect(shell.heading('Einstellungen')).toBeVisible();
+    const color = await shell.heading().evaluate((el) => getComputedStyle(el).color);
     expect(color).not.toBe('');
     await expectAccessible('settings page, forced colors');
   });

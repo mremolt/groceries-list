@@ -1,15 +1,18 @@
-import { expect, request as playwrightRequest, test } from '@playwright/test';
+import { request as playwrightRequest } from '@playwright/test';
 
+import { expect, test } from './fixtures';
 import { APP, newUser, recordSecret, registerThroughUi } from './support';
 
 // The one anonymous server session (ADR 0008, threat model T8): the cookie set by POST /api/v1/invitations. Tag: @real.
 test.describe('@real invitation session', () => {
-  test('the visitor session cookie from "remember invitation" is HttpOnly and SameSite=Lax', async ({ page }) => {
+  test('the visitor session cookie from "remember invitation" is HttpOnly and SameSite=Lax', async ({
+    page,
+    shell,
+    lists,
+  }) => {
     await registerThroughUi(page, newUser('invite'));
-    await page.getByRole('main').getByRole('button', { name: 'Neue Liste' }).click();
-    await page.getByRole('dialog', { name: 'Neue Liste' }).getByLabel('Name der Liste').fill('Einladung');
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('heading', { level: 1, name: 'Einladung' })).toBeVisible();
+    await lists.create('Einladung');
+    await expect(shell.heading('Einladung')).toBeVisible();
     const listId = page.url().slice(page.url().lastIndexOf('/') + 1);
     const link = (await (await page.request.get(`${APP}/api/v1/lists/${listId}/share-link`)).json()) as { url: string };
     const token = link.url.slice(link.url.lastIndexOf('/') + 1);
