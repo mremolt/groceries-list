@@ -11,7 +11,7 @@
 | M0 Project setup | done | b0ecad1 | m0-done |
 | M1 Accounts and app shell | done | 16e1331 | m1-done |
 | M2 Lists | done | 0eba963 | m2-done |
-| M3 Items | done | PENDING | m3-done |
+| M3 Items | done | 9a65f1a | m3-done |
 | M4 Sharing and joining | not started | | |
 | M5 Synchronisation | not started | | |
 | M6 Settings and account | not started | | |
