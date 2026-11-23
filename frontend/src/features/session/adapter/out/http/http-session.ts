@@ -6,11 +6,16 @@ import { TechnicalError } from '@platform/domain';
 import type { CurrentUser } from '../../../domain/current-user';
 import { NotAuthenticatedError } from '../../../domain/session-errors';
 import type { CheckSignedInPort } from '../../../ports/out/check-signed-in-port';
+import type { DeleteAccountPort } from '../../../ports/out/delete-account-port';
 import type { LoadCurrentUserPort } from '../../../ports/out/load-current-user-port';
 import type { LogoutPort } from '../../../ports/out/logout-port';
+import type { UpdateDisplayNamePort } from '../../../ports/out/update-display-name-port';
 import { MeControllerService } from './generated/endpoints/me-controller/me-controller.service';
-import { GetCurrentUserResponse } from './generated/endpoints/me-controller/me-controller.zod';
-import { LogoutResponse, toCurrentUser, toSessionError } from './session-mapper';
+import {
+  GetCurrentUserResponse,
+  UpdateCurrentUserResponse,
+} from './generated/endpoints/me-controller/me-controller.zod';
+import { LogoutResponse, toCurrentUser, toProfileError, toSessionError } from './session-mapper';
 
 /**
  * Outgoing HTTP adapter of the session feature. `GET /api/v1/me` uses the generated client and its zod schema
@@ -18,7 +23,9 @@ import { LogoutResponse, toCurrentUser, toSessionError } from './session-mapper'
  * `HttpClient` call here (the XSRF header comes from the platform HTTP stack, TS-SEC-10).
  */
 @Injectable()
-export class HttpSession implements LoadCurrentUserPort, LogoutPort, CheckSignedInPort {
+export class HttpSession
+  implements LoadCurrentUserPort, LogoutPort, CheckSignedInPort, UpdateDisplayNamePort, DeleteAccountPort
+{
   private readonly api = inject(MeControllerService);
   private readonly http = inject(HttpClient);
   private readonly reportError = inject(REPORT_ERROR);
@@ -46,6 +53,28 @@ export class HttpSession implements LoadCurrentUserPort, LogoutPort, CheckSigned
       const mapped = toSessionError(error);
       if (mapped instanceof NotAuthenticatedError) return false;
       throw this.reported(mapped);
+    }
+  }
+
+  async updateDisplayName(displayName: string): Promise<CurrentUser> {
+    let dto: unknown;
+    try {
+      dto = await untilAborted(this.api.updateCurrentUser({ displayName }));
+    } catch (error) {
+      throw this.reported(toProfileError(error));
+    }
+    const parsed = UpdateCurrentUserResponse.safeParse(dto);
+    if (!parsed.success) {
+      throw this.reported(new TechnicalError('session API answered a malformed profile', { cause: parsed.error }));
+    }
+    return toCurrentUser(parsed.data);
+  }
+
+  async deleteAccount(): Promise<void> {
+    try {
+      await untilAborted(this.api.deleteCurrentUser());
+    } catch (error) {
+      throw this.reported(toProfileError(error));
     }
   }
 

@@ -25,3 +25,8 @@
 ## Consequences
 
 AUTH screens are Keycloak themes (FreeMarker + CSS), not Angular pages; M1's Angular screens are the app shell only. Token and password never touch the SPA (TS-SEC-01, NG-SEC-08).
+
+## Implementation note (M6)
+
+FR-SET-04 as decided above: the SPA calls `DELETE /api/v1/me`; without a re-authentication confirmed in the session in the last 5 minutes the answer is `403 REAUTH_REQUIRED`, the SPA navigates to `/oauth2/authorization/keycloak?reauth=1` and comes back to `/einstellungen?konto-loeschen` (a constant path). The IdP account is deleted through the service account `groceries-admin` (realm role `manage-users` only; Keycloak 26.8 additionally needs the `kc-admin-api` client scope for the admin audience, which the dev realm sets). Order: product data first (one transaction, sessions ended), IdP second; a failed IdP call is retried from an outbox table. FR-SET-04 AC2's "Wrong password: field error" cannot occur in the product: the IdP shows its own error on its login page.
+

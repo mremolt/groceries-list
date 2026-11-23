@@ -29,7 +29,7 @@ class ProvideUserService implements ProvideUserUseCase {
     @Override
     public ProvideUserResult provide(ProvideUserCommand command) {
         User user = load.findBySubject(command.subject())
-                .map(existing -> existing.loggedIn(command.displayName(), clock.instant()))
+                .map(existing -> existing.loggedIn(clock.instant()))
                 .orElseGet(() -> register(command));
         User stored = save.save(user);
         return new ProvideUserResult(stored.id(), stored.email(), stored.displayName());

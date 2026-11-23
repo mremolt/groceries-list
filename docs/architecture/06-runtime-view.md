@@ -21,6 +21,31 @@ sequenceDiagram
   S-->>B: 302 /
 ```
 
+## 6.1a Delete the account (M6, FR-SET-04)
+
+```mermaid
+sequenceDiagram
+  participant B as Browser (SPA)
+  participant S as Backend (BFF)
+  participant K as Keycloak
+  B->>S: DELETE /api/v1/me
+  S-->>B: 403 REAUTH_REQUIRED (no fresh login in this session)
+  B->>S: navigate /oauth2/authorization/keycloak?reauth=1
+  S-->>B: 302 to Keycloak (prompt=login, max_age=0), expected subject kept in the session
+  B->>K: password
+  K-->>B: 302 callback (ID token with auth_time)
+  S->>S: same subject and auth_time < 5 min: confirm in the session
+  S-->>B: 302 /einstellungen?konto-loeschen
+  B->>S: DELETE /api/v1/me
+  S->>S: one transaction: lock user and lists, leave lists, delete empty lists, delete user, end sessions, outbox row
+  S->>K: DELETE admin/realms/groceries/users/{sub} (service account, timeouts)
+  S-->>B: 204, session invalidated, cookie expired
+```
+
+The SPA side: „Konto löschen“ opens the dialog „Konto löschen?“ (the password field of FR-SET-04 AC1 is the new login at the IdP, ADR 0003); confirming navigates the whole page to `…?reauth=1`. On `/einstellungen?konto-loeschen` the page removes the marker from the address (`replaceUrl`) and opens the final dialog; its confirmation calls `DELETE /api/v1/me`. `204` navigates to the login, `403 REAUTH_REQUIRED` starts the re-authentication again, any other failure keeps the dialog open with a status line and the error snackbar (FR-FB-05). A guessed or bookmarked address only opens the dialog: the backend refuses without a fresh login.
+
+If Keycloak does not answer, the answer is still `204`; the outbox row stays and `IdpDeletionRetryJob` retries every 5 minutes (idempotent: a missing user is a success).
+
 ## 6.2 Join via share link
 
 ```mermaid

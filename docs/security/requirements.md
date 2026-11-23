@@ -40,7 +40,7 @@ Deployed default: `__Host-SESSION`, `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=
 
 ## Dev realm values
 
-`backend/dev/keycloak/groceries-realm.json` and `backend/dev/secrets/keycloak-client-secret` hold the **dev-realm** client secret `dev-only-client-secret` and fictitious test users. They are development values for the local Compose installation only, are committed on purpose and must never be used in a deployed environment (SEC-INC-01, DP-ENV-01); deployed secrets come from the platform's secret store as mounted files (SPRING-CFG-07).
+`backend/dev/keycloak/groceries-realm.json`, `backend/dev/secrets/keycloak-client-secret` and `backend/dev/secrets/keycloak-admin-client-secret` hold the **dev-realm** client secrets `dev-only-client-secret` and `dev-only-admin-secret` (the latter for the account-deletion service account, role `manage-users` only) and fictitious test users. They are development values for the local Compose installation only, are committed on purpose and must never be used in a deployed environment (SEC-INC-01, DP-ENV-01); deployed secrets come from the platform's secret store as mounted files (SPRING-CFG-07).
 
 ## Penetration tests (SEC-REQ-04)
 

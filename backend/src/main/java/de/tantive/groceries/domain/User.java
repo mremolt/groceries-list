@@ -29,9 +29,17 @@ public record User(UUID id, String subject, String email, String displayName, In
         return new User(id, subject, email, displayName, now, now);
     }
 
-    /** A later login: records the time and takes over the name the identity provider currently reports. */
-    public User loggedIn(String currentDisplayName, Instant now) {
-        return new User(id, subject, email, currentDisplayName, createdAt, now);
+    /**
+     * A later login: records the time. The name stays the product's (FR-SET-01): the claim of the identity provider is
+     * only used at the first login, so a changed name is not overwritten by the old claim.
+     */
+    public User loggedIn(Instant now) {
+        return new User(id, subject, email, displayName, createdAt, now);
+    }
+
+    /** FR-SET-01: the person chose a new name. */
+    public User renamed(DisplayName name) {
+        return new User(id, subject, email, name.value(), createdAt, lastLoginAt);
     }
 
     private static String normalizeEmail(String raw) {

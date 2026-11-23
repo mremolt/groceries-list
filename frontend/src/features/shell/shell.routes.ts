@@ -5,11 +5,13 @@ import { provideSessionApi } from '@features/session';
 import { provideSharingApi } from '@features/sharing';
 import { provideTranslocoScope } from '@jsverse/transloco';
 
+import { AccountActions } from './adapter/in/ui/account-actions';
 import { authenticatedGuard } from './adapter/in/ui/authenticated-guard';
 import { ItemsStore } from './adapter/in/ui/items-store';
 import { JoinStore } from './adapter/in/ui/join-store';
 import { ListActions } from './adapter/in/ui/list-actions';
 import { ListsStore } from './adapter/in/ui/lists-store';
+import { SettingsStore } from './adapter/in/ui/settings-store';
 import { ShareActions } from './adapter/in/ui/share-actions';
 import { startGuard } from './adapter/in/ui/start-guard';
 
@@ -77,6 +79,7 @@ export const SHELL_ROUTES: Routes = [
       {
         path: 'einstellungen',
         title: 'platform.title.settings',
+        providers: [SettingsStore, AccountActions], // NG-STATE-12: route level
         data: { heading: 'shell.heading.settings' },
         loadComponent: () => import('./adapter/in/ui/settings-page').then((m) => m.SettingsPage),
       },

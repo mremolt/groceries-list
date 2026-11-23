@@ -21,6 +21,7 @@ import org.springframework.transaction.support.TransactionTemplate;
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
             "app.auth.client-secret=test",
+            "app.idp-admin.client-secret=test",
             "app.sharing.public-base-url=http://localhost:8080"
         })
 @Import(TestcontainersConfiguration.class)
@@ -63,6 +64,21 @@ class MembershipJdbcAdapterIT {
 
         tx.executeWithoutResult(status -> memberships.remove(list, alice));
         assertThat(memberships.countMembers(list)).isEqualTo(1);
+    }
+
+    @Test
+    void listsTheListIdsOfOneUserOrderedById() {
+        UUID alice = Arrange.user(jdbc);
+        UUID bob = Arrange.user(jdbc);
+        UUID first = Arrange.list(jdbc, alice, "A1", NOW);
+        UUID second = Arrange.list(jdbc, alice, "A2", NOW.plusSeconds(1));
+        Arrange.list(jdbc, bob, "B1", NOW);
+
+        assertThat(memberships.listIdsOf(alice))
+                .containsExactlyInAnyOrder(first, second)
+                .isSortedAccordingTo(java.util.Comparator.comparing(
+                        UUID::toString)); // PostgreSQL orders uuids bytewise = by text, not like Java
+        assertThat(memberships.listIdsOf(UUID.randomUUID())).isEmpty();
     }
 
     @Test

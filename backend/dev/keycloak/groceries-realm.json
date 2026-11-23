@@ -55,6 +55,30 @@
   },
   "clients": [
     {
+      "clientId": "groceries-admin",
+      "name": "Groceries admin client (deletes accounts, SPRING-SEC-41)",
+      "description": "Service account of the app: may manage users to delete the account of a person who deleted theirs (FR-SET-04). No login flows.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-only-admin-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": false,
+      "frontchannelLogout": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": [
+        "basic",
+        "roles",
+        "kc-admin-api"
+      ],
+      "optionalClientScopes": []
+    },
+    {
       "clientId": "groceries-bff",
       "name": "Groceries BFF (OIDC login, ADR 0002)",
       "enabled": true,
@@ -118,7 +142,27 @@
       ]
     }
   ],
+  "clientScopeMappings": {
+    "realm-management": [
+      {
+        "client": "groceries-admin",
+        "roles": [
+          "manage-users"
+        ]
+      }
+    ]
+  },
   "users": [
+    {
+      "username": "service-account-groceries-admin",
+      "enabled": true,
+      "serviceAccountClientId": "groceries-admin",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users"
+        ]
+      }
+    },
     {
       "username": "anna@example.test",
       "email": "anna@example.test",

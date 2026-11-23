@@ -1,0 +1,22 @@
+@use '@angular/material' as mat;
+
+.text {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+}
+
+.note {
+  min-block-size: 1.5rem;
+  margin: var(--app-space-2) 0 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.destructive {
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--mat-sys-error),
+      filled-label-text-color: var(--mat-sys-on-error),
+    )
+  );
+}

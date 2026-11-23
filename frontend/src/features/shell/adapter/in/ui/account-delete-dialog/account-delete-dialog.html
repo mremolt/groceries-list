@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>{{ 'shell.settings.account.dialog.title' | transloco }}</h2>
+<mat-dialog-content>
+  <p [id]="descriptionId" class="text">
+    {{ 'shell.settings.account.dialog.text' | transloco }}
+    {{ 'shell.settings.account.dialog.reauthDone' | transloco }}
+  </p>
+  <p class="note" role="status">{{ note() }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button matButton type="button" mat-dialog-close cdkFocusInitial>{{ 'shell.dialog.cancel' | transloco }}</button>
+  <button matButton="filled" type="button" class="destructive" [disabledInteractive]="running()" (click)="confirm()">
+    {{ 'shell.settings.account.dialog.confirm' | transloco }}
+  </button>
+</mat-dialog-actions>

@@ -36,7 +36,40 @@
     }
   },
   "settings": {
-    "placeholder": "Hier entstehen deine Einstellungen."
+    "loading": "Einstellungen werden geladen",
+    "failed": "Die Einstellungen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "profile": {
+      "title": "Profil",
+      "name": "Anzeigename",
+      "hint": "So wirst du in der App angezeigt.",
+      "save": "Speichern"
+    },
+    "error": {
+      "required": "Bitte gib einen Anzeigenamen ein.",
+      "tooLong": "Der Anzeigename darf höchstens 50 Zeichen lang sein."
+    },
+    "theme": {
+      "title": "Darstellung",
+      "label": "Design",
+      "system": "System",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "note": "„System“ folgt der Einstellung deines Geräts."
+    },
+    "account": {
+      "title": "Konto",
+      "email": "E-Mail-Adresse",
+      "logout": "Abmelden",
+      "delete": "Konto löschen",
+      "dialog": {
+        "title": "Konto löschen?",
+        "text": "Dein Konto wird dauerhaft gelöscht und du verlässt alle Listen. Listen, in denen du das letzte Mitglied bist, werden ebenfalls gelöscht.",
+        "reauthStart": "Zur Bestätigung musst du dich gleich noch einmal anmelden.",
+        "reauthDone": "Du hast dich gerade noch einmal angemeldet. Jetzt wird dein Konto gelöscht.",
+        "confirm": "Konto löschen"
+      }
+    }
   },
   "dialog": {
     "cancel": "Abbrechen",

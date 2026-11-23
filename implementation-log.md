@@ -14,10 +14,10 @@
 | M3 Items | done | 9a65f1a | m3-done |
 | M4 Sharing and joining | done | 90fc5a7 | m4-done |
 | M5 Synchronisation | done | ae98bc7 | m5-done |
-| M6 Settings and account | not started | | |
+| M6 Settings and account | done | PENDING | m6-done |
 | M7 Internal test readiness | not started | | |
 
-- **Next action:** M6 Settings and account (read requirements/05 M6 and 04 by requirement ID: FR-SET-*, FR-NAV-04, ADR 0003 for FR-SET-04 re-authentication, deletion concept docs/data-protection): backend + frontend forks in parallel against a contract fixed up front, rebuild image, real tier (Keycloak re-auth and deletion), gates (Chromium e2e only), commit `M6 done`, tag.
+- **Next action:** M7 Internal test readiness (read requirements/05 M7 and 04 §4 NFRs; deferred NFR-PRIV are out of scope per 05 §5): close known issues from the milestone entries, run `verify` + real tier + full gates, check docs/architecture against code (DOC-ARC-11), write the final log entry, commit `M7 done`, tag.
 - **Work in flight:** none.
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
@@ -77,6 +77,16 @@ Manual check (for human review): share a link by messenger, join with a second a
 Deviations: offline banner is visible text in the app-bar header announced once through the Announcer (not a second `role="status"` region, which broke 32 locators; A11Y-20). Under `page.clock` the new e2e specs use `focus()` instead of `click()` in the 320 px project (Playwright hang). Stubbed offline test aborts stub routes (setOffline does not affect routed stubs); the real tier uses setOffline. Membership changes (join/leave) and share-link changes do not move the list revision; the 30 s drawer poll covers them.
 
 Manual check (for human review): two devices side by side: add, check, rename, delete; network off and on.
+
+### M6 Settings and account (2026-11-23)
+
+| Done when | Status |
+|---|---|
+| FR-SET-01..04, FR-NAV-02 AC2 | Backend: PATCH /me (product is the source of truth for the display name), DELETE /me with re-authentication (<= 5 min, `?reauth=1` -> prompt=login/max_age=0, redirect to /einstellungen?konto-loeschen), one-transaction deletion with row locks (race IT, mutation-checked), sessions ended, Keycloak admin port (service account manage-users only, timeouts) with outbox `pending_idp_deletions` retried every 5 min (V8). Frontend: Profil/Darstellung/Konto cards, delete dialogs with re-authentication, per-device theme. Gates: `mvnw verify` green (288 unit, 86 IT); frontend unit 464 green; stubbed Chromium e2e 99 green (twice); real tier 36 green (incl. deletion: other session ends, guest keeps the shared list, login fails afterwards) |
+
+Deviations: FR-SET-04 AC1 password field replaced by re-authentication at the IdP (ADR 0003); two dialogs, the final one adds „Du hast dich gerade noch einmal angemeldet.“; the wrong-password text comes from Keycloak. `REAUTH_REQUIRED` (stale login) is covered in backend tests and the stubbed tier only. A deletion whose Keycloak call fails still answers 204 (data erased, IdP deletion retried). The Keycloak dev realm must be re-imported (`docker compose down -v`) to get the `groceries-admin` service account. The backend fork once ran `git stash`/`pop`; no loss (verified by green gates).
+
+Manual check (for human review): switch the theme on a phone and compare with the system setting; delete a test account that shares a list.
 
 ## Assumptions
 

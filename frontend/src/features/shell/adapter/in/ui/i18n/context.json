@@ -67,10 +67,6 @@
     "description": "UI text of the app shell: shell.empty.lists.hint",
     "maxLength": 172
   },
-  "shell.settings.placeholder": {
-    "description": "UI text of the app shell: shell.settings.placeholder",
-    "maxLength": 70
-  },
   "shell.nav.loadFailed": {
     "description": "Drawer text when the lists could not be loaded",
     "maxLength": 60
@@ -506,5 +502,101 @@
   "shell.connection.offline": {
     "description": "Banner under the app bar when the server cannot be reached for more than 10 s (FR-FB-06 AC1)",
     "maxLength": 70
+  },
+  "shell.settings.loading": {
+    "description": "Accessible name of the loading indicator of the settings page",
+    "maxLength": 40
+  },
+  "shell.settings.failed": {
+    "description": "Heading when the settings page cannot load the person",
+    "maxLength": 60
+  },
+  "shell.settings.retry": {
+    "description": "Button that loads the settings page again",
+    "maxLength": 30
+  },
+  "shell.settings.profile.title": {
+    "description": "Heading of the card with the display name (FR-SET-01)",
+    "maxLength": 20
+  },
+  "shell.settings.profile.name": {
+    "description": "Label of the display name field (FR-SET-01 AC1)",
+    "maxLength": 20
+  },
+  "shell.settings.profile.hint": {
+    "description": "Help text under the display name field (FR-SET-01 AC1)",
+    "maxLength": 40
+  },
+  "shell.settings.profile.save": {
+    "description": "Button that saves the display name (FR-SET-01 AC1)",
+    "maxLength": 20
+  },
+  "shell.settings.error.required": {
+    "description": "Field error: display name empty (FR-SET-01 AC1; shown after the prefix „Fehler:“)",
+    "maxLength": 50
+  },
+  "shell.settings.error.tooLong": {
+    "description": "Field error: display name over 50 characters (FR-SET-01 AC1)",
+    "maxLength": 60
+  },
+  "shell.settings.theme.title": {
+    "description": "Heading of the card with the theme choice (FR-SET-02)",
+    "maxLength": 20
+  },
+  "shell.settings.theme.label": {
+    "description": "Accessible name and visible label of the segmented button for the theme (FR-SET-02 AC1)",
+    "maxLength": 20
+  },
+  "shell.settings.theme.system": {
+    "description": "Segment: follow the device setting (FR-SET-02 AC1)",
+    "maxLength": 12
+  },
+  "shell.settings.theme.light": {
+    "description": "Segment: light theme (FR-SET-02 AC1)",
+    "maxLength": 12
+  },
+  "shell.settings.theme.dark": {
+    "description": "Segment: dark theme (FR-SET-02 AC1)",
+    "maxLength": 12
+  },
+  "shell.settings.theme.note": {
+    "description": "Note under the theme choice (FR-SET-02 AC1)",
+    "maxLength": 60
+  },
+  "shell.settings.account.title": {
+    "description": "Heading of the account card (FR-SET-03)",
+    "maxLength": 20
+  },
+  "shell.settings.account.email": {
+    "description": "Label of the read-only e-mail address (FR-SET-03 AC1)",
+    "maxLength": 25
+  },
+  "shell.settings.account.logout": {
+    "description": "Row that signs out (FR-SET-03 AC1, FR-AUTH-03)",
+    "maxLength": 20
+  },
+  "shell.settings.account.delete": {
+    "description": "Row that starts deleting the account (FR-SET-03 AC1, FR-SET-04)",
+    "maxLength": 20
+  },
+  "shell.settings.account.dialog.title": {
+    "description": "Title of the delete-account dialog (FR-SET-04 AC1)",
+    "maxLength": 25
+  },
+  "shell.settings.account.dialog.text": {
+    "description": "Body of the delete-account dialog (FR-SET-04 AC1)",
+    "maxLength": 150
+  },
+  "shell.settings.account.dialog.reauthStart": {
+    "description": "Replaces the password field: says the identity provider asks for the password next (ADR 0003)",
+    "maxLength": 70
+  },
+  "shell.settings.account.dialog.reauthDone": {
+    "description": "Final step after the new login: the account is deleted on confirmation (ADR 0003)",
+    "maxLength": 90
+  },
+  "shell.settings.account.dialog.confirm": {
+    "description": "Destructive button of the delete-account dialog (FR-SET-04 AC1)",
+    "maxLength": 20
   }
 }

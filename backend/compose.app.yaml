@@ -15,6 +15,8 @@ services:
     secrets:
       - source: keycloak_client_secret
         target: app.auth.client-secret
+      - source: keycloak_admin_client_secret
+        target: app.idp-admin.client-secret
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/groceries?connectTimeout=2&socketTimeout=10
       SPRING_DATASOURCE_USERNAME: groceries_app
@@ -51,3 +53,5 @@ services:
 secrets:
   keycloak_client_secret:
     file: ./dev/secrets/keycloak-client-secret   # dev-realm value, fictitious and committed (docs/security/requirements.md)
+  keycloak_admin_client_secret:
+    file: ./dev/secrets/keycloak-admin-client-secret   # dev-realm value of the account-deletion service account, fictitious and committed

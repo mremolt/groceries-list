@@ -1,5 +1,93 @@
-<mat-card appearance="outlined">
-  <mat-card-content>
-    <p>{{ 'shell.settings.placeholder' | transloco }}</p>
-  </mat-card-content>
-</mat-card>
+@switch (store.status()) {
+  @case ('ready') {
+    <div class="cards">
+      <mat-card appearance="outlined" [attr.aria-labelledby]="'settings-profile'">
+        <mat-card-header>
+          <h2 id="settings-profile" class="card-title">{{ 'shell.settings.profile.title' | transloco }}</h2>
+        </mat-card-header>
+        <mat-divider />
+        <mat-card-content>
+          <form novalidate (submit)="$event.preventDefault(); saveName()">
+            <app-validated-field
+              [label]="'shell.settings.profile.name' | transloco"
+              [hint]="'shell.settings.profile.hint' | transloco"
+              autocomplete="nickname"
+              [formField]="profileForm.displayName"
+              [errorMessages]="errorMessages()"
+            />
+            <div class="actions">
+              <button matButton="tonal" type="submit" disabledInteractive [disabled]="offline() || store.saving()">
+                {{ 'shell.settings.profile.save' | transloco }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" [attr.aria-labelledby]="'settings-theme'">
+        <mat-card-header>
+          <h2 id="settings-theme" class="card-title">{{ 'shell.settings.theme.title' | transloco }}</h2>
+        </mat-card-header>
+        <mat-divider />
+        <mat-card-content>
+          <p id="settings-theme-label" class="label">{{ 'shell.settings.theme.label' | transloco }}</p>
+          <mat-button-toggle-group
+            class="theme"
+            [attr.aria-labelledby]="'settings-theme-label'"
+            [attr.aria-describedby]="'settings-theme-note'"
+            [value]="scheme.preference()"
+            (change)="chooseTheme($event.value)"
+          >
+            <mat-button-toggle value="system">{{ 'shell.settings.theme.system' | transloco }}</mat-button-toggle>
+            <mat-button-toggle value="light">{{ 'shell.settings.theme.light' | transloco }}</mat-button-toggle>
+            <mat-button-toggle value="dark">{{ 'shell.settings.theme.dark' | transloco }}</mat-button-toggle>
+          </mat-button-toggle-group>
+          <p id="settings-theme-note" class="note">{{ 'shell.settings.theme.note' | transloco }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined" [attr.aria-labelledby]="'settings-account'">
+        <mat-card-header>
+          <h2 id="settings-account" class="card-title">{{ 'shell.settings.account.title' | transloco }}</h2>
+        </mat-card-header>
+        <mat-divider />
+        <div class="row">
+          <app-icon name="mail" />
+          <dl class="email">
+            <dt>{{ 'shell.settings.account.email' | transloco }}</dt>
+            <dd>{{ store.user()?.email }}</dd>
+          </dl>
+        </div>
+        <mat-divider />
+        <button class="row row-button" type="button" (click)="logout()">
+          <app-icon name="logout" />
+          <span>{{ 'shell.settings.account.logout' | transloco }}</span>
+        </button>
+        <mat-divider />
+        <button
+          class="row row-button destructive"
+          type="button"
+          [attr.aria-disabled]="offline() ? 'true' : null"
+          (click)="deleteAccount()"
+        >
+          <app-icon name="delete" />
+          <span>{{ 'shell.settings.account.delete' | transloco }}</span>
+        </button>
+      </mat-card>
+    </div>
+  }
+  @case ('failed') {
+    <app-empty-state
+      icon="settings"
+      [heading]="'shell.settings.failed' | transloco"
+      [text]="'platform.error.generic' | transloco"
+    >
+      <button matButton="filled" empty-action type="button" (click)="reload()">
+        {{ 'shell.settings.retry' | transloco }}
+      </button>
+    </app-empty-state>
+  }
+  @default {
+    <app-loading-indicator [label]="'shell.settings.loading' | transloco" />
+  }
+}

@@ -181,6 +181,121 @@ class BffLoginFlowTest {
     }
 
     @Test
+    void reauthenticationAsksTheIdpForTheCredentialsAndRemembersWhoIsExpected() {
+        MockHttpSession session = new MockHttpSession();
+
+        var result = mvc.get()
+                .uri("/oauth2/authorization/keycloak?reauth=1")
+                .session(session)
+                .with(AppSessions.alice())
+                .exchange();
+
+        assertThat(param(result, "prompt")).isEqualTo("login");
+        assertThat(param(result, "max_age")).isEqualTo("0");
+        assertThat(session.getAttribute("app.reauth.expected-subject")).isEqualTo("sub-alice");
+    }
+
+    @Test
+    void reauthenticationWithoutASessionIsAnOrdinaryLogin() {
+        MockHttpSession session = new MockHttpSession();
+
+        var result = mvc.get()
+                .uri("/oauth2/authorization/keycloak?reauth=1")
+                .session(session)
+                .exchange();
+
+        assertThat(query(result)).doesNotContainKeys("prompt", "max_age");
+        assertThat(session.getAttribute("app.reauth.expected-subject")).isNull();
+    }
+
+    @Test
+    void onlyTheValueOneStartsAReauthentication() {
+        var result = mvc.get()
+                .uri("/oauth2/authorization/keycloak?reauth=yes")
+                .with(AppSessions.alice())
+                .exchange();
+
+        assertThat(query(result)).doesNotContainKeys("prompt", "max_age");
+    }
+
+    private org.springframework.test.web.servlet.assertj.MvcTestResult reauthenticate(
+            MockHttpSession session, String subject, Instant authTime) {
+        var start = mvc.get()
+                .uri("/oauth2/authorization/keycloak?reauth=1")
+                .session(session)
+                .with(AppSessions.alice())
+                .exchange();
+        IDP.willIssueIdToken(subject, subject + "@example.test", "Alice", "sid-r", param(start, "nonce"), authTime);
+        when(provideUser.provide(any()))
+                .thenReturn(new ProvideUserResult(People.ALICE_ID, subject + "@example.test", "Alice"));
+        return mvc.get()
+                .uri("/login/oauth2/code/keycloak?code=abc&state={state}", param(start, "state"))
+                .session(session)
+                .exchange();
+    }
+
+    @Test
+    void aFreshLoginOfTheSamePersonConfirmsTheReauthenticationAndOpensTheDeletionDialog() {
+        MockHttpSession session = new MockHttpSession();
+
+        var callback = reauthenticate(session, "sub-alice", SecuritySliceBeans.NOW.minusSeconds(20));
+
+        assertThat(callback.getResponse().getHeader("Location")).isEqualTo("/einstellungen?konto-loeschen");
+        assertThat(ReauthSession.confirmedAt(session)).isEqualTo(SecuritySliceBeans.NOW);
+        assertThat(session.getAttribute("app.reauth.expected-subject")).isNull();
+    }
+
+    @Test
+    void aLoginWhoseAuthTimeIsOlderThanFiveMinutesDoesNotConfirm() {
+        MockHttpSession session = new MockHttpSession();
+
+        var callback = reauthenticate(session, "sub-alice", SecuritySliceBeans.NOW.minusSeconds(6 * 60));
+
+        assertThat(callback.getResponse().getHeader("Location")).isEqualTo("/einstellungen");
+        assertThat(ReauthSession.confirmedAt(session)).isNull();
+    }
+
+    @Test
+    void aLoginAsAnotherPersonDoesNotConfirm() {
+        MockHttpSession session = new MockHttpSession();
+        // the session starts as Alice (expected subject sub-alice), but Mallory types her credentials
+        var start = mvc.get()
+                .uri("/oauth2/authorization/keycloak?reauth=1")
+                .session(session)
+                .with(AppSessions.alice())
+                .exchange();
+        IDP.willIssueIdToken(
+                "sub-mallory", "m@example.test", "Mallory", "sid-m", param(start, "nonce"), SecuritySliceBeans.NOW);
+        when(provideUser.provide(any())).thenReturn(new ProvideUserResult(People.BOB_ID, "m@example.test", "Mallory"));
+
+        var callback = mvc.get()
+                .uri("/login/oauth2/code/keycloak?code=abc&state={state}", param(start, "state"))
+                .session(session)
+                .exchange();
+
+        assertThat(callback.getResponse().getHeader("Location")).isEqualTo("/einstellungen");
+        assertThat(ReauthSession.confirmedAt(session)).isNull();
+    }
+
+    @Test
+    void anOrdinaryLoginForgetsAnEarlierConfirmation() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        ReauthSession.confirm(session, SecuritySliceBeans.NOW.minusSeconds(30));
+        var start =
+                mvc.get().uri("/oauth2/authorization/keycloak").session(session).exchange();
+        IDP.willIssueIdToken("sub-alice", "alice@example.test", "Alice", "sid-o", param(start, "nonce"));
+        when(provideUser.provide(any()))
+                .thenReturn(new ProvideUserResult(People.ALICE_ID, "alice@example.test", "Alice"));
+
+        mvc.get()
+                .uri("/login/oauth2/code/keycloak?code=abc&state={state}", param(start, "state"))
+                .session(session)
+                .exchange();
+
+        assertThat(ReauthSession.confirmedAt(session)).isNull();
+    }
+
+    @Test
     void refusesAnIdTokenWithTheWrongNonceAndLogsNoTokenOrAddress() {
         MockHttpSession session = new MockHttpSession();
         var start =

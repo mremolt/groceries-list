@@ -43,7 +43,7 @@ class ProvideUserServiceTest {
     }
 
     @Test
-    void updatesTheLoginTimeAndNameOfAKnownSubjectWithoutCreatingAnotherAccount() {
+    void updatesTheLoginTimeOfAKnownSubjectButKeepsTheNameTheProductHoldsWithoutCreatingAnotherAccount() {
         UUID id = UUID.randomUUID();
         User existing = User.register(id, "sub-1", "a@example.test", "Alice", NOW.minusSeconds(3600));
         when(load.findBySubject("sub-1")).thenReturn(Optional.of(existing));
@@ -52,7 +52,8 @@ class ProvideUserServiceTest {
         ProvideUserResult result = service.provide(new ProvideUserCommand("sub-1", "a@example.test", "Alice N."));
 
         assertThat(result.userId()).isEqualTo(id);
-        assertThat(result.displayName()).isEqualTo("Alice N.");
+        // FR-SET-01: a name chosen in the product is not overwritten by the (older) claim of the identity provider
+        assertThat(result.displayName()).isEqualTo("Alice");
     }
 
     @Test

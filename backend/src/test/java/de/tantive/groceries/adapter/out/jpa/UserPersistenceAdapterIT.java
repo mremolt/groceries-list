@@ -3,6 +3,7 @@ package de.tantive.groceries.adapter.out.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import de.tantive.groceries.domain.DisplayName;
 import de.tantive.groceries.domain.User;
 import de.tantive.groceries.domain.UserEmailTakenException;
 import de.tantive.groceries.ports.out.LoadUserPort;
@@ -21,6 +22,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
             "app.auth.client-secret=test",
+            "app.idp-admin.client-secret=test",
             "app.sharing.public-base-url=http://localhost:8080"
         })
 @Import(TestcontainersConfiguration.class)
@@ -49,11 +51,11 @@ class UserPersistenceAdapterIT {
     }
 
     @Test
-    void updatesTheLoginTimeOfAnExistingAccountInPlace() {
+    void updatesTheLoginTimeAndNameOfAnExistingAccountInPlace() {
         String subject = "sub-" + UUID.randomUUID();
         User first = save.save(User.register(UUID.randomUUID(), subject, subject + "@example.test", "Alice", NOW));
 
-        save.save(first.loggedIn("Alice N.", NOW.plusSeconds(5)));
+        save.save(first.loggedIn(NOW.plusSeconds(5)).renamed(DisplayName.of("Alice N.")));
 
         assertThat(load.findById(first.id())).hasValueSatisfying(user -> {
             assertThat(user.displayName()).isEqualTo("Alice N.");

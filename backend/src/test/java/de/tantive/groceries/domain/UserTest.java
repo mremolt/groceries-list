@@ -50,15 +50,28 @@ class UserTest {
     }
 
     @Test
-    void recordsTheLoginTimeAndTakesOverTheCurrentDisplayName() {
+    void recordsTheLoginTimeAndKeepsTheNameTheProductHolds() {
         User user = User.register(ID, "sub-1", "a@example.test", "Alice", NOW);
         Instant later = NOW.plusSeconds(60);
 
-        User updated = user.loggedIn("Alice Renamed", later);
+        User updated = user.loggedIn(later);
 
         assertThat(updated.lastLoginAt()).isEqualTo(later);
-        assertThat(updated.displayName()).isEqualTo("Alice Renamed");
+        assertThat(updated.displayName()).isEqualTo("Alice");
         assertThat(updated.createdAt()).isEqualTo(NOW);
         assertThat(updated.id()).isEqualTo(ID);
+    }
+
+    @Test
+    void renamingChangesOnlyTheName() {
+        User user = User.register(ID, "sub-1", "a@example.test", "Alice", NOW);
+
+        User renamed = user.renamed(DisplayName.of(" Alice Renamed "));
+
+        assertThat(renamed.displayName()).isEqualTo("Alice Renamed");
+        assertThat(renamed)
+                .usingRecursiveComparison()
+                .ignoringFields("displayName")
+                .isEqualTo(user);
     }
 }

@@ -79,6 +79,19 @@ final class IdpStub implements AutoCloseable {
                 "nonce", nonce)));
     }
 
+    /** As above, with the {@code auth_time} claim Keycloak adds: when the person really typed their credentials. */
+    void willIssueIdToken(
+            String subject, String email, String displayName, String sid, String nonce, Instant authTime) {
+        nextIdToken.set(sign(Map.of(
+                "sub", subject,
+                "email", email,
+                "email_verified", false,
+                "displayName", displayName,
+                "sid", sid,
+                "nonce", nonce,
+                "auth_time", authTime.getEpochSecond())));
+    }
+
     /** A signed token with the claims of an OIDC back-channel logout token. */
     String logoutToken(String subject, String sid) {
         return sign(Map.of(

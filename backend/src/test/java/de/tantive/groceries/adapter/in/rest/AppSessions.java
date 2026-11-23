@@ -27,6 +27,11 @@ public final class AppSessions {
         return session("sub-carol", People.CAROL_ID, "carol@example.test", "Carol Example");
     }
 
+    /** A logged-in person with their own id, for tests that must not touch the shared test people (e.g. deletion). */
+    public static RequestPostProcessor person(java.util.UUID id, String email, String name) {
+        return session("sub-" + id, id, email, name);
+    }
+
     private static RequestPostProcessor session(String subject, java.util.UUID id, String email, String name) {
         OidcIdToken token = OidcIdToken.withTokenValue("test-token")
                 .subject(subject)

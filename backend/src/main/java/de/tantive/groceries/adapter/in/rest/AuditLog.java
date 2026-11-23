@@ -28,6 +28,30 @@ public final class AuditLog {
                 .log("Security event");
     }
 
+    /** The person logged in again to confirm a destructive action (FR-SET-04). */
+    static void reauthenticated(UUID userId) {
+        AUDIT.atInfo()
+                .addKeyValue("event", "reauthentication.success")
+                .addKeyValue("userId", userId)
+                .log("Security event");
+    }
+
+    static void reauthenticationRefused(UUID userId, String reason) {
+        AUDIT.atWarn()
+                .addKeyValue("event", "reauthentication.refused")
+                .addKeyValue("reason", reason)
+                .addKeyValue("userId", userId)
+                .log("Security event");
+    }
+
+    /** The account was deleted on the person's request (FR-SET-04); only the pseudonymous id, never name or address. */
+    public static void accountDeleted(UUID userId) {
+        AUDIT.atInfo()
+                .addKeyValue("event", "account.deleted")
+                .addKeyValue("userId", userId)
+                .log("Security event");
+    }
+
     static void loggedOut(UUID userId) {
         AUDIT.atInfo()
                 .addKeyValue("event", "logout")

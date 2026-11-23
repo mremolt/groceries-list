@@ -24,6 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
             "app.auth.client-secret=test-only",
+            "app.idp-admin.client-secret=test-only",
             "app.sharing.public-base-url=http://localhost:8080"
         })
 @AutoConfigureMockMvc

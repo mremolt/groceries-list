@@ -482,8 +482,10 @@ class ArchitectureTest {
             "de.tantive.groceries.application.sessions.EndIdpSessionsService", // provider-initiated back-channel logout
             "de.tantive.groceries.application.lists.CreateListService", // creates a new aggregate: no id from the
             // caller; the user's own limit is locked per user (ListRulesConcurrencyIT)
-            "de.tantive.groceries.application.sharing.LookupInvitationService" // public, no caller: the unguessable
+            "de.tantive.groceries.application.sharing.LookupInvitationService", // public, no caller: the unguessable
             // token is the authorisation and a wrong one is the uniform 404 (SharingApiIT, FR-SHARE-04 AC2)
+            "de.tantive.groceries.application.accounts.RetryIdpDeletionsService" // triggered by the scheduler, no
+            // caller and no id: it only finishes deletions the product recorded itself (DeleteAccountIT)
             );
 
     @ArchTest

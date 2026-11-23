@@ -4,7 +4,7 @@ import { provideRouter, Router, type Routes, withComponentInputBinding } from '@
 import { RouterTestingHarness } from '@angular/router/testing';
 import { ListLimitReachedError, ListNameInvalidError, ListNotFoundError } from '@features/lists';
 import { LOGOUT, type LogoutUseCase } from '@features/session';
-import { PAGE_NAVIGATION, type PageNavigation } from '@platform';
+import { ColorScheme, PAGE_NAVIGATION, type PageNavigation } from '@platform';
 import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
@@ -12,6 +12,7 @@ import { provideTestAnnouncer } from '@testing/announcer';
 import { expectNoAxeViolations } from '@testing/axe';
 import { itemUseCaseFakes } from '@testing/item-use-cases';
 import { BBQ, listUseCaseFakes, WEEK } from '@testing/list-use-cases';
+import { sessionUseCaseFakes } from '@testing/session-use-cases';
 import { sharingUseCaseFakes } from '@testing/sharing-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
 import { fireEvent, screen, within } from '@testing-library/angular';
@@ -19,10 +20,12 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
+import { AccountActions } from './account-actions';
 import { AppShell } from './app-shell';
 import { ListPage } from './list-page';
 import { ListsEmptyPage } from './lists-empty-page';
 import { SettingsPage } from './settings-page';
+import { SettingsStore } from './settings-store';
 import { startGuard } from './start-guard';
 
 // The routes of shell.routes.ts with the real guard and pages; only the use cases are doubles (NG-TEST-06).
@@ -43,7 +46,12 @@ const ROUTES: Routes = [
         component: ListPage,
         data: { heading: 'shell.heading.lists', headingFromList: true },
       },
-      { path: 'einstellungen', component: SettingsPage, data: { heading: 'shell.heading.settings' } },
+      {
+        path: 'einstellungen',
+        component: SettingsPage,
+        providers: [SettingsStore, AccountActions],
+        data: { heading: 'shell.heading.settings' },
+      },
     ],
   },
 ];
@@ -68,6 +76,8 @@ async function setup(options: { size?: SizeClass; url?: string; lists?: (typeof 
       ...items.providers,
       ...sharing.providers,
       { provide: WindowSize, useValue: { sizeClass } },
+      ...sessionUseCaseFakes().providers,
+      ColorScheme,
       { provide: LOGOUT, useValue: mock<LogoutUseCase>() },
       { provide: PAGE_NAVIGATION, useValue: navigation },
       ...provideTestAnnouncer(),

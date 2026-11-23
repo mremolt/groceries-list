@@ -27,6 +27,8 @@ app:
   auth:
     issuer-uri: http://keycloak.localhost:8180/realms/groceries
     client-secret: dev-only-client-secret   # dev realm value, fictitious (docs/security/requirements.md)
+  idp-admin:
+    client-secret: dev-only-admin-secret    # service account that deletes accounts at the IdP, dev realm value, fictitious
   sharing:
     public-base-url: http://localhost:4200   # the Angular dev server, where people open /j/<token> locally
   frontend:

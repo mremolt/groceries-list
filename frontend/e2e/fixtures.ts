@@ -6,6 +6,7 @@ import type { ListResponse } from '../src/features/lists/adapter/out/http/genera
 import { stubConfig } from './fixtures/config';
 import { type ItemsStub, stubItems } from './fixtures/items';
 import { type ListsStub, stubLists } from './fixtures/lists';
+import { type ProfileStub, stubProfile } from './fixtures/profile';
 import { stubSession } from './fixtures/session';
 import { type SharingStub, stubSharing } from './fixtures/sharing';
 
@@ -34,6 +35,8 @@ interface Fixtures {
   listsApi: ListsStub;
   /** Stateful stub of the items API (`/api/v1/lists/:id/items`), consistent with `listsApi`. */
   itemsApi: ItemsStub;
+  /** Stub of the profile commands `PATCH` and `DELETE /api/v1/me` (settings page). */
+  profileApi: ProfileStub;
   /** Stateful stub of the sharing API (share link, invitations, join), consistent with `listsApi`. */
   sharingApi: SharingStub;
 }
@@ -58,6 +61,12 @@ export const test = base.extend<Fixtures>({
   itemsApi: [
     async ({ page, listsApi, initialItems }, use) => {
       await use(await stubItems(page, listsApi.lists, initialItems.items));
+    },
+    { auto: true },
+  ],
+  profileApi: [
+    async ({ page }, use) => {
+      await use(await stubProfile(page));
     },
     { auto: true },
   ],

@@ -561,6 +561,28 @@ paths:
       tags:
       - sharing
   /api/v1/me:
+    delete:
+      operationId: deleteCurrentUser
+      responses:
+        "204":
+          description: "The account, its memberships and the lists where the person\
+            \ was the last member are deleted; all sessions ended (FR-SET-04)"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No re-authentication in the last 5 minutes; code REAUTH_REQUIRED.
+            Start GET /oauth2/authorization/keycloak?reauth=1
+      summary: Deletes the account after a fresh re-authentication (FR-SET-04)
+      tags:
+      - me-controller
     get:
       operationId: getCurrentUser
       responses:
@@ -577,6 +599,37 @@ paths:
                 $ref: "#/components/schemas/ProblemDetail"
           description: No session; code UNAUTHENTICATED
       summary: Profile of the logged-in person
+      tags:
+      - me-controller
+    patch:
+      operationId: updateCurrentUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCurrentUserRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUserResponse"
+          description: The profile after the change
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: "Invalid name; code VALIDATION_FAILED with errors[].code DISPLAY_NAME_REQUIRED\
+            \ or DISPLAY_NAME_TOO_LONG"
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+      summary: Changes the display name (FR-SET-01)
       tags:
       - me-controller
   /api/v1/memberships/join:
@@ -833,6 +886,16 @@ components:
           minLength: 1
       required:
       - token
+    UpdateCurrentUserRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          example: Alex Beispiel
+          maxLength: 50
+          minLength: 1
+      required:
+      - displayName
     UpdateItemRequest:
       type: object
       description: At least one of text and done

@@ -229,3 +229,37 @@ start	duration_s	milestone	category	label	exit
 2026-11-23T16:47:07+01:00	64	M5-frontend	e2e	e2e all chromium stubbed projects (final 2)	0
 2026-11-23T16:49:45+01:00	13	M5	infra	build image	0
 2026-11-23T16:50:27+01:00	81	M5-frontend	e2e	e2e real	0
+2026-11-23T16:55:38+01:00	3	M6-frontend	test-run	RED: session domain + services	1
+2026-11-23T16:55:58+01:00	3	M6-frontend	test-run	GREEN: session domain + services	0
+2026-11-23T16:56:32+01:00	3	M6-frontend	test-run	GREEN: http-session	0
+2026-11-23T16:57:15+01:00	4	M6-backend	test-run	RED: domain + use case tests (no services yet)	1
+2026-11-23T16:57:21+01:00	2	M6-frontend	test-run	RED: settings store	1
+2026-11-23T16:57:32+01:00	3	M6-frontend	test-run	GREEN: settings store	0
+2026-11-23T16:58:54+01:00	3	M6-frontend	test-run	RED: settings ui	1
+2026-11-23T16:59:48+01:00	7	M6-backend	test-run	unit tests (accounts)	1
+2026-11-23T16:59:59+01:00	12	M6-backend	test-run	unit tests (accounts)	0
+2026-11-23T17:00:05+01:00	8	M6-frontend	test-run	GREEN?: settings ui	1
+2026-11-23T17:00:29+01:00	7	M6-frontend	test-run	GREEN?: settings ui 2	0
+2026-11-23T17:00:41+01:00	4	M6-backend	test-run	BffLoginFlowTest reauth	1
+2026-11-23T17:00:57+01:00	4	M6-backend	test-run	BffLoginFlowTest reauth	1
+2026-11-23T17:01:10+01:00	6	M6-backend	test-run	BffLoginFlowTest reauth	1
+2026-11-23T17:01:57+01:00	9	M6-backend	test-run	unit tests accounts + BffLoginFlow	0
+2026-11-23T17:01:23+01:00	111	M6-frontend	e2e	e2e settings (fast)	1
+2026-11-23T17:04:45+01:00	15	M6-frontend	e2e	e2e settings (fast) 2	1
+2026-11-23T17:05:47+01:00	22	M6-backend	test-run	DeleteAccountIT	1
+2026-11-23T17:06:03+01:00	14	M6-frontend	e2e	e2e settings (fast) 3	1
+2026-11-23T17:06:13+01:00	17	M6-backend	test-run	DeleteAccountIT 2	1
+2026-11-23T17:06:24+01:00	13	M6-frontend	e2e	e2e settings (fast) 4	0
+2026-11-23T17:06:38+01:00	20	M6-backend	debug	mutation: no locks in DeleteAccount (expect race IT red)	1
+2026-11-23T17:06:42+01:00	18	M6-frontend	e2e	e2e settings all chromium	1
+2026-11-23T17:07:40+01:00	16	M6-frontend	e2e	e2e settings all chromium 2	0
+2026-11-23T17:10:10+01:00	31	M6-backend	build-gate	mvnw verify (full, spec update)	1
+2026-11-23T17:10:54+01:00	81	M6-backend	build-gate	mvnw verify (full, spec update) 2	1
+2026-11-23T17:12:20+01:00	60	M6-backend	build-gate	mvnw verify (full, spec update) 3	1
+2026-11-23T17:13:27+01:00	68	M6-backend	build-gate	mvnw verify (full) 4	0
+2026-11-23T17:17:35+01:00	78	M6-frontend	e2e	e2e all chromium stubbed	1
+2026-11-23T17:18:59+01:00	75	M6-backend	build-gate	mvnw verify (final)	0
+2026-11-23T17:21:24+01:00	12	M6	infra	build image	0
+2026-11-23T17:22:01+01:00	115	M6-frontend	e2e	e2e real	1
+2026-11-23T17:24:02+01:00	91	M6-frontend	e2e	e2e real 2	1
+2026-11-23T17:25:42+01:00	87	M6-frontend	e2e	e2e real 3	0

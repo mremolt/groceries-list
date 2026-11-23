@@ -57,6 +57,30 @@ keys:
     required: false
     secret: false
     description: Read timeout of calls to the IdP (default 5s).
+  - key: app.idp-admin.issuer-uri
+    required: false
+    secret: false
+    description: Realm issuer URL of the admin API (default app.auth.issuer-uri).
+  - key: app.idp-admin.client-id
+    required: false
+    secret: false
+    description: Service-account client that deletes accounts at the IdP (default groceries-admin).
+  - key: app.idp-admin.client-secret
+    required: true
+    secret: true
+    description: Secret of the account-deletion service account, read from a mounted file (config tree, SPRING-SEC-41).
+  - key: app.idp-admin.connect-timeout
+    required: false
+    secret: false
+    description: Connect timeout of calls to the IdP admin API (default 2s).
+  - key: app.idp-admin.read-timeout
+    required: false
+    secret: false
+    description: Read timeout of calls to the IdP admin API (default 5s).
+  - key: app.account.idp-deletion-retry-delay
+    required: false
+    secret: false
+    description: Pause between retries of account deletions at the IdP that failed once (ISO duration, default PT5M).
   - key: app.rate-limits.login-start-per-minute
     required: false
     secret: false

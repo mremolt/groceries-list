@@ -4,6 +4,7 @@ import de.tantive.groceries.domain.Membership;
 import de.tantive.groceries.ports.out.MembershipPort;
 import de.tantive.groceries.stereotype.PersistenceAdapter;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
@@ -28,6 +29,14 @@ class MembershipJdbcAdapter implements MembershipPort {
                 .param("id", userId)
                 .query(Integer.class)
                 .single();
+    }
+
+    @Override
+    public List<UUID> listIdsOf(UUID userId) {
+        return jdbc.sql("SELECT list_id FROM memberships WHERE user_id = :user ORDER BY list_id")
+                .param("user", userId)
+                .query((rs, row) -> rs.getObject("list_id", UUID.class))
+                .list();
     }
 
     @Override

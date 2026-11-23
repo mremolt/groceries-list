@@ -97,6 +97,9 @@ springdoc:
     enabled: false                    # spec comes from the committed file; on only in application-local.yaml and OpenApiSpecIT (SPRING-API-10)
   writer-with-order-by-keys: true     # deterministic output for the stale-spec check (SPRING-API-08)
 
+app:
+  idp-admin:
+    issuer-uri: ${app.auth.issuer-uri}   # the admin API of the same realm as the login (SPRING-SEC-41)
 
 ---
 spring:
@@ -107,3 +110,4 @@ logging:
   structured:
     format:
       console: ecs                    # JSON logs outside local development (SPRING-LOG-02)
+

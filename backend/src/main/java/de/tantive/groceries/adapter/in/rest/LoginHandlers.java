@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -29,11 +31,19 @@ final class LoginHandlers {
     /** The SPA route that joins the list of the token remembered in the session (ADR 0008). */
     static final String CONSUME_PATH = "/j/consume";
 
+    /** The SPA settings page, and the same page with the account-deletion dialog open (FR-SET-04). */
+    static final String SETTINGS_PATH = "/einstellungen";
+
+    static final String DELETE_ACCOUNT_PATH = "/einstellungen?konto-loeschen";
+
+    private static final java.time.Duration REAUTH_MAX_AGE = java.time.Duration.ofMinutes(5);
+    private static final java.time.Duration CLOCK_SKEW = java.time.Duration.ofMinutes(1);
+
     private static final DefaultRedirectStrategy REDIRECT = new DefaultRedirectStrategy();
 
     private LoginHandlers() {}
 
-    static AuthenticationSuccessHandler success(RegisterIdpSessionUseCase registerSession) {
+    static AuthenticationSuccessHandler success(RegisterIdpSessionUseCase registerSession, Clock clock) {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
             if (authentication.getPrincipal() instanceof AppOidcUser user) {
                 HttpSession session = request.getSession();
@@ -41,6 +51,12 @@ final class LoginHandlers {
                 registerSession.register(new RegisterIdpSessionCommand(
                         session.getId(), sid == null ? "" : sid, user.toCaller().subject()));
                 AuditLog.loginSucceeded(user.toCaller().userId());
+                ReauthSession.clear(session);
+                String expected = ReauthSession.takeExpected(session);
+                if (expected != null) {
+                    REDIRECT.sendRedirect(request, response, reauthenticated(session, user, expected, clock));
+                    return;
+                }
                 Object requested = session.getAttribute(POST_LOGIN_PATH);
                 session.removeAttribute(POST_LOGIN_PATH);
                 if (PendingInvitation.isPending(session)) {
@@ -55,6 +71,26 @@ final class LoginHandlers {
                 REDIRECT.sendRedirect(request, response, "/");
             }
         };
+    }
+
+    /**
+     * FR-SET-04: confirms the re-authentication for the same person only, and only for a login that really happened
+     * just now ({@code auth_time}); returns the SPA path to open next (a constant, no state in the URL).
+     */
+    private static String reauthenticated(HttpSession session, AppOidcUser user, String expectedSubject, Clock clock) {
+        Instant now = clock.instant();
+        Instant authTime = user.getAuthenticatedAt();
+        boolean sameAccount = expectedSubject.equals(user.toCaller().subject());
+        boolean fresh = authTime != null
+                && !authTime.isBefore(now.minus(REAUTH_MAX_AGE))
+                && !authTime.isAfter(now.plus(CLOCK_SKEW));
+        if (sameAccount && fresh) {
+            ReauthSession.confirm(session, now);
+            AuditLog.reauthenticated(user.toCaller().userId());
+            return DELETE_ACCOUNT_PATH;
+        }
+        AuditLog.reauthenticationRefused(user.toCaller().userId(), sameAccount ? "stale" : "other-account");
+        return SETTINGS_PATH;
     }
 
     static AuthenticationFailureHandler failure() {

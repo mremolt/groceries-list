@@ -21,3 +21,30 @@
     scroll-behavior: auto !important;
   }
 }
+
+// The check mark of the selected segment (theme choice, FR-SET-02) is an icon in a fixed 18 px box that Material clips on
+// purpose. A larger line height set by the reader (WCAG 1.4.12) must not grow the icon beyond it: there is no text in it.
+.mat-button-toggle-checkbox-wrapper,
+.mat-button-toggle-checkbox-wrapper .mat-pseudo-checkbox {
+  line-height: 1 !important;
+}
+
+// An unselected segment has no check mark: Material collapses its box to 0 px and clips it; take it out of the layout instead.
+.mat-button-toggle:not(.mat-button-toggle-checked) .mat-button-toggle-checkbox-wrapper {
+  display: none;
+}
+
+// Forced colors: Material marks the checked segment with a 500 px bottom border that the group clips. The reflow check
+// cannot tell that clip from lost text, and the border is no mark a reader can rely on; mark the segment with the system
+// highlight colours instead.
+@media (forced-colors: active) {
+  .mat-button-toggle-checked .mat-button-toggle-focus-overlay {
+    border-bottom-width: 0 !important;
+  }
+
+  .mat-button-toggle-checked .mat-button-toggle-button {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}

@@ -8,6 +8,7 @@ Local identity provider for the groceries list ([ADR 0002](../../../docs/adr/000
 | Login theme | `theme/groceries/login/` (FreeMarker templates, `resources/css`, `js`, self-hosted Roboto, German `messages/messages_de.properties`) |
 | Reset mail theme | `theme/groceries/email/` (German reset mail, no list content) |
 | BFF client secret | `groceries-bff` / `dev-only-client-secret`, also in `../secrets/keycloak-client-secret` (mounted file read by the backend, SPRING-CFG-07) |
+| Account-deletion client | `groceries-admin` / `dev-only-admin-secret` (service account, only the role `manage-users`, scopes `roles` and `kc-admin-api`; also in `../secrets/keycloak-admin-client-secret`); the app deletes the Keycloak user of a person who deleted their account (FR-SET-04, SPRING-SEC-41) |
 | Demo users | `anna@example.test` / `Demo-Passwort-1`, `ben@example.test` / `Demo-Passwort-2` (fictitious) |
 
 Run: `cd backend && docker compose --profile auth --profile mail up -d --wait` (Keycloak on http://keycloak.localhost:8180, admin `admin`/`admin`; Mailpit UI on http://localhost:8025). The issuer is `http://keycloak.localhost:8180/realms/groceries` for the browser, the app on the host and containers alike (SPRING-DEV-11). After a realm change: `docker compose --profile auth --profile mail down -v` (the import runs once per empty database). Theme files are re-read on every request in dev mode.

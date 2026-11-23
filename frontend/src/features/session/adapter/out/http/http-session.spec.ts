@@ -8,7 +8,11 @@ import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
-import { NotAuthenticatedError } from '../../../domain/session-errors';
+import {
+  DisplayNameInvalidError,
+  NotAuthenticatedError,
+  ReauthenticationRequiredError,
+} from '../../../domain/session-errors';
 import { getGetCurrentUserMockHandler } from './generated/endpoints/me-controller/me-controller.msw';
 import { MeControllerService } from './generated/endpoints/me-controller/me-controller.service';
 import { HttpSession } from './http-session';
@@ -178,6 +182,92 @@ describe('HttpSession.isSignedIn', () => {
     const { adapter, reportError } = setup();
 
     await expect(adapter.isSignedIn()).rejects.toBeInstanceOf(TechnicalError);
+    expect(reportError.report.mock.calls).toHaveLength(1);
+  });
+});
+
+describe('HttpSession.updateDisplayName', () => {
+  it('patches the name with the XSRF header and maps the answered profile (FR-SET-01)', async () => {
+    document.cookie = 'XSRF-TOKEN=xsrf-2; path=/';
+    let body: unknown;
+    let xsrf: string | null = null;
+    server.use(
+      http.patch('*/api/v1/me', async ({ request }) => {
+        body = await request.json();
+        xsrf = request.headers.get('x-xsrf-token');
+        return HttpResponse.json({ ...USER, displayName: 'Mara' });
+      }),
+    );
+    const { adapter } = setup();
+
+    expect(await adapter.updateDisplayName('Mara')).toEqual({ ...USER, displayName: 'Mara' });
+    expect(body).toEqual({ displayName: 'Mara' });
+    expect(xsrf).toBe('xsrf-2');
+  });
+
+  it.each([
+    ['DISPLAY_NAME_REQUIRED', 'required'],
+    ['DISPLAY_NAME_TOO_LONG', 'tooLong'],
+  ])('maps the field error %s of a 400 to a DisplayNameInvalidError(%s)', async (code, problem) => {
+    server.use(
+      http.patch('*/api/v1/me', () =>
+        HttpResponse.json(
+          { status: 400, code: 'VALIDATION_FAILED', errors: [{ field: 'displayName', code }] },
+          { status: 400, headers: { 'Content-Type': 'application/problem+json' } },
+        ),
+      ),
+    );
+    const { adapter, reportError } = setup();
+
+    await expect(adapter.updateDisplayName('x')).rejects.toEqual(new DisplayNameInvalidError(problem as never));
+    expect(reportError.report.mock.calls).toHaveLength(0);
+  });
+
+  it('answers a reported TechnicalError for a server error', async () => {
+    server.use(http.patch('*/api/v1/me', () => HttpResponse.json({ status: 500 }, { status: 500 })));
+    const { adapter, reportError } = setup();
+
+    await expect(adapter.updateDisplayName('Mara')).rejects.toBeInstanceOf(TechnicalError);
+    expect(reportError.report.mock.calls).toHaveLength(1);
+  });
+});
+
+describe('HttpSession.deleteAccount', () => {
+  it('deletes with the XSRF header on 204 (FR-SET-04)', async () => {
+    document.cookie = 'XSRF-TOKEN=xsrf-3; path=/';
+    let xsrf: string | null = null;
+    server.use(
+      http.delete('*/api/v1/me', ({ request }) => {
+        xsrf = request.headers.get('x-xsrf-token');
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const { adapter } = setup();
+
+    await expect(adapter.deleteAccount()).resolves.toBeUndefined();
+    expect(xsrf).toBe('xsrf-3');
+  });
+
+  it('maps 403 REAUTH_REQUIRED to ReauthenticationRequiredError, unreported', async () => {
+    server.use(
+      http.delete('*/api/v1/me', () =>
+        HttpResponse.json(
+          { status: 403, code: 'REAUTH_REQUIRED' },
+          { status: 403, headers: { 'Content-Type': 'application/problem+json' } },
+        ),
+      ),
+    );
+    const { adapter, reportError } = setup();
+
+    await expect(adapter.deleteAccount()).rejects.toBeInstanceOf(ReauthenticationRequiredError);
+    expect(reportError.report.mock.calls).toHaveLength(0);
+  });
+
+  it('answers a reported TechnicalError for any other failure', async () => {
+    server.use(http.delete('*/api/v1/me', () => HttpResponse.json({ status: 500 }, { status: 500 })));
+    const { adapter, reportError } = setup();
+
+    await expect(adapter.deleteAccount()).rejects.toBeInstanceOf(TechnicalError);
     expect(reportError.report.mock.calls).toHaveLength(1);
   });
 });

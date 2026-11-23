@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, type Routes } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { LOGOUT, type LogoutUseCase } from '@features/session';
-import { PAGE_NAVIGATION, type PageNavigation } from '@platform';
+import { ColorScheme, PAGE_NAVIGATION, type PageNavigation } from '@platform';
 import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
@@ -11,6 +11,7 @@ import { provideTestAnnouncer } from '@testing/announcer';
 import { expectNoAxeViolations } from '@testing/axe';
 import { itemUseCaseFakes } from '@testing/item-use-cases';
 import { listUseCaseFakes } from '@testing/list-use-cases';
+import { sessionUseCaseFakes } from '@testing/session-use-cases';
 import { sharingUseCaseFakes } from '@testing/sharing-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
 import { fireEvent, screen, within } from '@testing-library/angular';
@@ -18,9 +19,11 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
+import { AccountActions } from './account-actions';
 import { AppShell } from './app-shell';
 import { ListsEmptyPage } from './lists-empty-page';
 import { SettingsPage } from './settings-page';
+import { SettingsStore } from './settings-store';
 
 const ROUTES: Routes = [
   {
@@ -28,7 +31,12 @@ const ROUTES: Routes = [
     component: AppShell,
     children: [
       { path: '', component: ListsEmptyPage, data: { heading: 'shell.heading.lists' } },
-      { path: 'einstellungen', component: SettingsPage, data: { heading: 'shell.heading.settings' } },
+      {
+        path: 'einstellungen',
+        component: SettingsPage,
+        providers: [SettingsStore, AccountActions],
+        data: { heading: 'shell.heading.settings' },
+      },
     ],
   },
 ];
@@ -49,6 +57,8 @@ async function setup(size: SizeClass = 'compact', url = '/') {
       provideRouter(ROUTES),
       Snackbar,
       { provide: WindowSize, useValue: { sizeClass } },
+      ...sessionUseCaseFakes().providers,
+      ColorScheme,
       { provide: LOGOUT, useValue: logout },
       { provide: PAGE_NAVIGATION, useValue: navigation },
       ...provideTestTranslations(),

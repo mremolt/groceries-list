@@ -125,7 +125,7 @@ class SecurityConfiguration {
                                     endpoint.authorizationRequestResolver(new PromptCreateResolver(registrations)))
                             .tokenEndpoint(endpoint -> endpoint.accessTokenResponseClient(tokenClient))
                             .userInfoEndpoint(endpoint -> endpoint.oidcUserService(oidcUserService))
-                            .successHandler(LoginHandlers.success(registerSession))
+                            .successHandler(LoginHandlers.success(registerSession, clock))
                             .failureHandler(LoginHandlers.failure());
                 })
                 .logout(logout -> logout.logoutUrl("/logout")

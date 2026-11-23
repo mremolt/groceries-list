@@ -24,7 +24,7 @@ Rules: [data-protection.md](../baseline/08-crosscutting-concepts/data-protection
 | Recipients | operator; Keycloak (processor-internal component); mail server for reset mails |
 | Transfers outside EU/EEA | none planned (local installation) |
 | Retention | [deletion-concept.md](deletion-concept.md) |
-| Data subject rights covered by | `DeleteAccount` use case (M6); copy of data handled manually by support (N3, deferred) |
+| Data subject rights covered by | `DeleteAccount` use case (FR-SET-04; M6); `pending_idp_deletions(idp_subject, recorded_at)` holds the pseudonymous IdP subject between the erasure and the deletion at the IdP; copy of data handled manually by support (N3, deferred) |
 | DPIA needed? | no (small, low-risk lists); TBD (DPO) |
 
 ## Processors and external services (DP-PROC-01)

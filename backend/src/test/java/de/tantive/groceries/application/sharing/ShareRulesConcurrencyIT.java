@@ -35,6 +35,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
         properties = {
             "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
             "app.auth.client-secret=test",
+            "app.idp-admin.client-secret=test",
             "app.sharing.public-base-url=http://localhost:8080"
         })
 @Import(TestcontainersConfiguration.class)

@@ -14,6 +14,7 @@ export const END_SESSION_URL = 'http://keycloak.localhost:8180/realms/groceries/
 export async function stubSession(page: Page, signedIn: boolean): Promise<{ calls: () => number }> {
   let calls = 0;
   await page.route('**/api/v1/me', (route) => {
+    if (route.request().method() !== 'GET') return route.fallback(); // PATCH and DELETE: the profile stub (FR-SET-01, FR-SET-04)
     calls += 1;
     return signedIn
       ? route.fulfill({ json: stubUser })
