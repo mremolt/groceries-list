@@ -23,6 +23,10 @@ class I18nConfiguration {
         source.setBasename("messages");
         source.setDefaultEncoding("UTF-8");
         source.setFallbackToSystemLocale(false);
+        // Security filters answer before the locale resolver ran: the request locale can be the JVM's (en_US), for
+        // which no
+        // bundle exists. German is the only language (ADR 0005), so it is the explicit default.
+        source.setDefaultLocale(Locale.GERMAN);
         return source;
     }
 

@@ -4,9 +4,44 @@ info:
   version: v1
 servers:
 - url: /
-paths: {}
+paths:
+  /api/v1/me:
+    get:
+      operationId: getCurrentUser
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUserResponse"
+          description: The logged-in person
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: No session; code UNAUTHENTICATED
+      summary: Profile of the logged-in person
+      tags:
+      - me-controller
 components:
   schemas:
+    CurrentUserResponse:
+      type: object
+      properties:
+        displayName:
+          type: string
+          example: Alex Beispiel
+        email:
+          type: string
+          example: alex@beispiel.de
+        id:
+          type: string
+          format: uuid
+      required:
+      - displayName
+      - email
+      - id
     ProblemDetail:
       type: object
       description: RFC 9457 problem details; code is stable (API-REST-07)

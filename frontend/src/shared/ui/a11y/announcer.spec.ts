@@ -1,7 +1,7 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TestBed } from '@angular/core/testing';
-import { mock } from 'vitest-mock-extended';
 import { describe, expect, it } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 
 import { Announcer, CdkAnnouncer } from './announcer';
 
@@ -17,6 +17,6 @@ describe('CdkAnnouncer', () => {
 
     TestBed.inject(Announcer).announce('Liste aktualisiert');
 
-    expect(live.announce).toHaveBeenCalledWith('Liste aktualisiert', 'polite');
+    expect(live.announce.mock.calls).toEqual([['Liste aktualisiert', 'polite']]);
   });
 });

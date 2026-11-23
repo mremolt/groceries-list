@@ -13,3 +13,4 @@ Decisions are ADRs in [`docs/adr/`](../adr/) (D6). Index (DOC-ARC-03):
 | [0007](../adr/0007-last-write-wins-item-updates.md) | Last write wins (deviation from API-REST-11) | Accepted |
 | [0008](../adr/0008-share-token-and-join-flow.md) | Share token and join flow | Accepted |
 | [0009](../adr/0009-single-bounded-context.md) | One bounded context | Accepted |
+| [0010](../adr/0010-account-creation-from-unverified-email.md) | Create an account row from an unverified e-mail; never link by e-mail | Accepted |

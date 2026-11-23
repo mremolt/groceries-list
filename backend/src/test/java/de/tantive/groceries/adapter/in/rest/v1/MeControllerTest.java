@@ -26,6 +26,14 @@ class MeControllerTest {
     GetCurrentUserUseCase getCurrentUser;
 
     @Test
+    void anAnonymousCallCreatesNoServerSideSession() {
+        var result = mvc.get().uri("/api/v1/me").exchange();
+
+        assertThat(result.getRequest().getSession(false)).isNull();
+        assertThat(result.getResponse().getHeaders("Set-Cookie")).noneMatch(cookie -> cookie.startsWith("SESSION"));
+    }
+
+    @Test
     void answers401ProblemJsonWithoutASession() {
         var result = mvc.get().uri("/api/v1/me").exchange();
 

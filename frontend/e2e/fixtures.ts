@@ -2,6 +2,7 @@ import { AxeBuilder } from '@axe-core/playwright';
 import { expect, type Page, test as base } from '@playwright/test';
 
 import { stubConfig } from './fixtures/config';
+import { stubSession } from './fixtures/session';
 
 const AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const AAA = ['wcag2aaa']; // axe has no wcag21aaa / wcag22aaa tag
@@ -16,6 +17,10 @@ interface Fixtures {
   expectErrors: (pattern: RegExp) => void;
   /** Paths of API calls the page made (TS-TEST-14). */
   apiCalls: string[];
+  /** Who is signed in. Default: signed in; `null` answers 401 like the BFF without a session. */
+  session: { signedIn: boolean };
+  /** Number of `/api/v1/me` calls (request budget, TS-TEST-14). */
+  meCalls: () => number;
 }
 
 const recordedApiCalls = new WeakMap<Page, string[]>();
@@ -26,6 +31,14 @@ async function stubRuntimeConfig(page: Page): Promise<void> {
 }
 
 export const test = base.extend<Fixtures>({
+  session: [{ signedIn: true }, { option: true }],
+  meCalls: [
+    async ({ page, session }, use) => {
+      const stub = await stubSession(page, session.signedIn);
+      await use(() => stub.calls());
+    },
+    { auto: true },
+  ],
   expectErrors: async ({ page }, use) => {
     await use((pattern) => {
       expectedErrors.set(page, [...(expectedErrors.get(page) ?? []), pattern]);

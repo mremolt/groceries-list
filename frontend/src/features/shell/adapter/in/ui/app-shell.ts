@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
@@ -27,7 +27,7 @@ function headingKeyOf(route: ActivatedRouteSnapshot): string {
   let current: ActivatedRouteSnapshot | null = route;
   let key = '';
   while (current) {
-    const heading = current.data['heading'];
+    const heading: unknown = current.data['heading'];
     if (typeof heading === 'string') key = heading;
     current = current.firstChild;
   }
@@ -76,6 +76,7 @@ export class AppShell {
   protected readonly windowSize = inject(WindowSize);
 
   protected readonly drawer = viewChild.required(MatSidenav);
+  private readonly menuButton = viewChild<unknown, ElementRef<HTMLElement>>('menuButton', { read: ElementRef });
 
   protected readonly expanded = computed(() => this.windowSize.sizeClass() === 'expanded');
   protected readonly headingKey = toSignal(
@@ -86,6 +87,17 @@ export class AppShell {
     ),
     { initialValue: '' },
   );
+
+  /**
+   * The drawer is closed: focus returns to the menu button (FR-NAV-02 AC4, NG-UI-33). Without animations (reduced
+   * motion) the browser drops focus from the hidden drawer to the body after Material's restore ran, so the restore
+   * is made explicit. Focus that already moved on (the page heading after choosing an entry) stays.
+   */
+  protected restoreFocus(): void {
+    const active = document.activeElement;
+    const lost = !active || active === document.body || active.closest('mat-sidenav') !== null;
+    if (lost) this.menuButton()?.nativeElement.focus();
+  }
 
   /** FR-NAV-02 AC4: selecting an entry closes the modal drawer. */
   protected closeIfModal(): void {

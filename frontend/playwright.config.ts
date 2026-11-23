@@ -14,45 +14,79 @@ if (skipWebkit) {
   console.warn('E2E_SKIP_WEBKIT=1: WebKit projects are NOT run; the TS-TEST-16 matrix is incomplete.');
 }
 
+const realTier = process.env['E2E_REAL'] === '1';
+
 export default defineConfig({
   testDir: 'e2e',
+  ...(realTier ? {} : { testIgnore: /real\// }), // the real tier runs only against the Compose stack
   retries: process.env['CI'] ? 1 : 0, // TS-TEST-31
   reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: { baseURL: 'http://localhost:4200', reducedMotion: 'reduce' },
-  webServer: {
-    command: 'npm run start -- --port 4200',
-    url: 'http://localhost:4200',
-    reuseExistingServer: !process.env['CI'],
-    timeout: 120_000,
-  },
-  projects: [
-    // T1: npm run e2e
-    { name: 'stubbed-expanded', use: expanded },
-    { name: 'stubbed-firefox-expanded', use: { ...expanded, browserName: 'firefox' as const } },
-    { name: 'stubbed-webkit-expanded', use: { ...expanded, browserName: 'webkit' as const } },
-    { name: 'stubbed-compact', ...responsive, use: { browserName: 'chromium' as const, ...size(390, 844), ...touch } },
-    {
-      name: 'stubbed-medium',
-      ...responsive,
-      use: { browserName: 'chromium' as const, ...size(768, 1024), hasTouch: true },
-    },
-    { name: 'stubbed-reflow', ...responsive, use: { browserName: 'chromium' as const, ...size(320, 800) } },
-    { name: 'stubbed-dark', ...themed, use: { ...expanded, colorScheme: 'dark' as const } },
-    { name: 'stubbed-high-contrast', ...themed, use: { ...expanded, contrast: 'more' as const } },
-    { name: 'stubbed-forced-colors', grep: /@shell/, use: { ...expanded, forcedColors: 'active' as const } },
-    // T2: npm run e2e:nightly
-    { name: 'nightly-large', ...responsive, use: { browserName: 'chromium' as const, ...size(1440, 900) } },
-    { name: 'nightly-extra-large', ...responsive, use: { browserName: 'chromium' as const, ...size(1920, 1080) } },
-    {
-      name: 'nightly-compact-landscape',
-      ...responsive,
-      use: { browserName: 'chromium' as const, ...size(844, 390), ...touch },
-    },
-    { name: 'nightly-firefox-compact', ...responsive, use: { browserName: 'firefox' as const, ...size(390, 844) } },
-    {
-      name: 'nightly-webkit-compact',
-      ...responsive,
-      use: { browserName: 'webkit' as const, ...size(390, 844), ...touch },
-    },
-  ].filter((project) => !(skipWebkit && project.name.includes('webkit'))),
+  // The real-backend tier (E2E_REAL=1) talks to the Compose stack and needs no dev server.
+  ...(realTier
+    ? {}
+    : {
+        webServer: {
+          command: 'npm run start -- --port 4200',
+          url: 'http://localhost:4200',
+          reuseExistingServer: !process.env['CI'],
+          timeout: 120_000,
+        },
+      }),
+  // The real tier shares one identity provider and one mail catcher: one worker, files in name order.
+  ...(realTier ? { workers: 1 } : {}),
+  projects: realTier
+    ? [
+        // Real backend tier (REPO-CI-04, SPRING-DEV-10): npm run e2e:real, against `docker compose ... up` of backend/.
+        {
+          name: 'real',
+          grep: /@real/,
+          testMatch: /real\/.*\.spec\.ts/,
+          use: {
+            baseURL: 'http://localhost:8080',
+            browserName: 'chromium' as const,
+            viewport: { width: 1024, height: 768 },
+          },
+        },
+      ]
+    : [
+        // T1: npm run e2e
+        { name: 'stubbed-expanded', use: expanded },
+        { name: 'stubbed-firefox-expanded', use: { ...expanded, browserName: 'firefox' as const } },
+        { name: 'stubbed-webkit-expanded', use: { ...expanded, browserName: 'webkit' as const } },
+        {
+          name: 'stubbed-compact',
+          ...responsive,
+          use: { browserName: 'chromium' as const, ...size(390, 844), ...touch },
+        },
+        {
+          name: 'stubbed-medium',
+          ...responsive,
+          use: { browserName: 'chromium' as const, ...size(768, 1024), hasTouch: true },
+        },
+        { name: 'stubbed-reflow', ...responsive, use: { browserName: 'chromium' as const, ...size(320, 800) } },
+        { name: 'stubbed-dark', ...themed, use: { ...expanded, colorScheme: 'dark' as const } },
+        { name: 'stubbed-high-contrast', ...themed, use: { ...expanded, contrast: 'more' as const } },
+        { name: 'stubbed-forced-colors', grep: /@shell/, use: { ...expanded, forcedColors: 'active' as const } },
+        // T2: npm run e2e:nightly
+        { name: 'nightly-large', ...responsive, use: { browserName: 'chromium' as const, ...size(1440, 900) } },
+        { name: 'nightly-extra-large', ...responsive, use: { browserName: 'chromium' as const, ...size(1920, 1080) } },
+        {
+          name: 'nightly-compact-landscape',
+          ...responsive,
+          use: { browserName: 'chromium' as const, ...size(844, 390), ...touch },
+        },
+        { name: 'nightly-firefox-compact', ...responsive, use: { browserName: 'firefox' as const, ...size(390, 844) } },
+        {
+          name: 'nightly-webkit-compact',
+          ...responsive,
+          use: { browserName: 'webkit' as const, ...size(390, 844), ...touch },
+        },
+      ]
+        .filter((project) => !(skipWebkit && project.name.includes('webkit')))
+        // @modal tests need the modal drawer (< 840 px), @permanent tests the permanent one (>= 840 px): no test is skipped
+        .map((project) => ({
+          ...project,
+          grepInvert: project.use.viewport.width >= 840 ? /@modal/ : /@permanent/,
+        })),
 });

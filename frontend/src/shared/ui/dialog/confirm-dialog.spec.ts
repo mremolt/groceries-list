@@ -1,5 +1,5 @@
-import { MatDialog } from '@angular/material/dialog';
 import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { expectNoAxeViolations } from '@testing/axe';
 import { fireEvent, screen } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';

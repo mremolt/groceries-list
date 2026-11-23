@@ -14,3 +14,75 @@ start	duration_s	milestone	category	label	exit
 2026-11-23T11:40:05+01:00	324	M0-frontend	debug	lint/arch/knip fixes, build+test	0
 2026-11-23T11:45:41+01:00	108	M0-frontend	e2e	Playwright matrix + fixtures, verify green	0
 2026-11-23T11:47:30+01:00	240	M0-integration	other	config.json contract, real index.html test, IDE setup, both verifies	0
+2026-11-23T11:52:27+01:00	69	M1-keycloak	read-docs	pull Keycloak image, read base login theme templates, tokens	0
+2026-11-23T11:53:36+01:00	9	M1-keycloak	code	realm JSON (user profile, brute force, mappers, demo users)	0
+2026-11-23T11:53:45+01:00	49	M1-keycloak	code	compose edits, theme.properties, German messages, e-mail theme	0
+2026-11-23T11:54:34+01:00	31	M1-keycloak	code	theme templates (template, login, register, reset, update-password, info, error)	0
+2026-11-23T11:55:05+01:00	40	M1-keycloak	code	CSS, JS, fonts	0
+2026-11-23T11:55:45+01:00	80	M1-keycloak	infra	compose up auth+mail first attempts (realm import error)	0
+2026-11-23T11:52:28+01:00	30	M1-backend	infra	pom deps, resolve	0
+2026-11-23T11:52:58+01:00	64	M1-backend	read-docs	Spring Security 7 APIs (javap), session schema	0
+2026-11-23T11:54:02+01:00	48	M1-backend	code	domain+application tests and code	0
+2026-11-23T11:54:50+01:00	41	M1-backend	code	migrations + persistence IT written	0
+2026-11-23T11:55:31+01:00	159	M1-backend	code	adapters, security config, handlers, compile fixes	0
+2026-11-23T11:58:10+01:00	270	M1-backend	code	slice test infra, MeController test, login flow tests, ArchUnit adjustments	0
+2026-11-23T11:52:26+01:00	106	M1-frontend	read-docs	explore frontend, baseline UI/state/signal-forms rules, mockups	0
+2026-11-23T11:54:12+01:00	170	M1-frontend	code	npm installs, shared/ui (icon, window-size, announcer, snackbar, dialog, field, empty-state) + platform additions	0
+2026-11-23T11:57:02+01:00	89	M1-frontend	code	session feature core, shell store/guard	0
+2026-11-23T11:58:31+01:00	215	M1-frontend	code	app-shell component, pages, routes, catalogs, app.config	0
+2026-11-23T12:02:46+01:00	5	M1-backend	test-run	BffLoginFlowTest	1
+2026-11-23T11:59:19+01:00	200	M1-frontend	debug	unit test fix loop: 6 ng test runs, jsdom keyCode/focus quirks, field error approach	0
+2026-11-23T12:02:56+01:00	10	M1-backend	test-run	BffLoginFlowTest	1
+2026-11-23T12:03:10+01:00	22	M1-keycloak	infra	compose up auth+mail clean	0
+2026-11-23T12:03:18+01:00	15	M1-backend	test-run	login flow + rate limit tests	1
+2026-11-23T12:03:32+01:00	20	M1-keycloak	test-run	themed pages playwright+axe run	1
+2026-11-23T12:04:32+01:00	12	M1-backend	debug	fix login flow test state encoding	1
+2026-11-23T12:04:43+01:00	6	M1-frontend	build-gate	typecheck+arch+knip	1
+2026-11-23T12:05:07+01:00	13	M1-backend	debug	token response converter	1
+2026-11-23T11:57:05+01:00	480	M1-keycloak	debug	iterating theme/realm against real Keycloak (template errors, reset flow on login page, update-password error key, expired link, lockout timing)	0
+2026-11-23T12:03:00+01:00	160	M1-keycloak	test-run	final full playwright+axe run, screenshot review	0
+2026-11-23T12:03:30+01:00	130	M1-keycloak	docs	README, security requirements, ch.8, feedback, timing, stack down	0
+2026-11-23T12:06:27+01:00	2	M1-frontend	test-run	ng test (unit+component)	1
+2026-11-23T12:06:35+01:00	6	M1-frontend	test-run	ng test (unit+component)	1
+2026-11-23T12:07:28+01:00	6	M1-frontend	test-run	ng test (unit+component)	0
+2026-11-23T12:08:02+01:00	36	M1-backend	build-gate	mvnw verify (first full)	1
+2026-11-23T12:06:50+01:00	153	M1-frontend	other	waiting for backend spec (getCurrentUser) in the openapi file	0
+2026-11-23T12:08:47+01:00	38	M1-backend	build-gate	mvnw verify -Dopenapi.update=true	1
+2026-11-23T12:09:42+01:00	5	M1-backend	build-gate	mvnw verify (spotbugs fixes)	1
+2026-11-23T12:09:53+01:00	41	M1-backend	build-gate	mvnw verify (spotbugs fixes 2)	1
+2026-11-23T12:10:45+01:00	43	M1-backend	build-gate	mvnw verify (spotbugs fixes 3)	0
+2026-11-23T12:12:00+01:00	37	M1-backend	build-gate	mvnw verify (final, spec check)	0
+2026-11-23T12:03:00+01:00	540	M1-backend	debug	login flow test: state encoding, token converter, session rotation, SpotBugs fixes	0
+2026-11-23T12:09:00+01:00	180	M1-backend	docs	ADR 0010, security requirements, chapters 5/6/8/9, compose.app.yaml	0
+2026-11-23T12:16:41+01:00	17	M1-frontend	build-gate	format+lint+typecheck+arch+knip (verify subset)	1
+2026-11-23T12:17:14+01:00	300	M1-frontend	build-gate	npm run verify (E2E_SKIP_WEBKIT=1, local spec)	1
+2026-11-23T12:23:15+01:00	14	M1-frontend	e2e	playwright stubbed-expanded only	1
+2026-11-23T12:23:41+01:00	13	M1-frontend	e2e	playwright stubbed-expanded only (2)	1
+2026-11-23T12:24:58+01:00	4	M1-frontend	e2e	playwright stubbed-expanded only (3)	0
+2026-11-23T12:25:05+01:00	22	M1-frontend	e2e	playwright all stubbed projects (no webkit)	1
+2026-11-23T12:32:35+01:00	50	M1-frontend	build-gate	npm run verify (E2E_SKIP_WEBKIT=1, local spec)	1
+2026-11-23T12:33:40+01:00	22	M1-frontend	build-gate	npm run verify (E2E_SKIP_WEBKIT=1, local spec) #2	1
+2026-11-23T12:34:10+01:00	50	M1-frontend	build-gate	npm run verify (E2E_SKIP_WEBKIT=1, local spec) #3	0
+2026-11-23T12:04:53+01:00	70	M1-frontend	code	e2e specs (shell, drawer, menu, snackbar, focus, theme)	0
+2026-11-23T12:09:23+01:00	420	M1-frontend	code	orval per-feature config, session HTTP adapter + msw adapter spec, local spec workaround	0
+2026-11-23T12:19:00+01:00	800	M1-frontend	debug	e2e fix loop: missing generated service provider, console-error expectations, focus indicator, drawer focus restore without animations, forced-colors snackbar, arch/lint fixes	0
+2026-11-23T12:04:00+01:00	90	M1-frontend	docs	accessibility.md rows, arc42 chapters 5/6/8, feedback file	0
+2026-11-23T12:35:35+01:00	40	M1-integration	build-gate	mvnw verify -Dopenapi.update=true	0
+2026-11-23T12:36:15+01:00	52	M1-integration	build-gate	npm run verify (committed spec)	0
+2026-11-23T12:37:31+01:00	4	M1-e2e	build-gate	frontend npm run build	0
+2026-11-23T12:37:35+01:00	25	M1-e2e	build-gate	backend build-image (buildpacks, first run)	0
+2026-11-23T12:38:19+01:00	19	M1-e2e	infra	compose up auth+mail+app (first)	0
+2026-11-23T12:39:44+01:00	347	M1-e2e	e2e	e2e:real first run	1
+2026-11-23T12:46:12+01:00	41	M1-e2e	build-gate	mvnw verify (fixes: request cache, default locale)	0
+2026-11-23T12:47:00+01:00	11	M1-e2e	build-gate	build-image (rebuild)	0
+2026-11-23T12:47:11+01:00	19	M1-e2e	infra	compose up (rebuilt)	0
+2026-11-23T12:47:34+01:00	80	M1-e2e	e2e	e2e:real second run	1
+2026-11-23T12:49:21+01:00	11	M1-e2e	build-gate	build-image (rebuild 2)	0
+2026-11-23T12:49:39+01:00	17	M1-e2e	e2e	e2e:real third run	1
+2026-11-23T12:50:07+01:00	16	M1-e2e	e2e	e2e:real fourth run	0
+2026-11-23T12:50:27+01:00	15	M1-e2e	e2e	e2e:real fifth run (repeat)	0
+2026-11-23T12:50:42+01:00	52	M1-e2e	build-gate	npm run verify (with real specs present)	1
+2026-11-23T12:52:01+01:00	51	M1-e2e	build-gate	npm run verify (after lint fixes)	0
+2026-11-23T12:52:56+01:00	15	M1-e2e	e2e	e2e:real sixth run (final, with log check)	0
+2026-11-23T12:53:11+01:00	34	M1-e2e	build-gate	mvnw verify (final)	0
+2026-11-23T12:36:30+01:00	300	M1-e2e	code	e2e real specs, support helpers, config, scripts, docs (hand row)	0

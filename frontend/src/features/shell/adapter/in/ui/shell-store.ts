@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
+import { LOGOUT } from '@features/session';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { TechnicalError } from '@platform/domain';
-import { LOGOUT } from '@features/session';
 
 /** View state of the app shell: only the sign-out command so far (FR-AUTH-03, UI-20). */
 interface ShellState {

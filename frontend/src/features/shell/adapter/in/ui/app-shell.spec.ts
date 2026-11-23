@@ -11,8 +11,8 @@ import { expectNoAxeViolations } from '@testing/axe';
 import { provideTestTranslations } from '@testing/transloco';
 import { fireEvent, screen, within } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { describe, expect, it } from 'vitest';
 
 import { AppShell } from './app-shell';
 import { ListsEmptyPage } from './lists-empty-page';
@@ -32,7 +32,9 @@ const ROUTES: Routes = [
 async function setup(size: SizeClass = 'compact', url = '/') {
   const sizeClass = signal<SizeClass>(size);
   const logout = mock<LogoutUseCase>();
-  const navigation = mock<PageNavigation>();
+  // NG-TOOL-11: explicit fake, `expect(mock.method)` trips unbound-method
+  const assign = vi.fn<(url: string) => void>();
+  const navigation: PageNavigation = { assign };
   TestBed.configureTestingModule({
     providers: [
       provideRouter(ROUTES),
@@ -51,7 +53,7 @@ async function setup(size: SizeClass = 'compact', url = '/') {
     fixture: harness.fixture,
     sizeClass,
     logout,
-    navigation,
+    assign,
     snackbar: TestBed.inject(Snackbar),
   };
 }
@@ -182,7 +184,7 @@ describe('AppShell', () => {
       expect(
         within(menu)
           .getAllByRole('menuitem')
-          .map((item) => item.textContent?.trim()),
+          .map((item) => item.textContent.trim()),
       ).toEqual(['Einstellungen', 'Abmelden']);
     });
 
@@ -192,17 +194,17 @@ describe('AppShell', () => {
       button.focus();
       await userEvent.keyboard('{Enter}'); // keyboard origin: the first entry gets focus
       await screen.findByRole('menu');
-      await expect.poll(() => document.activeElement?.textContent?.trim()).toBe('Einstellungen');
+      await expect.poll(() => document.activeElement?.textContent.trim()).toBe('Einstellungen');
 
       await pressKey('ArrowDown', 40);
-      expect(document.activeElement?.textContent?.trim()).toBe('Abmelden');
+      expect(document.activeElement?.textContent.trim()).toBe('Abmelden');
       await pressKey('Escape', 27);
 
       await expect.poll(() => document.activeElement).toBe(button);
     });
 
     it('signs out and sends the whole page to the IdP end-session address', async () => {
-      const { logout, navigation } = await setup();
+      const { logout, assign } = await setup();
       logout.execute.mockResolvedValue(
         'http://keycloak.localhost:8180/realms/groceries/protocol/openid-connect/logout',
       );
@@ -211,19 +213,19 @@ describe('AppShell', () => {
       await userEvent.click(await screen.findByRole('menuitem', { name: 'Abmelden' }));
 
       await expect
-        .poll(() => navigation.assign)
+        .poll(() => assign)
         .toHaveBeenCalledWith('http://keycloak.localhost:8180/realms/groceries/protocol/openid-connect/logout');
     });
 
     it('shows the generic error snackbar when signing out fails and stays on the page', async () => {
-      const { logout, navigation } = await setup();
+      const { logout, assign } = await setup();
       logout.execute.mockRejectedValue(new TechnicalError('server error'));
       await userEvent.click(await screen.findByRole('button', { name: 'Weitere Optionen' }));
 
       await userEvent.click(await screen.findByRole('menuitem', { name: 'Abmelden' }));
 
       expect(await screen.findByText('Das hat nicht geklappt. Bitte versuche es noch einmal.')).toBeTruthy();
-      expect(navigation.assign).not.toHaveBeenCalled();
+      expect(assign).not.toHaveBeenCalled();
     });
   });
 

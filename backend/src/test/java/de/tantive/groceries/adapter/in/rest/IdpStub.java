@@ -36,7 +36,7 @@ final class IdpStub implements AutoCloseable {
     IdpStub() {
         try {
             key = new RSAKeyGenerator(2048).keyID("test-key").generate();
-            server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+            server = HttpServer.create(new InetSocketAddress(java.net.InetAddress.getLoopbackAddress(), 0), 0);
         } catch (JOSEException | IOException e) {
             throw new IllegalStateException(e);
         }
@@ -61,7 +61,7 @@ final class IdpStub implements AutoCloseable {
     }
 
     String issuer() {
-        return "http://127.0.0.1:" + server.getAddress().getPort() + "/realms/groceries";
+        return "http://localhost:" + server.getAddress().getPort() + "/realms/groceries";
     }
 
     RSAKey key() {

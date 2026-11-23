@@ -8,12 +8,17 @@ import { EmptyState } from './empty-state';
 
 @Component({
   imports: [EmptyState, MatButton],
-  template: `<app-empty-state icon="cart" heading="Noch keine Listen" text="Lege deine erste Einkaufsliste an.">
-    <button matButton="filled" empty-action type="button">Neue Liste</button>
-    <p empty-hint>Du hast einen Teilen-Link bekommen?</p>
+  template: `<app-empty-state icon="cart" [heading]="heading" [text]="text">
+    <button matButton="filled" empty-action type="button">{{ action }}</button>
+    <p empty-hint>{{ hint }}</p>
   </app-empty-state>`,
 })
-class Host {}
+class Host {
+  protected readonly heading = 'Noch keine Listen';
+  protected readonly text = 'Lege deine erste Einkaufsliste an.';
+  protected readonly action = 'Neue Liste';
+  protected readonly hint = 'Du hast einen Teilen-Link bekommen?';
+}
 
 describe('EmptyState', () => {
   it('shows heading, text, projected action and hint', async () => {

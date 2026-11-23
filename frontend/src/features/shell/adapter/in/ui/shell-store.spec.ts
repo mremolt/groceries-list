@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { LOGOUT, type LogoutUseCase } from '@features/session';
 import { TechnicalError } from '@platform/domain';
-import { mock } from 'vitest-mock-extended';
 import { describe, expect, it } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 
 import { ShellStore } from './shell-store';
 
@@ -23,16 +23,20 @@ describe('ShellStore', () => {
 
   it('does not sign out twice while the first call runs (UI-20)', async () => {
     const { logout, store } = setup();
-    let finish: (url: string) => void = () => undefined;
-    logout.execute.mockReturnValue(new Promise<string>((resolve) => (finish = resolve)));
+    let resolveLogout: ((url: string) => void) | undefined;
+    logout.execute.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveLogout = resolve;
+      }),
+    );
 
     const first = store.logout();
     const second = await store.logout();
-    finish('https://idp.example/logout');
+    resolveLogout?.('https://idp.example/logout');
     await first;
 
     expect(second).toBeNull();
-    expect(logout.execute).toHaveBeenCalledOnce();
+    expect(logout.execute.mock.calls).toHaveLength(1);
   });
 
   it('marks a technical failure and allows another try', async () => {

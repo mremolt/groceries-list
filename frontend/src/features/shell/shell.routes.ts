@@ -1,6 +1,6 @@
 import type { Routes } from '@angular/router';
-import { provideTranslocoScope } from '@jsverse/transloco';
 import { provideSessionApi } from '@features/session';
+import { provideTranslocoScope } from '@jsverse/transloco';
 
 import { authenticatedGuard } from './adapter/in/ui/authenticated-guard';
 

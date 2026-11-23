@@ -52,6 +52,7 @@ server:
         secure: true
         http-only: true
         same-site: lax
+        max-age: 30d                  # a persistent cookie as long as the session lives, so closing the browser does not end it (FR-AUTH-02 AC5)
   forward-headers-strategy: none     # explicit per deployment (SPRING-SEC-12): none until a validating reverse proxy sits in front
   max-http-request-header-size: 16KB # SPRING-SEC-15
   shutdown: graceful                 # OBS-04, SPRING-OBS-04

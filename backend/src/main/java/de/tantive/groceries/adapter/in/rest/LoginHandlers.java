@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.oidc.authentication.logout.OidcLogoutToken;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -23,6 +25,8 @@ final class LoginHandlers {
 
     /** Session attribute for a validated internal path to open after login (set by the join flow, M4). */
     static final String POST_LOGIN_PATH = "app.post-login-path";
+
+    private static final DefaultRedirectStrategy REDIRECT = new DefaultRedirectStrategy();
 
     private LoginHandlers() {}
 
@@ -36,17 +40,21 @@ final class LoginHandlers {
                 AuditLog.loginSucceeded(user.toCaller().userId());
                 Object requested = session.getAttribute(POST_LOGIN_PATH);
                 session.removeAttribute(POST_LOGIN_PATH);
-                response.sendRedirect(requested instanceof String path ? InternalPaths.orRoot(path) : "/");
+                REDIRECT.sendRedirect(
+                        request, response, requested instanceof String path ? InternalPaths.orRoot(path) : "/");
             } else {
-                response.sendRedirect("/");
+                REDIRECT.sendRedirect(request, response, "/");
             }
         };
     }
 
     static AuthenticationFailureHandler failure() {
         return (HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) -> {
-            AuditLog.loginFailed(exception.getClass().getSimpleName());
-            response.sendRedirect("/?login=failed");
+            String reason = exception instanceof OAuth2AuthenticationException oauth
+                    ? oauth.getError().getErrorCode()
+                    : exception.getClass().getSimpleName();
+            AuditLog.loginFailed(reason);
+            REDIRECT.sendRedirect(request, response, "/?login=failed");
         };
     }
 
@@ -68,8 +76,8 @@ final class LoginHandlers {
         return (HttpServletRequest request, HttpServletResponse response, @Nullable Authentication authentication) -> {
             if (authentication != null && authentication.getPrincipal() instanceof OidcLogoutToken token) {
                 String sid = token.getSessionId();
-                endSessions.end(new EndIdpSessionsCommand(
-                        token.getSubject() == null ? "" : token.getSubject(), sid == null ? "" : sid));
+                String subject = token.getSubject();
+                endSessions.end(new EndIdpSessionsCommand(subject == null ? "" : subject, sid == null ? "" : sid));
                 AuditLog.backChannelLogout(sid != null);
             }
         };
@@ -88,12 +96,14 @@ final class LoginHandlers {
             extends org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler {
 
         private final JsonMapper mapper;
+        private final DefaultRedirectStrategy seeOther = new DefaultRedirectStrategy();
 
         JsonAwareLogoutSuccessHandler(
                 org.springframework.security.oauth2.client.registration.ClientRegistrationRepository registrations,
                 JsonMapper mapper) {
             super(registrations);
             this.mapper = mapper;
+            this.seeOther.setStatusCode(HttpStatus.SEE_OTHER);
         }
 
         @Override
@@ -107,8 +117,7 @@ final class LoginHandlers {
                 response.setHeader("Cache-Control", "no-store");
                 mapper.writeValue(response.getOutputStream(), java.util.Map.of("redirectUri", target));
             } else {
-                response.setStatus(HttpStatus.SEE_OTHER.value());
-                response.setHeader("Location", target);
+                seeOther.sendRedirect(request, response, target);
             }
         }
 

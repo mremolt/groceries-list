@@ -25,7 +25,7 @@ describe('SnackbarHost', () => {
 
     const region = screen.getByRole('status');
     expect(region.getAttribute('aria-live')).toBe('polite');
-    expect(region.textContent?.trim()).toBe('');
+    expect(region.textContent.trim()).toBe('');
   });
 
   it('shows the message in the status region and does not take focus', async () => {
@@ -49,7 +49,7 @@ describe('SnackbarHost', () => {
       .click(screen.getByRole('button', { name: 'Hinweis schließen' }));
     await fixture.whenStable();
 
-    expect(screen.getByRole('status').textContent?.trim()).toBe('');
+    expect(screen.getByRole('status').textContent.trim()).toBe('');
   });
 
   it('replaces the current message with a new one', async () => {
@@ -70,7 +70,7 @@ describe('SnackbarHost', () => {
     vi.advanceTimersByTime(SNACKBAR_DURATION_MS);
     await fixture.whenStable();
 
-    expect(screen.getByRole('status').textContent?.trim()).toBe('');
+    expect(screen.getByRole('status').textContent.trim()).toBe('');
   });
 
   it('stays while hovered and starts counting again after the pointer leaves', async () => {

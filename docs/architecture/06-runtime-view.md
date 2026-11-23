@@ -1,6 +1,6 @@
 # 6. Runtime View
 
-Status: planned; each scenario is confirmed per milestone.
+Status: 6.1 and 6.5 are built in the frontend as of M1 (the guard, the 401 interceptor and the sign-out); the rest is planned per milestone.
 
 ## 6.1 Login (OIDC code flow through the BFF)
 
@@ -43,3 +43,7 @@ Open list: `GET /v1/lists/{id}/items` with `If-None-Match` every 5 s while visib
 ## 6.4 Optimistic check/uncheck
 
 Store patches the item, calls `PATCH /v1/lists/{id}/items/{itemId}`, rolls back and shows the error snackbar on failure (NG-STATE-10).
+
+## 6.5 Sign-out (frontend, M1)
+
+The ⋮ menu entry „Abmelden“ calls `Logout`, which posts `/logout` (XSRF header) to the BFF and expects `200 {"redirectUri"}`; the adapter accepts only an `https` URL (`http` only for the local IdP, TS-SEC-10). The page then navigates to that address with `window.location.assign`. A technical failure shows the generic error snackbar and the page stays. The sign-out command cannot run twice at once (UI-20).

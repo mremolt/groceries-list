@@ -39,8 +39,9 @@ Mobile assistive technology and real devices: not tested by the unattended run; 
 
 | Journey | Routes | States (dialog open, error, empty, loading, …) | E2E spec tag | Owner |
 |---|---|---|---|---|
-| Auth pages (Keycloak) | `/realms/groceries/...` | error, reset sent, expired | `@a11y-auth` | team |
-| App shell and lists | `/`, `/listen/:id` | empty, loading, drawer open, menu open, dialogs | `@a11y-lists` | team |
+| Auth pages (Keycloak) | `/realms/groceries/...` | login, register (also with errors), reset request, check-your-mailbox | `@a11y-auth` (real tier, `frontend/e2e/real/auth.spec.ts`) | team |
+| App shell (M1, built) | `/`, `/einstellungen` | empty state, modal drawer open (compact, medium), permanent drawer (expanded), ⋮ menu open, snackbar, sign-out error | `@a11y-shell` | team |
+| Lists (M2, planned) | `/listen/:id` | dialogs (new, rename, delete, leave), menu entries | `@a11y-lists` | team |
 | Items | `/listen/:id` | empty, all checked, edit dialog, error snackbar | `@a11y-items` | team |
 | Sharing | `/j/:token`, share dialog | invitation, invalid link | `@a11y-share` | team |
 | Settings | `/einstellungen` | delete-account dialog | `@a11y-settings` | team |

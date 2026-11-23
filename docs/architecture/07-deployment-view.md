@@ -1,6 +1,6 @@
 # 7. Deployment View
 
-Repository layout, CI, delivery, images and local development follow the baseline: [../baseline/07-deployment-view](../baseline/07-deployment-view/README.md). Interim per REL-CD-08: [ADR 0004](../adr/0004-local-gates-and-compose-test-environment.md). Status: M0 scaffolding exists (backend `compose.yaml`, `compose.app.yaml`, `configuration-keys.yaml`); image build and deployment not yet exercised.
+Repository layout, CI, delivery, images and local development follow the baseline: [../baseline/07-deployment-view](../baseline/07-deployment-view/README.md). Interim per REL-CD-08: [ADR 0004](../adr/0004-local-gates-and-compose-test-environment.md). Status: exercised in M1. The application image builds with Buildpacks and the embedded bundle (`./mvnw spring-boot:build-image -Dfrontend.dist=../frontend/dist/frontend/browser`), and `docker compose --profile auth --profile mail -f compose.yaml -f compose.app.yaml up -d --wait` starts PostgreSQL, Keycloak, Mailpit and the app; `GET /` answers 200 `text/html` and `GET /config.json` 200 against that image (REL-FE-06, first part). The real-backend E2E tier runs against this stack (chapter 10). The local installation sets a 120/min login-start limit (`APP_RATE_LIMITS_LOGIN_START_PER_MINUTE`) because the tests log in from one address; the application default is 10/min.
 
 ## 7.1 Infrastructure
 

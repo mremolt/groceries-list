@@ -36,4 +36,12 @@ Base package `de.tantive.groceries`. Rings and adapters per [spring.md](../basel
 
 ## 5.3 Level 2: frontend
 
-Features under `frontend/src/features/` (`shell`, `lists`, `items`, `sharing`, `settings`) in rings per [angular.md](../baseline/05-building-block-view/angular.md); `src/platform` for HTTP, theme, runtime config, clock; `src/shared/ui` for snackbar, dialog, empty state components. Planned, filled per milestone.
+Rings per [angular.md](../baseline/05-building-block-view/angular.md). Built in M1 (DOC-ARC-11); lists, items, sharing and settings are planned for M2-M6.
+
+| Element | Content | Status |
+|---|---|---|
+| `src/platform` | runtime config, theme (`ColorScheme`), route title and focus, global error path, `PAGE_NAVIGATION` + `LOGIN_PATH` (whole-page navigation to the BFF login), `unauthenticatedInterceptor` (401 on `/api/` goes to the login), `untilAborted`, `TechnicalError` | built |
+| `src/shared/ui` | `AppIcon` (self-hosted SVG icons), `WindowSize` (size classes), `Announcer`, `Snackbar` + `SnackbarHost`, `ConfirmDialogs`, `ValidatedField` (Signal Forms control), `EmptyState` | built |
+| `features/session` | use cases `LoadCurrentUser`, `Logout`; ports; HTTP adapter over the generated client; published API `provideSessionApi()` | built (adapter see implementation log) |
+| `features/shell` | `AppShell` (app bar with the page's h1, drawer, ⋮ menu), `ShellStore` (sign-out), `authenticatedGuard`, empty lists page, settings placeholder | built |
+| `features/lists`, `items`, `sharing`, `settings` | | planned (M2-M6) |

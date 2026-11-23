@@ -1,18 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  ElementRef,
-  input,
-  model,
-  output,
-  viewChild,
-} from '@angular/core';
-import type { ValidationError } from '@angular/forms/signals';
-import type { FormValueControl } from '@angular/forms/signals';
+import type { ElementRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model, output, viewChild } from '@angular/core';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-
 import { TranslocoPipe } from '@jsverse/transloco';
 
 import { AppIcon } from '../icon/app-icon';
@@ -39,7 +29,7 @@ export class ValidatedField implements FormValueControl<string> {
   readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
   readonly touched = input(false);
   readonly disabled = input(false);
-  readonly touch = output<void>();
+  readonly touch = output();
 
   readonly label = input.required<string>();
   readonly type = input<'text' | 'email' | 'password'>('text');

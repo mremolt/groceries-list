@@ -39,4 +39,14 @@ public final class AppOidcUser extends DefaultOidcUser {
     public Caller toCaller() {
         return new Caller(userId, subject, email, displayName);
     }
+
+    @Override
+    public boolean equals(@org.jspecify.annotations.Nullable Object other) {
+        return other instanceof AppOidcUser that && userId.equals(that.userId) && super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), userId);
+    }
 }

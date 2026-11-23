@@ -6,5 +6,6 @@
     "src/platform/platform.tokens.ts": ["exports"],
     "src/platform/index.ts": ["exports", "types"]
   },
-  "ignore": ["test/fixtures/**"]
+  "ignore": ["test/fixtures/**"],
+  "ignoreDependencies": ["@faker-js/faker"]
 }

@@ -15,12 +15,15 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenValidator;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -32,6 +35,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.converter.ClaimTypeConverter;
+import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -76,7 +80,10 @@ class AuthConfiguration {
     OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient(
             RestClient.Builder builder) {
         RestClientAuthorizationCodeTokenResponseClient client = new RestClientAuthorizationCodeTokenResponseClient();
-        client.setRestClient(builder.build());
+        client.setRestClient(builder.configureMessageConverters(converters ->
+                        converters.addCustomConverter(new OAuth2AccessTokenResponseHttpMessageConverter()))
+                .defaultStatusHandler(new OAuth2ErrorResponseErrorHandler())
+                .build());
         return client;
     }
 
@@ -100,13 +107,17 @@ class AuthConfiguration {
         delegate.setRetrieveUserInfo(request -> false);
         return request -> {
             OidcUser oidc = delegate.loadUser(request);
-            String email = oidc.getEmail() == null ? "" : oidc.getEmail();
-            String name = oidc.getClaimAsString("displayName");
             ProvideUserResult user = provideUser.provide(new ProvideUserCommand(
-                    Objects.requireNonNull(oidc.getSubject(), "sub"), email, name == null ? "" : name));
+                    Objects.requireNonNull(oidc.getSubject(), "sub"),
+                    orEmpty(oidc.getEmail()),
+                    orEmpty(oidc.getClaimAsString("displayName"))));
             return new AppOidcUser(
                     oidc.getAuthorities(), oidc.getIdToken(), user.userId(), user.email(), user.displayName());
         };
+    }
+
+    private static String orEmpty(@Nullable String value) {
+        return Optional.ofNullable(value).orElse("");
     }
 
     static URL url(String value) {

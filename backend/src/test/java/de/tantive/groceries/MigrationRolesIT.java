@@ -20,7 +20,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * The real migrations run against PostgreSQL, and the DML-only role gets what V1 grants, nothing more (SPRING-DB-14,
  * SPRING-DB-19, SPRING-REL-03): data rights on tables the migration role creates later, but no schema changes.
  */
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+            "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
+            "app.auth.client-secret=test-only"
+        })
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
 class MigrationRolesIT {

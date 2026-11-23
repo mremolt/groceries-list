@@ -19,7 +19,12 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
  * {@code ./mvnw verify -Dopenapi.update=true}.
  */
 @SpringBootTest(
-        properties = {"springdoc.api-docs.enabled=true", "springdoc.writer-with-order-by-keys=true"},
+        properties = {
+            "springdoc.api-docs.enabled=true",
+            "springdoc.writer-with-order-by-keys=true",
+            "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
+            "app.auth.client-secret=test-only"
+        },
         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButton } from '@angular/material/button';
+import type { MatDialog } from '@angular/material/dialog';
 import {
   MAT_DIALOG_DATA,
-  MatDialog,
   MatDialogActions,
   MatDialogClose,
   MatDialogContent,
@@ -32,7 +32,7 @@ const DESCRIPTION_ID = 'confirm-dialog-text';
   styleUrl: './confirm-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConfirmDialog {
+class ConfirmDialog {
   protected readonly data = inject<ConfirmDialogData>(MAT_DIALOG_DATA);
   protected readonly descriptionId = DESCRIPTION_ID;
 }

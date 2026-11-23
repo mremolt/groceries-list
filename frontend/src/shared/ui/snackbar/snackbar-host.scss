@@ -42,7 +42,11 @@
 }
 
 @media (forced-colors: active) {
+  // forced colors: system colours only, so text and background keep their contrast (NFR-A11Y-09)
   .snackbar {
     border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    --mat-icon-button-icon-color: ButtonText;
   }
 }

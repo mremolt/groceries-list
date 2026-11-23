@@ -28,6 +28,15 @@ class MeController {
     @GetMapping
     @Operation(operationId = "getCurrentUser", summary = "Profile of the logged-in person")
     @ApiResponse(
+            responseCode = "200",
+            description = "The logged-in person",
+            content =
+                    @io.swagger.v3.oas.annotations.media.Content(
+                            mediaType = "application/json",
+                            schema =
+                                    @io.swagger.v3.oas.annotations.media.Schema(
+                                            implementation = CurrentUserResponse.class)))
+    @ApiResponse(
             responseCode = "401",
             description = "No session; code UNAUTHENTICATED",
             content =

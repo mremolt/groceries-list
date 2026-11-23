@@ -22,9 +22,11 @@
     "test": "npm run generate:api && ng test --watch=false",
     "e2e": "playwright test --project='stubbed-*'",
     "e2e:fast": "playwright test --project=stubbed-expanded",
+    "e2e:real": "node scripts/e2e-real.mjs",
     "e2e:nightly": "playwright test --project='stubbed-*' --project='nightly-*'",
     "check": "node scripts/verify.mjs generate:api! typecheck lint check:arch test",
     "verify": "node scripts/verify.mjs generate:api! format:check lint typecheck check:arch check:unused test build! e2e",
+    "verify:full": "node scripts/verify.mjs generate:api! format:check lint typecheck check:arch check:unused test build! e2e e2e:real",
     "new:feature": "node scripts/new-feature.mjs"
   },
   "dependencies": {

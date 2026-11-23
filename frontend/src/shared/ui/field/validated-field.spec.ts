@@ -13,9 +13,9 @@ const MESSAGES = { required: 'Bitte gib einen Namen ein.', default: 'Das passt n
 @Component({
   imports: [ValidatedField, FormField],
   template: `<form novalidate (submit)="$event.preventDefault(); save()">
-    <app-validated-field label="Name der Liste" autocomplete="off" [formField]="f.name" [errorMessages]="messages" />
-    <app-validated-field label="Notiz" [formField]="f.note" [errorMessages]="messages" />
-    <button type="submit">Erstellen</button>
+    <app-validated-field [label]="labels.name" autocomplete="off" [formField]="f.name" [errorMessages]="messages" />
+    <app-validated-field [label]="labels.note" [formField]="f.note" [errorMessages]="messages" />
+    <button type="submit">{{ labels.submit }}</button>
   </form>`,
 })
 class Host {
@@ -25,6 +25,7 @@ class Host {
     required(p.note);
   });
   protected readonly messages = MESSAGES;
+  protected readonly labels = { name: 'Name der Liste', note: 'Notiz', submit: 'Erstellen' };
   readonly submitted = vi.fn();
 
   protected async save(): Promise<void> {
@@ -73,7 +74,7 @@ describe('ValidatedField', () => {
     expect(screen.getAllByText(/Fehler:/)).toHaveLength(1);
     expect(host.submitted).not.toHaveBeenCalled();
     await expect.poll(() => document.activeElement).toBe(screen.getByLabelText('Name der Liste'));
-    expect((screen.getByLabelText('Notiz') as HTMLInputElement).value).toBe('Eier');
+    expect(screen.getByLabelText<HTMLInputElement>('Notiz').value).toBe('Eier');
   });
 
   it('submits when the form is valid', async () => {

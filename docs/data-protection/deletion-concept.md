@@ -16,7 +16,7 @@ Rules: [data-protection.md](../baseline/08-crosscutting-concepts/data-protection
 | Memberships | `memberships` (`ON DELETE CASCADE` from `users` and `lists`, SPRING-DP-03) | until leave/delete | leave, list delete, account delete | none | cascade + last-member rule BR-04 | M2/M6 ITs |
 | Lists and items | `lists`, `items` (cascade) | until deleted by a member or when the last member leaves | member action | none | `DeleteList`, `LeaveList`, `DeleteAccount` | M2/M6 ITs |
 | Share tokens | `lists.share_token` | replaced on renewal; removed with the list | renewal/list delete | none | with the list | M4 IT |
-| Sessions and tokens | `spring_session`, `spring_session_attributes`, `idp_sessions` | idle 30 days sliding, absolute 30 days | login | none | expiry job; end on logout, back-channel logout, account deletion | M1/M6 ITs |
+| Sessions and tokens | `spring_session`, `spring_session_attributes`, `idp_sessions` (rows of dead sessions purged at every login) | idle 30 days sliding, absolute 30 days | login | none | expiry job; end on logout, back-channel logout, account deletion | M1/M6 ITs |
 | Pending join token | server-side session attribute | until consumed or session end | invitation | none | with the session | M4 test |
 | Reset mails | mail server | operator-defined (Mailpit: in-memory) | send | none | mail server retention | n/a |
 

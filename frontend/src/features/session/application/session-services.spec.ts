@@ -1,5 +1,5 @@
-import { mock } from 'vitest-mock-extended';
 import { describe, expect, it } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 
 import type { CurrentUser } from '../domain/current-user';
 import { NotAuthenticatedError } from '../domain/session-errors';
@@ -33,6 +33,6 @@ describe('LogoutService', () => {
     port.logout.mockResolvedValue('http://keycloak.localhost:8180/realms/groceries/protocol/openid-connect/logout');
 
     expect(await new LogoutService(port).execute()).toContain('/protocol/openid-connect/logout');
-    expect(port.logout).toHaveBeenCalledOnce();
+    expect(port.logout.mock.calls).toHaveLength(1);
   });
 });

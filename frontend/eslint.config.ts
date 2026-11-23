@@ -180,7 +180,20 @@ export default defineConfig(
       // NG-I18N-05: no hard-coded user-visible text (Transloco templates contain no static text)
       '@angular-eslint/template/i18n': [
         'error',
-        { checkText: true, checkAttributes: true, checkId: false, ignoreAttributes: ['appearance'] },
+        {
+          checkText: true,
+          checkAttributes: true,
+          checkId: false,
+          ignoreAttributes: [
+            'appearance',
+            'matButton',
+            'ariaCurrentWhenActive',
+            'xPosition',
+            'align',
+            'aria-live',
+            'icon',
+          ],
+        },
       ],
     },
   },

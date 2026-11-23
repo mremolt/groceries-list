@@ -1,5 +1,10 @@
 <mat-sidenav-container class="container">
-  <mat-sidenav class="drawer" [mode]="expanded() ? 'side' : 'over'" [opened]="expanded()">
+  <mat-sidenav
+    class="drawer"
+    [mode]="expanded() ? 'side' : 'over'"
+    [opened]="expanded()"
+    (closedStart)="restoreFocus()"
+  >
     <nav [attr.aria-label]="'shell.nav.label' | transloco" class="nav">
       <div class="drawer-head">
         <button matButton="tonal" class="new-list" type="button" disabledInteractive [disabled]="true">
@@ -40,6 +45,7 @@
           <button
             matIconButton
             type="button"
+            #menuButton
             class="menu-button"
             [attr.aria-label]="'shell.nav.open' | transloco"
             (click)="drawer().open()"

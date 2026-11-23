@@ -16,7 +16,11 @@ import org.springframework.util.ClassUtils;
  * The deployed defaults start (TEST-CFG-02: no {@code local} profile, only the keys of the key list) and the probes
  * answer on the main port without a session (SPRING-OBS-01/02, OBS-05).
  */
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+            "app.auth.issuer-uri=http://keycloak.localhost:8180/realms/groceries",
+            "app.auth.client-secret=test-only"
+        })
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
 class ApplicationStartsIT {

@@ -9,7 +9,7 @@
 |---|---|---|---|
 | M0 design (documents only) | done | f9e82bc | |
 | M0 Project setup | done | b0ecad1 | m0-done |
-| M1 Accounts and app shell | in progress | | |
+| M1 Accounts and app shell | done | (see git log) | m1-done |
 | M2 Lists | not started | | |
 | M3 Items | not started | | |
 | M4 Sharing and joining | not started | | |
@@ -17,8 +17,8 @@
 | M6 Settings and account | not started | | |
 | M7 Internal test readiness | not started | | |
 
-- **Next action:** M1: three parallel forks (backend OIDC/BFF/user provisioning; Keycloak realm+theme; frontend app shell), then the real-backend E2E tier against Keycloak, then commit `M1 done`, tag `m1-done`.
-- **Work in flight:** M1 started (nothing uncommitted yet).
+- **Next action:** M2 Lists (BR-01–05, BR-10–12 lists, FR-LIST-01–05, FR-NAV-02/03/05/06, FR-FB-01 AC1, FR-FB-03). Plan: backend fork (lists/memberships use cases, jpa, REST v1, tests incl. cross-user) and frontend fork (lists feature, drawer entries, dialogs, ⋮ menu, deep links, start screen) in parallel against a contract fixed up front, then extend the real-backend E2E tier, verify both gates, commit `M2 done`, tag.
+- **Work in flight:** none (M1 committed).
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
 ## Durations (implementation time per step)
@@ -53,3 +53,19 @@ Wall-clock timestamps taken with `date -Is` at step start and end. Durations are
 Assumptions/deviations: WebKit E2E projects cannot start on this host (Playwright needs libicu74 on Fedora); the explicit switch `E2E_SKIP_WEBKIT=1` was used for the verify. This is an environment gap, not a weakened check; run `sudo npx playwright install-deps` and plain `npm run verify` on a capable host. Medium viewport 768 px (baseline table) instead of 834 px. Backend `allowEmptyShould(true)` on three application-ring ArchUnit rules until the first `@UseCase` (to remove in M1). CSP report endpoint has no rate limit/metric yet (M1).
 
 Manual check (for human review): open the test environment on a phone and a desktop; toggle the system dark mode.
+
+### M1 Accounts and app shell (2026-11-23)
+
+| Done when | Status |
+|---|---|
+| All AUTH acceptance criteria tested | Tested against the real Keycloak in `npm run e2e:real` (16 scenarios, green twice) and in backend tests. Deviations: AUTH-04 AC3 (a newer reset link does not invalidate older ones; each is single-use and expires in 60 min); AUTH-02 AC4 lockout text reveals that the account exists after the lock (required by the AC); exact 5th-attempt boundary not observable (Keycloak quick-login rule locks after fast repeated failures) |
+| Reset e-mails delivered in the test environment | Yes: Mailpit via Keycloak SMTP, asserted in E2E |
+| Drawer focus handling with the keyboard | Yes: component + stubbed E2E (open, Esc, backdrop, focus return to menu button) |
+
+Other: the three AUTH screens are Keycloak themed pages (ADR 0003); the invitation page for FR-AUTH-06 comes in M4. Backend: login by OIDC client with ID-token claims only; sessions 30 d idle/absolute (ADR 0002). Image built with Buildpacks and run in Compose with the app and Keycloak (REL-FE-06 positive case proven; start-without-bundle case only by backend test). WebKit E2E still skipped via `E2E_SKIP_WEBKIT=1` on this host.
+
+Assumptions: A-1 (invitation page before the Keycloak redirect, ADR 0003), A-2 (session lifetimes, ADR 0002), ADR 0010 (account row created with unverified e-mail under OQ-1, never linked by e-mail). Medium window uses the modal drawer (FR-NAV-01), not the navigation rail of NG-UI-10. Mockup logo icon on Keycloak pages omitted.
+
+Manual check (for human review): sign up, log out, log in, reset the password; try a wrong password 6 times.
+
+Known issues: no rate-limit metric for `/csp-reports` (OBS-07); `idp_sessions` rows purged only on next login registration; session attributes Java-serialized (SPRING-SEC-42 alternative, documented); POST /logout not in the OpenAPI spec.

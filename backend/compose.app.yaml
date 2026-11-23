@@ -8,8 +8,13 @@ name: groceries-dev
 services:
   app:
     image: groceries:local
+    # Start with: docker compose --profile auth --profile mail -f compose.yaml -f compose.app.yaml up
     depends_on:
       postgres: { condition: service_healthy }
+      keycloak: { condition: service_healthy }
+    secrets:
+      - source: keycloak_client_secret
+        target: app.auth.client-secret
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/groceries?connectTimeout=2&socketTimeout=10
       SPRING_DATASOURCE_USERNAME: groceries_app
@@ -17,6 +22,18 @@ services:
       SPRING_FLYWAY_USER: groceries_owner
       SPRING_FLYWAY_PASSWORD: groceries_owner
       INFO_RELEASE_VERSION: local
+      # BFF login (ADR 0002): the issuer URL is identical for the browser, a host app and this container (SPRING-DEV-11);
+      # keycloak.localhost resolves to the Keycloak container through the network alias of compose.yaml.
+      APP_AUTH_ISSUER_URI: http://keycloak.localhost:8180/realms/groceries
+      # The client secret is a mounted file read through Boot's config tree (SPRING-CFG-07): /run/secrets/app.auth.client-secret.
+      SPRING_CONFIG_IMPORT: optional:configtree:/run/secrets/
+      # Plain http on localhost cannot carry a Secure or __Host- cookie: the local installation uses a plain cookie
+      # (docs/security/requirements.md). Deployed environments keep the secure defaults of application.yaml.
+      SERVER_SERVLET_SESSION_COOKIE_NAME: SESSION
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: "false"
+      APP_FRONTEND_ENVIRONMENT: local-compose
+      # The E2E tier starts many logins from one address; the production default (10 per minute) would answer 429 (SPRING-SEC-21).
+      APP_RATE_LIMITS_LOGIN_START_PER_MINUTE: "120"
     ports:
       - "127.0.0.1:8080:8080"
     stop_grace_period: 60s   # above the shutdown budget (SPRING-OBS-04, REL-RUN-06)
@@ -26,3 +43,7 @@ services:
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
+
+secrets:
+  keycloak_client_secret:
+    file: ./dev/secrets/keycloak-client-secret   # dev-realm value, fictitious and committed (docs/security/requirements.md)

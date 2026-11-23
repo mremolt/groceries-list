@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { AppIcon } from '@shared/ui/icon/app-icon';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
+import { AppIcon } from '@shared/ui/icon/app-icon';
 
 /**
  * Start page without lists (FR-NAV-03 AC2, FR-FB-01 AC1). The button is inactive until lists exist (M2).

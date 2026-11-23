@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
@@ -16,13 +17,16 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.security.web.header.writers.CrossOriginOpenerPolicyHeaderWriter.CrossOriginOpenerPolicy;
 import org.springframework.security.web.header.writers.CrossOriginResourcePolicyHeaderWriter.CrossOriginResourcePolicy;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -51,6 +55,10 @@ class SecurityConfiguration {
                         SecurityContextHolderFilter.class)
                 .csrf(csrf -> csrf.spa())
                 .headers(headers -> apiHeaders(headers))
+                // An anonymous API call must not create a server-side session (resource exhaustion, T8) nor race the
+                // login
+                // flow for the session's attributes: the SPA starts the login itself after the 401.
+                .requestCache(cache -> cache.requestCache(new NullRequestCache()))
                 .exceptionHandling(handling -> handling.authenticationEntryPoint(ProblemJson.unauthorized(mapper))
                         .accessDeniedHandler(ProblemJson.forbidden(mapper)))
                 .addFilterBefore(
@@ -76,12 +84,15 @@ class SecurityConfiguration {
             throws Exception {
         return http.authorizeHttpRequests(rules -> rules.anyRequest().permitAll())
                 .csrf(csrf -> csrf.spa().ignoringRequestMatchers("/csp-reports"))
-                .oauth2Login(login -> login.authorizationEndpoint(endpoint ->
-                                endpoint.authorizationRequestResolver(new PromptCreateResolver(registrations)))
-                        .tokenEndpoint(endpoint -> endpoint.accessTokenResponseClient(tokenClient))
-                        .userInfoEndpoint(endpoint -> endpoint.oidcUserService(oidcUserService))
-                        .successHandler(LoginHandlers.success(registerSession))
-                        .failureHandler(LoginHandlers.failure()))
+                .oauth2Login(login -> {
+                    login.addObjectPostProcessor(sessionIdRotation());
+                    login.authorizationEndpoint(endpoint ->
+                                    endpoint.authorizationRequestResolver(new PromptCreateResolver(registrations)))
+                            .tokenEndpoint(endpoint -> endpoint.accessTokenResponseClient(tokenClient))
+                            .userInfoEndpoint(endpoint -> endpoint.oidcUserService(oidcUserService))
+                            .successHandler(LoginHandlers.success(registerSession))
+                            .failureHandler(LoginHandlers.failure());
+                })
                 .logout(logout -> logout.logoutUrl("/logout")
                         .addLogoutHandler(LoginHandlers.loggedOut())
                         .logoutSuccessHandler(LoginHandlers.logoutSuccess(registrations, mapper)))
@@ -117,6 +128,17 @@ class SecurityConfiguration {
                         new RequestSizeLimitFilter(limits.maxBodySize().toBytes(), mapper), HeaderWriterFilter.class)
                 .addFilterAfter(new CspNonceFilter(), HeaderWriterFilter.class)
                 .build();
+    }
+
+    /** The session id is rotated at login (session fixation, SPRING-SEC-32), stated explicitly and tested. */
+    private static ObjectPostProcessor<OAuth2LoginAuthenticationFilter> sessionIdRotation() {
+        return new ObjectPostProcessor<>() {
+            @Override
+            public <O extends OAuth2LoginAuthenticationFilter> O postProcess(O filter) {
+                filter.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
+                return filter;
+            }
+        };
     }
 
     private static void apiHeaders(HeadersConfigurer<HttpSecurity> headers) {
