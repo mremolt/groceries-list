@@ -4,9 +4,19 @@ import { ItemNotFoundError, ItemTextInvalidError } from '@features/items';
 import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
+import { provideTestAnnouncer } from '@testing/announcer';
 import { expectNoAxeViolations } from '@testing/axe';
 import { deferred } from '@testing/deferred';
-import { BREAD, BUTTER, EGGS, type ItemUseCaseFakes, itemUseCaseFakes, MILK, YOGHURT } from '@testing/item-use-cases';
+import {
+  BREAD,
+  BUTTER,
+  EGGS,
+  type ItemUseCaseFakes,
+  itemUseCaseFakes,
+  MILK,
+  snapshot,
+  YOGHURT,
+} from '@testing/item-use-cases';
 import { listUseCaseFakes, WEEK } from '@testing/list-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
 import { render, screen, within } from '@testing-library/angular';
@@ -30,6 +40,7 @@ async function setup(options: { items?: typeof ALL; size?: SizeClass } = {}) {
       ...lists.providers,
       Snackbar,
       { provide: WindowSize, useValue: { sizeClass } },
+      ...provideTestAnnouncer(),
       ...provideTestTranslations(),
     ],
   });
@@ -382,7 +393,7 @@ describe('clear checked items (FR-ITEM-05)', () => {
   it('asks with the number of items, then removes exactly the items that were checked and says so (AC1-AC3)', async () => {
     const { fakes, snackbar } = await setup();
     fakes.clearChecked.execute.mockResolvedValue(2);
-    fakes.loadItems.execute.mockResolvedValue([MILK, BREAD, EGGS]);
+    fakes.loadItems.execute.mockResolvedValue(snapshot([MILK, BREAD, EGGS]));
 
     await userEvent.click(within(cartSection()).getByRole('button', { name: 'Erledigte entfernen' }));
     const dialog = await screen.findByRole('dialog', { name: 'Erledigte entfernen?' });
@@ -442,7 +453,7 @@ describe('loading and failing', () => {
   it('shows the failure with a retry that loads again', async () => {
     const { fakes, providers } = itemUseCaseFakes();
     fakes.loadItems.execute.mockRejectedValueOnce(new TechnicalError('down'));
-    fakes.loadItems.execute.mockResolvedValueOnce([MILK]);
+    fakes.loadItems.execute.mockResolvedValueOnce(snapshot([MILK]));
     await render(ListItems, {
       inputs: { listId: 'l1' },
       providers: [
@@ -450,6 +461,7 @@ describe('loading and failing', () => {
         ...listUseCaseFakes([WEEK]).providers,
         Snackbar,
         { provide: WindowSize, useValue: { sizeClass: signal<SizeClass>('expanded') } },
+        ...provideTestAnnouncer(),
         ...provideTestTranslations(),
       ],
     });

@@ -77,14 +77,15 @@ describe('DeleteItemService and LoadItemsService', () => {
     expect(port.deleteItem.mock.calls).toEqual([['l1', 'i1']]);
   });
 
-  it('load the items of the list with the abort signal', async () => {
+  it('load the items of the list with the abort signal and the held etag', async () => {
     const port = mock<LoadItemsPort>();
-    port.loadItems.mockResolvedValue([MILK]);
-    const signal = new AbortController().signal;
+    const load = { kind: 'changed', items: [MILK], etag: '"2"' } as const;
+    port.loadItems.mockResolvedValue(load);
+    const options = { signal: new AbortController().signal, etag: '"1"' };
 
-    expect(await new LoadItemsService(port).execute('l1', signal)).toEqual([MILK]);
+    expect(await new LoadItemsService(port).execute('l1', options)).toEqual(load);
 
-    expect(port.loadItems.mock.calls).toEqual([['l1', signal]]);
+    expect(port.loadItems.mock.calls).toEqual([['l1', options]]);
   });
 });
 

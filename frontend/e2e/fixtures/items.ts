@@ -19,11 +19,17 @@ export interface ItemsStub {
     patched: { id: string; body: UpdateItemRequest }[];
     deleted: string[];
     cleared: ClearCheckedRequest[];
+    /** The `If-None-Match` of every `GET .../items` (null on the first load): proves the polls are conditional. */
+    ifNoneMatch: (string | null)[];
   };
   /** The next write call fails with this status (a server error, FR-FB-05). */
   failNextWrite: (status: number) => void;
   /** Somebody else changes the server state between two calls of this person (FR-SYNC-02). */
   deleteBehindTheBack: (listId: string, itemId: string) => void;
+  /** Another member adds an item (FR-SYNC-01, FR-SYNC-02 AC1). */
+  addBehindTheBack: (listId: string, text: string) => ItemResponse;
+  /** Another member checks or unchecks an item. */
+  setDoneBehindTheBack: (listId: string, itemId: string, done: boolean) => void;
 }
 
 export function item(id: string, text: string, done = false, second = 0): ItemResponse {
@@ -53,7 +59,7 @@ export async function stubItems(
   let nextId = 1000;
   let loadCalls = 0;
   let failWith: number | undefined;
-  const sent: ItemsStub['sent'] = { added: [], patched: [], deleted: [], cleared: [] };
+  const sent: ItemsStub['sent'] = { added: [], patched: [], deleted: [], cleared: [], ifNoneMatch: [] };
 
   const itemsOf = (listId: string): ItemResponse[] | undefined => {
     const list = lists.find((entry) => entry.id === listId);
@@ -74,7 +80,14 @@ export async function stubItems(
   const syncCount = (listId: string): void => {
     const index = lists.findIndex((entry) => entry.id === listId);
     const list = lists[index];
-    if (list) lists[index] = { ...list, openCount: (items.get(listId) ?? []).filter((entry) => !entry.done).length };
+    // every change moves the revision, which is the ETag of the items (ADR 0006)
+    if (list) {
+      lists[index] = {
+        ...list,
+        openCount: (items.get(listId) ?? []).filter((entry) => !entry.done).length,
+        revision: list.revision + 1,
+      };
+    }
   };
   const take = (): number | undefined => {
     const status = failWith;
@@ -146,7 +159,13 @@ export async function stubItems(
     const state = itemsOf(listId);
     if (request.method() === 'GET') {
       loadCalls += 1;
-      return state ? route.fulfill({ json: { items: state } }) : route.fulfill(problem(404, 'LIST_NOT_FOUND'));
+      const known = request.headers()['if-none-match'] ?? null;
+      sent.ifNoneMatch.push(known);
+      const list = lists.find((entry) => entry.id === listId);
+      if (!state || !list) return route.fulfill(problem(404, 'LIST_NOT_FOUND'));
+      const etag = `"${String(list.revision)}"`;
+      if (known === etag) return route.fulfill({ status: 304, headers: { ETag: etag } });
+      return route.fulfill({ json: { items: state }, headers: { ETag: etag } });
     }
     const failing = take();
     if (failing) return route.fulfill({ status: failing, json: { title: 'Server error' } });
@@ -173,6 +192,20 @@ export async function stubItems(
       const state = itemsOf(listId);
       const index = state?.findIndex((entry) => entry.id === itemId) ?? -1;
       if (state && index >= 0) state.splice(index, 1);
+      syncCount(listId);
+    },
+    addBehindTheBack: (listId, text) => {
+      const state = itemsOf(listId) ?? [];
+      const created = item(String(nextId++), text, false, 600 + state.length);
+      state.push(created);
+      syncCount(listId);
+      return created;
+    },
+    setDoneBehindTheBack: (listId, itemId, done) => {
+      const state = itemsOf(listId);
+      const index = state?.findIndex((entry) => entry.id === itemId) ?? -1;
+      const current = state?.[index];
+      if (state && current) state[index] = { ...current, done, version: current.version + 1 };
       syncCount(listId);
     },
   };

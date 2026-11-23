@@ -18,7 +18,6 @@ import {
   getAddItemMockHandler,
   getClearCheckedItemsMockHandler,
   getDeleteItemMockHandler,
-  getListItemsMockHandler,
   getUpdateItemMockHandler,
 } from './generated/endpoints/items/items.msw';
 import { ItemsService } from './generated/endpoints/items/items.service';
@@ -65,17 +64,52 @@ describe('HttpItems', () => {
     server.use(
       http.get('*/api/v1/lists/:id/items', () => {
         calls += 1;
-        return HttpResponse.json({ items: [DTO] });
+        return HttpResponse.json({ items: [DTO] }, { headers: { ETag: '"3"' } });
       }),
     );
 
-    expect(await setup().adapter.loadItems(LIST)).toEqual([DTO]);
+    expect(await setup().adapter.loadItems(LIST)).toEqual({ kind: 'changed', items: [DTO], etag: '"3"' });
     expect(calls).toBe(1);
+  });
+
+  it('sends the held etag as If-None-Match and answers "unchanged" to a 304 (ADR 0006, NFR-PERF-04)', async () => {
+    const sent: (string | null)[] = [];
+    server.use(
+      http.get('*/api/v1/lists/:id/items', ({ request }) => {
+        sent.push(request.headers.get('If-None-Match'));
+        return new HttpResponse(null, { status: 304, headers: { ETag: '"3"' } });
+      }),
+    );
+
+    expect(await setup().adapter.loadItems(LIST, { etag: '"3"' })).toEqual({ kind: 'unchanged' });
+    expect(sent).toEqual(['"3"']);
+  });
+
+  it('sends no If-None-Match on the first load', async () => {
+    const sent: (string | null)[] = [];
+    server.use(
+      http.get('*/api/v1/lists/:id/items', ({ request }) => {
+        sent.push(request.headers.get('If-None-Match'));
+        return HttpResponse.json({ items: [] }, { headers: { ETag: '"1"' } });
+      }),
+    );
+
+    await setup().adapter.loadItems(LIST);
+
+    expect(sent).toEqual([null]);
+  });
+
+  it('answers a TechnicalError when the 200 carries no ETag', async () => {
+    server.use(http.get('*/api/v1/lists/:id/items', () => HttpResponse.json({ items: [] })));
+    const { adapter, reportError } = setup();
+
+    await expect(adapter.loadItems(LIST)).rejects.toBeInstanceOf(TechnicalError);
+    expect(reportError.report.mock.calls).toHaveLength(1);
   });
 
   it('answers what the generated mock handlers answer for each operation', async () => {
     server.use(
-      getListItemsMockHandler({ items: [DTO] }),
+      http.get('*/api/v1/lists/:id/items', () => HttpResponse.json({ items: [DTO] }, { headers: { ETag: '"1"' } })), // the generated handler sets no ETag
       getAddItemMockHandler(DTO),
       getUpdateItemMockHandler({ ...DTO, done: true }),
       getDeleteItemMockHandler(),
@@ -83,7 +117,7 @@ describe('HttpItems', () => {
     );
     const { adapter } = setup();
 
-    expect(await adapter.loadItems(LIST)).toEqual([DTO]);
+    expect(await adapter.loadItems(LIST)).toMatchObject({ kind: 'changed', items: [DTO] });
     expect(await adapter.addItem(LIST, '2× Milch')).toEqual(DTO);
     expect((await adapter.updateItem(LIST, ID, { done: true })).done).toBe(true);
     await expect(adapter.deleteItem(LIST, ID)).resolves.toBeUndefined();

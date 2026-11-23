@@ -1,9 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, type Provider } from '@angular/core';
 import { REPORT_ERROR, untilAborted } from '@platform';
 import { TechnicalError } from '@platform/domain';
 import type { ZodType } from 'zod';
 
 import type { Item } from '../../../domain/item';
+import type { ItemsLoad, LoadItemsOptions } from '../../../domain/items-load';
 import type { AddItemPort } from '../../../ports/out/add-item-port';
 import type { ClearCheckedItemsPort } from '../../../ports/out/clear-checked-items-port';
 import type { DeleteItemPort } from '../../../ports/out/delete-item-port';
@@ -28,9 +30,24 @@ export class HttpItems implements LoadItemsPort, AddItemPort, UpdateItemPort, De
   private readonly api = inject(ItemsService);
   private readonly reportError = inject(REPORT_ERROR);
 
-  async loadItems(listId: string, signal?: AbortSignal): Promise<readonly Item[]> {
-    const dto = await this.call(() => this.api.listItems(listId), signal);
-    return this.parse(ListItemsResponse, dto).items.map(toItem);
+  /**
+   * One call for all items. With the etag of the held snapshot the server answers 304 while the list did not move; the
+   * browser hands that to the HttpClient as an error status, which is the normal "unchanged" answer here (ADR 0006).
+   */
+  async loadItems(listId: string, options?: LoadItemsOptions): Promise<ItemsLoad> {
+    const headers = options?.etag ? { 'If-None-Match': options.etag } : undefined;
+    try {
+      const response = await untilAborted(
+        this.api.listItems(listId, { observe: 'response', ...(headers ? { headers } : {}) }),
+        options?.signal,
+      );
+      const etag = response.headers.get('ETag');
+      if (!etag) throw this.reported(new TechnicalError('items API answered without an ETag'));
+      return { kind: 'changed', items: this.parse(ListItemsResponse, response.body).items.map(toItem), etag };
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 304) return { kind: 'unchanged' };
+      throw error instanceof TechnicalError ? error : this.reported(toItemError(error));
+    }
   }
 
   async addItem(listId: string, text: string): Promise<Item> {

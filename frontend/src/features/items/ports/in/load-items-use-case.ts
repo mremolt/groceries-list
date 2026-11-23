@@ -1,5 +1,5 @@
-import type { Item } from '../../domain/item';
+import type { ItemsLoad, LoadItemsOptions } from '../../domain/items-load';
 
 export interface LoadItemsUseCase {
-  execute(listId: string, signal?: AbortSignal): Promise<readonly Item[]>;
+  execute(listId: string, options?: LoadItemsOptions): Promise<ItemsLoad>;
 }

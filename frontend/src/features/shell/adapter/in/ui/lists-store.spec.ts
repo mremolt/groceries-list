@@ -210,3 +210,71 @@ describe('ListsStore', () => {
     });
   });
 });
+
+describe('ListsStore refresh (FR-SYNC-03)', () => {
+  let s: ReturnType<typeof setup>;
+  beforeEach(async () => {
+    s = setup();
+    await s.store.reload();
+  });
+
+  it('takes the new numbers and names of the lists', async () => {
+    s.loadMyLists.execute.mockResolvedValue([{ ...week, name: 'Großeinkauf', openCount: 9, revision: 5 }, bbq]);
+
+    expect(await s.store.refresh()).toBe('ok');
+
+    expect(s.store.lists()[0]).toMatchObject({ name: 'Großeinkauf', openCount: 9 });
+  });
+
+  it('keeps the object of a list that did not change, so the drawer keeps its rows', async () => {
+    const before = s.store.lists();
+    s.loadMyLists.execute.mockResolvedValue([{ ...week }, { ...bbq, openCount: 2 }]);
+
+    await s.store.refresh();
+
+    expect(s.store.lists()[0]).toBe(before[0]);
+    expect(s.store.lists()[1]).not.toBe(before[1]);
+  });
+
+  it('follows the open list: its new name reaches the heading (FR-SYNC-03 AC1)', async () => {
+    s.loadList.execute.mockResolvedValue(week);
+    await s.store.open('l1');
+    s.loadMyLists.execute.mockResolvedValue([{ ...week, name: 'Großeinkauf', revision: 4 }, bbq]);
+
+    await s.store.refresh();
+
+    expect(s.store.currentList()?.name).toBe('Großeinkauf');
+  });
+
+  it('keeps the drawer when the server cannot be reached and says "failed" (FR-FB-06)', async () => {
+    s.loadMyLists.execute.mockRejectedValue(new TechnicalError('offline'));
+
+    expect(await s.store.refresh()).toBe('failed');
+
+    expect(s.store.status()).toBe('ready');
+    expect(s.store.lists()).toHaveLength(2);
+  });
+
+  it('answers "superseded" when a newer load took over', async () => {
+    const slow = deferred<readonly ShoppingList[]>();
+    s.loadMyLists.execute.mockReturnValueOnce(slow.promise);
+    const refreshing = s.store.refresh();
+    s.loadMyLists.execute.mockResolvedValue([bbq]);
+    await s.store.reload();
+
+    slow.resolve([week, bbq]);
+
+    expect(await refreshing).toBe('superseded');
+    expect(s.store.lists().map((l) => l.id)).toEqual(['l2']);
+  });
+
+  it('knows the lists the person deleted or left themselves, so a later "gone" is not news (FR-SYNC-05)', async () => {
+    s.deleteList.execute.mockResolvedValue(undefined);
+    s.leaveList.execute.mockResolvedValue(undefined);
+
+    await s.store.delete('l1');
+    await s.store.leave('l2');
+
+    expect([s.store.isDeparted('l1'), s.store.isDeparted('l2'), s.store.isDeparted('l3')]).toEqual([true, true, false]);
+  });
+});

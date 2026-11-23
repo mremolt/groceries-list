@@ -72,7 +72,8 @@
     "saved": "Gespeichert",
     "left": "Du hast die Liste verlassen",
     "deleted": "Liste gelöscht",
-    "gone": "Diese Liste gibt es nicht mehr."
+    "gone": "Diese Liste gibt es nicht mehr.",
+    "removed": "Diese Liste wurde gelöscht."
   },
   "list": {
     "loading": "Liste wird geladen",
@@ -179,5 +180,16 @@
       "title": "Das hat nicht geklappt",
       "retry": "Erneut versuchen"
     }
+  },
+  "sync": {
+    "updated": "Liste aktualisiert: {changes}.",
+    "added": "{count, plural, one {# neuer Artikel} other {# neue Artikel}}",
+    "checked": "{count} erledigt",
+    "unchecked": "{count} wieder offen",
+    "edited": "{count, plural, one {# Artikel geändert} other {# Artikel geändert}}",
+    "removed": "{count, plural, one {# Artikel entfernt} other {# Artikel entfernt}}"
+  },
+  "connection": {
+    "offline": "Keine Verbindung. Änderungen sind gerade nicht möglich."
   }
 }

@@ -120,6 +120,24 @@
   }
 }
 
+// FR-FB-06 AC1: an M3 banner in secondaryContainer under the app bar
+.connection-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-3);
+  margin: 0;
+  padding: var(--app-space-3) var(--app-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  font: var(--mat-sys-body-medium);
+
+  @media (forced-colors: active) {
+    border-color: CanvasText;
+  }
+}
+
 .page-title {
   margin: 0;
   font: var(--mat-sys-headline-large);

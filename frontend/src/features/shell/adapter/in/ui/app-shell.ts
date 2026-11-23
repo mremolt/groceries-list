@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   type OnInit,
@@ -22,6 +23,7 @@ import {
 } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { PAGE_NAVIGATION } from '@platform';
+import { Announcer } from '@shared/ui/a11y/announcer';
 import { AppIcon } from '@shared/ui/icon/app-icon';
 import { WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
@@ -32,6 +34,8 @@ import { ListActions } from './list-actions';
 import { ListsStore } from './lists-store';
 import { ShareActions } from './share-actions';
 import { ShellStore } from './shell-store';
+import { ConnectionMonitor } from './sync/connection-monitor';
+import { ShellSync } from './sync/shell-sync';
 
 interface PageHeading {
   /** The translation key of the page heading, set as `data.heading` on the route (FR-NAV-04 AC1). */
@@ -81,7 +85,7 @@ function pageHeadingOf(route: ActivatedRouteSnapshot): PageHeading {
     SnackbarHost,
     TranslocoPipe,
   ],
-  providers: [ShellStore],
+  providers: [ShellStore, ShellSync],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,6 +100,10 @@ export class AppShell implements OnInit {
   private readonly actions = inject(ListActions);
   private readonly shareActions = inject(ShareActions);
   protected readonly windowSize = inject(WindowSize);
+  private readonly shellSync = inject(ShellSync);
+  private readonly announcer = inject(Announcer);
+  /** FR-FB-06: the banner under the app bar and the disabled commands that change data. */
+  protected readonly offline = inject(ConnectionMonitor).offline;
 
   protected readonly drawer = viewChild.required(MatSidenav);
   private readonly menuButton = viewChild<unknown, ElementRef<HTMLElement>>('menuButton', { read: ElementRef });
@@ -118,8 +126,16 @@ export class AppShell implements OnInit {
   /** The ⋮ menu offers the list commands only on a list that was found. */
   protected readonly onList = computed(() => this.pageHeading().fromList && this.lists.currentList() !== null);
 
+  constructor() {
+    // FR-FB-06 AC1: the banner is also said politely, once, when it appears
+    effect(() => {
+      if (this.offline()) this.announcer.announce(this.transloco.translate('shell.connection.offline'));
+    });
+  }
+
   ngOnInit(): void {
     void this.lists.ensureLoaded(); // the drawer needs the lists on every page, also on a deep link
+    this.shellSync.start(); // FR-SYNC-03: the drawer follows the other members; it stops with the shell
   }
 
   /**
@@ -139,6 +155,7 @@ export class AppShell implements OnInit {
   }
 
   protected newList(): void {
+    if (this.offline()) return;
     this.closeIfModal();
     void this.actions.create(() => this.menuButton()?.nativeElement ?? document.querySelector<HTMLElement>('h1'));
   }
@@ -149,18 +166,22 @@ export class AppShell implements OnInit {
   }
 
   protected renewShareLink(): void {
+    if (this.offline()) return;
     void this.shareActions.renewCurrent(() => this.moreButton());
   }
 
   protected renameList(): void {
+    if (this.offline()) return;
     void this.actions.renameCurrent(() => this.moreButton());
   }
 
   protected leaveList(): void {
+    if (this.offline()) return;
     void this.actions.leaveCurrent(() => this.moreButton());
   }
 
   protected deleteList(): void {
+    if (this.offline()) return;
     void this.actions.deleteCurrent(() => this.moreButton());
   }
 

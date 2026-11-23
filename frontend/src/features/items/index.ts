@@ -1,5 +1,6 @@
 // Published API of the items feature (TS-ARCH-10/19): the items of one list and the commands on them. Never routes.
 export type { Item } from './domain/item';
+export { describeChanges, hasChanges, type ItemChanges, reuseUnchanged } from './domain/item-changes';
 export {
   ItemLimitReachedError,
   ItemListNotFoundError,
@@ -7,6 +8,7 @@ export {
   ItemTextInvalidError,
 } from './domain/item-errors';
 export { checkedItems, focusTargetAfterChecking, openItems } from './domain/item-order';
+export type { ItemsLoad, LoadItemsOptions } from './domain/items-load';
 export { provideItemsApi } from './items.providers';
 export { ADD_ITEM, CLEAR_CHECKED_ITEMS, DELETE_ITEM, EDIT_ITEM, LOAD_ITEMS, SET_ITEM_DONE } from './items.tokens';
 export type { AddItemUseCase } from './ports/in/add-item-use-case';

@@ -209,3 +209,23 @@ start	duration_s	milestone	category	label	exit
 2026-11-23T16:15:42+01:00	77	M4-frontend	e2e	e2e chromium stubbed all 3	0
 2026-11-23T16:18:56+01:00	14	M4	infra	build image	0
 2026-11-23T16:19:40+01:00	47	M4-frontend	e2e	e2e real	0
+2026-11-23T16:23:13+01:00	1	M5-frontend	build-gate	generate:api	0
+2026-11-23T16:23:41+01:00	27	M5-backend	test-run	GREEN: items snapshot unit	0
+2026-11-23T16:24:52+01:00	12	M5-backend	test-run	items sync ITs	1
+2026-11-23T16:25:06+01:00	39	M5-backend	test-run	items sync ITs 2	0
+2026-11-23T16:26:13+01:00	0	M5-frontend	test-run	RED: items-store refresh specs (compile error, no refresh)	1
+2026-11-23T16:27:18+01:00	0	M5-frontend	test-run	RED: lists-store refresh specs	1
+2026-11-23T16:26:18+01:00	67	M5-backend	build-gate	mvnw verify -Dopenapi.update=true	0
+2026-11-23T16:27:55+01:00	0	M5-frontend	test-run	RED: sync infrastructure specs (page-activity, poller, connection-monitor)	1
+2026-11-23T16:27:34+01:00	59	M5-backend	build-gate	mvnw verify -Dopenapi.update=true (2)	0
+2026-11-23T16:28:49+01:00	0	M5-frontend	test-run	RED: list-sync specs	1
+2026-11-23T16:28:57+01:00	55	M5-backend	build-gate	mvnw verify (final, no update flag)	0
+2026-11-23T16:34:27+01:00	16	M5-frontend	e2e	sync.spec first run	1
+2026-11-23T16:35:41+01:00	102	M5-frontend	e2e	e2e all chromium stubbed projects	1
+2026-11-23T16:38:58+01:00	77	M5-frontend	e2e	e2e all chromium stubbed projects 2	1
+2026-11-23T16:45:41+01:00	13	M5-frontend	test-run	unit tests (all)	0
+2026-11-23T16:45:54+01:00	6	M5-frontend	build-gate	build	0
+2026-11-23T16:46:03+01:00	64	M5-frontend	e2e	e2e all chromium stubbed projects (final 1)	0
+2026-11-23T16:47:07+01:00	64	M5-frontend	e2e	e2e all chromium stubbed projects (final 2)	0
+2026-11-23T16:49:45+01:00	13	M5	infra	build image	0
+2026-11-23T16:50:27+01:00	81	M5-frontend	e2e	e2e real	0

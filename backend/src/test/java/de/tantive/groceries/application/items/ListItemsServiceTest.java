@@ -26,7 +26,7 @@ class ListItemsServiceTest {
     private final ItemPort items = mock(ItemPort.class);
     private final ListItemsService service = new ListItemsService(lists, items);
     private final UUID listId = UUID.randomUUID();
-    private final ShoppingList list = ShoppingList.create(listId, ListName.of("WG"), People.ALICE_ID, NOW);
+    private final ShoppingList list = new ShoppingList(listId, ListName.of("WG"), People.ALICE_ID, NOW, NOW, 7);
 
     private void bobIsMember() {
         when(lists.findForMember(listId, People.BOB_ID)).thenReturn(Optional.of(list));
@@ -39,7 +39,38 @@ class ListItemsServiceTest {
         List<Item> all = List.of(Item.create(UUID.randomUUID(), ItemText.of("Milch"), NOW));
         when(items.findAllOf(listId)).thenReturn(all);
 
-        assertThat(service.listItems(new ListItemsQuery(People.bob(), listId))).isEqualTo(all);
+        assertThat(service.listItems(new ListItemsQuery(People.bob(), listId)))
+                .isEqualTo(ItemsSnapshot.changed(7, all));
+    }
+
+    @Test
+    void aClientThatHoldsTheCurrentRevisionGetsNotModifiedAndNoItemIsRead() {
+        bobIsMember();
+
+        ItemsSnapshot snapshot = service.listItems(new ListItemsQuery(People.bob(), listId, 7L));
+
+        assertThat(snapshot).isEqualTo(ItemsSnapshot.unchanged(7));
+        assertThat(snapshot.notModified()).isTrue();
+        verifyNoInteractions(items);
+    }
+
+    @Test
+    void aClientThatHoldsAnOlderRevisionGetsTheItemsAndTheCurrentRevision() {
+        bobIsMember();
+        List<Item> all = List.of(Item.create(UUID.randomUUID(), ItemText.of("Brot"), NOW));
+        when(items.findAllOf(listId)).thenReturn(all);
+
+        assertThat(service.listItems(new ListItemsQuery(People.bob(), listId, 6L)))
+                .isEqualTo(ItemsSnapshot.changed(7, all));
+    }
+
+    @Test
+    void aNonMemberWhoNamesTheCurrentRevisionStillGetsNotFound() {
+        when(lists.findForMember(listId, People.BOB_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.listItems(new ListItemsQuery(People.bob(), listId, 7L)))
+                .isInstanceOf(ListNotFoundException.class);
+        verifyNoInteractions(items);
     }
 
     @Test

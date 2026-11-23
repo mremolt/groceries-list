@@ -30,6 +30,8 @@ import { Snackbar } from '@shared/ui/snackbar/snackbar';
 import { ItemDialog, type ItemDialogData, type ItemDialogResult } from './item-dialog/item-dialog';
 import { ItemsStore } from './items-store';
 import { ListsStore } from './lists-store';
+import { ConnectionMonitor } from './sync/connection-monitor';
+import { ListSync } from './sync/list-sync';
 
 /**
  * The body of a list page (FR-ITEM-01..06, FR-FB-01 AC2/AC3): the card „Artikel hinzufügen“, „Noch zu kaufen“ with badge
@@ -57,6 +59,7 @@ import { ListsStore } from './lists-store';
     TranslocoPipe,
     ValidatedField,
   ],
+  providers: [ListSync],
   templateUrl: './list-items.html',
   styleUrl: './list-items.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +73,9 @@ export class ListItems {
   private readonly document = inject(DOCUMENT);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
+  private readonly sync = inject(ListSync);
+  /** FR-FB-06 AC2: while the server cannot be reached, what changes data is disabled; reading stays possible. */
+  protected readonly offline = inject(ConnectionMonitor).offline;
   protected readonly store = inject(ItemsStore);
   protected readonly sizeClass = inject(WindowSize).sizeClass;
 
@@ -95,6 +101,7 @@ export class ListItems {
       const id = this.listId();
       untracked(() => {
         void this.store.load(id);
+        this.sync.start(id); // FR-SYNC-01: the open list follows the other members; it stops with this component
       });
     });
     // the drawer follows the items without another request (API-N1-01): store-to-store sync through the page (NG-STATE-03)
@@ -113,6 +120,7 @@ export class ListItems {
 
   /** FR-ITEM-01: one free-text line; the field is cleared and keeps the focus after the item was saved. */
   protected async add(): Promise<void> {
+    if (this.offline()) return;
     const text = this.model().text;
     await submit(this.addForm, async (field) => {
       const result = await this.store.add(text);
@@ -146,6 +154,7 @@ export class ListItems {
 
   /** FR-ITEM-03/04: edit or delete in one dialog. */
   protected async edit(item: Item): Promise<void> {
+    if (this.offline()) return;
     const ref = this.dialog.open<ItemDialog, ItemDialogData, ItemDialogResult>(ItemDialog, {
       data: {
         item,
@@ -168,6 +177,7 @@ export class ListItems {
 
   /** FR-ITEM-05: only the items that were checked when the dialog opened (AC4). */
   protected async clearChecked(): Promise<void> {
+    if (this.offline()) return;
     const ids = this.store.checked().map((item) => item.id);
     const confirmed = await this.confirmDialogs.confirm({
       title: this.transloco.translate('shell.items.dialog.clear.title'),

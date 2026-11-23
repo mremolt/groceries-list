@@ -8,6 +8,7 @@ import { PAGE_NAVIGATION } from '@platform';
 import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
+import { provideTestAnnouncer } from '@testing/announcer';
 import { expectNoAxeViolations } from '@testing/axe';
 import { itemUseCaseFakes } from '@testing/item-use-cases';
 import { listUseCaseFakes, WEEK } from '@testing/list-use-cases';
@@ -52,6 +53,7 @@ async function setup(size: SizeClass = 'expanded') {
       { provide: WindowSize, useValue: { sizeClass: signal<SizeClass>(size) } },
       { provide: LOGOUT, useValue: mock<LogoutUseCase>() },
       { provide: PAGE_NAVIGATION, useValue: { assign: vi.fn() } },
+      ...provideTestAnnouncer(),
       ...provideTestTranslations(),
     ],
   });

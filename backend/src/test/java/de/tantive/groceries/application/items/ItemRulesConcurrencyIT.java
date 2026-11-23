@@ -62,6 +62,51 @@ class ItemRulesConcurrencyIT {
                 .isEqualTo(500);
     }
 
+    /** FR-SYNC-02 AC1: items added at the same time by different members are all kept. */
+    @Test
+    void itemsAddedAtTheSameTimeByDifferentMembersAreAllKept() throws Exception {
+        UUID alice = Arrange.user(jdbc);
+        UUID bob = Arrange.user(jdbc);
+        UUID list = Arrange.list(jdbc, alice, "WG", Instant.now());
+        Arrange.join(jdbc, bob, list, Instant.now());
+        Caller aliceCaller = new Caller(alice, "sub-" + alice, alice + "@example.test", "Alice");
+        Caller bobCaller = new Caller(bob, "sub-" + bob, bob + "@example.test", "Bob");
+        long revisionBefore = revisionOf(list);
+
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            CountDownLatch go = new CountDownLatch(1);
+            List<Future<Object>> futures = new ArrayList<>();
+            for (Caller who : List.of(aliceCaller, bobCaller)) {
+                futures.add(pool.submit(() -> {
+                    go.await();
+                    return addItem.addItem(
+                            new AddItemCommand(who, list, ItemText.of("Milch von " + who.displayName())));
+                }));
+            }
+            go.countDown();
+            for (Future<Object> future : futures) {
+                future.get();
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+
+        assertThat(jdbc.sql("select count(*) from items where list_id = ?")
+                        .param(list)
+                        .query(Long.class)
+                        .single())
+                .isEqualTo(2);
+        assertThat(revisionOf(list)).isEqualTo(revisionBefore + 2); // atomic increments, none lost
+    }
+
+    private long revisionOf(UUID list) {
+        return jdbc.sql("select revision from lists where id = ?")
+                .param(list)
+                .query(Long.class)
+                .single();
+    }
+
     private List<Object> runTogether(Caller caller, UUID list) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         try {

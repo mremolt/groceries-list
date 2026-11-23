@@ -8,6 +8,7 @@ import { PAGE_NAVIGATION, type PageNavigation } from '@platform';
 import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
+import { provideTestAnnouncer } from '@testing/announcer';
 import { expectNoAxeViolations } from '@testing/axe';
 import { itemUseCaseFakes } from '@testing/item-use-cases';
 import { BBQ, listUseCaseFakes, WEEK } from '@testing/list-use-cases';
@@ -69,6 +70,7 @@ async function setup(options: { size?: SizeClass; url?: string; lists?: (typeof 
       { provide: WindowSize, useValue: { sizeClass } },
       { provide: LOGOUT, useValue: mock<LogoutUseCase>() },
       { provide: PAGE_NAVIGATION, useValue: navigation },
+      ...provideTestAnnouncer(),
       ...provideTestTranslations(),
     ],
   });

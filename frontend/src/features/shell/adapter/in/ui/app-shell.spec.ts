@@ -7,7 +7,9 @@ import { PAGE_NAVIGATION, type PageNavigation } from '@platform';
 import { TechnicalError } from '@platform/domain';
 import { type SizeClass, WindowSize } from '@shared/ui/layout/window-size';
 import { Snackbar } from '@shared/ui/snackbar/snackbar';
+import { provideTestAnnouncer } from '@testing/announcer';
 import { expectNoAxeViolations } from '@testing/axe';
+import { itemUseCaseFakes } from '@testing/item-use-cases';
 import { listUseCaseFakes } from '@testing/list-use-cases';
 import { sharingUseCaseFakes } from '@testing/sharing-use-cases';
 import { provideTestTranslations } from '@testing/transloco';
@@ -41,6 +43,8 @@ async function setup(size: SizeClass = 'compact', url = '/') {
   TestBed.configureTestingModule({
     providers: [
       ...listProviders,
+      ...itemUseCaseFakes().providers, // the shell's sync reads the open list's count from the items store
+      ...provideTestAnnouncer(),
       ...sharingUseCaseFakes().providers,
       provideRouter(ROUTES),
       Snackbar,

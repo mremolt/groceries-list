@@ -474,5 +474,37 @@
   "shell.join.failed.retry": {
     "description": "UI text of sharing and joining (M4, FR-SHARE, FR-AUTH-06): shell.join.failed.retry",
     "maxLength": 30
+  },
+  "shell.snackbar.removed": {
+    "description": "Snackbar when another member deleted the open list (FR-SYNC-05, FR-FB-01 AC5)",
+    "maxLength": 40
+  },
+  "shell.sync.updated": {
+    "description": "Screen-reader announcement of changes made by other members (FR-SYNC-04); {changes} is the list of the parts below, e.g. '2 neue Artikel, 1 erledigt'",
+    "maxLength": 80
+  },
+  "shell.sync.added": {
+    "description": "Part of the sync announcement: new items by others",
+    "maxLength": 30
+  },
+  "shell.sync.checked": {
+    "description": "Part of the sync announcement: items others checked off",
+    "maxLength": 20
+  },
+  "shell.sync.unchecked": {
+    "description": "Part of the sync announcement: items others put back to open",
+    "maxLength": 30
+  },
+  "shell.sync.edited": {
+    "description": "Part of the sync announcement: items whose text others changed",
+    "maxLength": 40
+  },
+  "shell.sync.removed": {
+    "description": "Part of the sync announcement: items others removed",
+    "maxLength": 40
+  },
+  "shell.connection.offline": {
+    "description": "Banner under the app bar when the server cannot be reached for more than 10 s (FR-FB-06 AC1)",
+    "maxLength": 70
   }
 }

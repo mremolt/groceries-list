@@ -239,6 +239,14 @@ paths:
         schema:
           type: string
           format: uuid
+      - description: "The ETag of the snapshot the client already holds; the server\
+          \ answers 304 without reading any item when the list did not change (ADR\
+          \ 0006, NFR-PERF-04)"
+        in: header
+        name: If-None-Match
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -246,6 +254,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/ItemsResponse"
           description: "The items, oldest first (BR-09), at most 500"
+          headers:
+            ETag:
+              description: "Strong ETag of the snapshot, the list revision in quotes"
+              schema:
+                type: string
+              style: simple
+        "304":
+          description: "The list did not change since the snapshot named in If-None-Match;\
+            \ no body, the ETag header is repeated"
+          headers:
+            ETag:
+              description: "Strong ETag of the snapshot, the list revision in quotes"
+              schema:
+                type: string
+              style: simple
         "401":
           content:
             application/problem+json:

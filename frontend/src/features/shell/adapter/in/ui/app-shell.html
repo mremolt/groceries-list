@@ -7,7 +7,14 @@
   >
     <nav [attr.aria-label]="'shell.nav.label' | transloco" class="nav">
       <div class="drawer-head">
-        <button matButton="tonal" class="new-list" type="button" (click)="newList()">
+        <button
+          matButton="tonal"
+          class="new-list"
+          type="button"
+          disabledInteractive
+          [disabled]="offline()"
+          (click)="newList()"
+        >
           <app-icon name="add" />
           {{ 'shell.nav.newList' | transloco }}
         </button>
@@ -99,6 +106,13 @@
         </button>
       </div>
       <h1 class="page-title">{{ listName() ?? (headingKey() | transloco) }}</h1>
+      <!-- FR-FB-06 AC1: a visible banner; the app announcer says it politely, without moving focus (A11Y-20, NFR-A11Y-07) -->
+      @if (offline()) {
+        <p class="connection-banner">
+          <app-icon name="cloudOff" />
+          <span>{{ 'shell.connection.offline' | transloco }}</span>
+        </p>
+      }
     </header>
     <main class="page">
       <router-outlet />
@@ -108,19 +122,26 @@
 
 <mat-menu #more="matMenu" xPosition="before">
   @if (onList()) {
-    <button mat-menu-item type="button" (click)="renameList()">
+    <button mat-menu-item type="button" disabledInteractive [disabled]="offline()" (click)="renameList()">
       <app-icon name="edit" />
       <span>{{ 'shell.menu.rename' | transloco }}</span>
     </button>
-    <button mat-menu-item type="button" (click)="renewShareLink()">
+    <button mat-menu-item type="button" disabledInteractive [disabled]="offline()" (click)="renewShareLink()">
       <app-icon name="refresh" />
       <span>{{ 'shell.menu.renewLink' | transloco }}</span>
     </button>
-    <button mat-menu-item type="button" (click)="leaveList()">
+    <button mat-menu-item type="button" disabledInteractive [disabled]="offline()" (click)="leaveList()">
       <app-icon name="exit" />
       <span>{{ 'shell.menu.leave' | transloco }}</span>
     </button>
-    <button mat-menu-item type="button" class="danger" (click)="deleteList()">
+    <button
+      mat-menu-item
+      type="button"
+      class="danger"
+      disabledInteractive
+      [disabled]="offline()"
+      (click)="deleteList()"
+    >
       <app-icon name="delete" />
       <span>{{ 'shell.menu.delete' | transloco }}</span>
     </button>

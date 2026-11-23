@@ -13,11 +13,11 @@
 | M2 Lists | done | 0eba963 | m2-done |
 | M3 Items | done | 9a65f1a | m3-done |
 | M4 Sharing and joining | done | 90fc5a7 | m4-done |
-| M5 Synchronisation | not started | | |
+| M5 Synchronisation | done | PENDING | m5-done |
 | M6 Settings and account | not started | | |
 | M7 Internal test readiness | not started | | |
 
-- **Next action:** M5 Synchronisation (FR-SYNC-01..05, BR list revision per ADR 0006, NFR-PERF-03; read 04 by requirement ID): backend (changes-since endpoint, N+1 care) + frontend (polling, visibility, live region, list-removed handling) forks in parallel against a contract fixed up front, rebuild image, real tier (incl. two-user sync scenario), gates (Chromium e2e only), commit `M5 done`, tag.
+- **Next action:** M6 Settings and account (read requirements/05 M6 and 04 by requirement ID: FR-SET-*, FR-NAV-04, ADR 0003 for FR-SET-04 re-authentication, deletion concept docs/data-protection): backend + frontend forks in parallel against a contract fixed up front, rebuild image, real tier (Keycloak re-auth and deletion), gates (Chromium e2e only), commit `M6 done`, tag.
 - **Work in flight:** none.
 - Initial commit `ce2ac52` (baseline sync and kickoff) done.
 
@@ -67,6 +67,16 @@ Manual check (for human review): a real shopping trip on a phone with the demo l
 Deviations: the anonymous visitor session created by `POST /api/v1/invitations` is a deliberate exception to "no session for anonymous calls" (threat model T8, 2 h lifetime). A MockMvc assertion on that cookie was replaced by a real-tier check (`e2e/real/invitation-session.spec.ts`). The sign-up variant uses `?prompt=create`. The invitation page shows the list name in plain text (not bold as in the mockup). Frontend fork changed three M3 e2e tests (`.check()`/`.uncheck()` to `.click()` + assertions) because they were unstable under parallel projects. Initial-bundle warning (952 kB) predates M3.
 
 Manual check (for human review): share a link by messenger, join with a second account (new and existing), renew the link and open the old one.
+
+### M5 Synchronisation (2026-11-23)
+
+| Done when | Status |
+|---|---|
+| FR-SYNC-01..05, FR-FB-06, NFR-PERF-03/04, NFR-A11Y-07 | Backend: ETag "<revision>" + If-None-Match -> 304 on GET items (statement count proves no items read, mutation-checked), 404 after leave/delete, concurrent adds kept. Frontend: 5 s item poll with etag, 30 s drawer poll, focus/visibility handling, batched polite announcements, list-removed handling, offline banner with disabled actions, backoff, no leaks. Gates: `mvnw verify` green; frontend unit 414 green; stubbed Chromium e2e 87 green (twice); real tier 32 green (two browser contexts, 6 s propagation, offline via setOffline) |
+
+Deviations: offline banner is visible text in the app-bar header announced once through the Announcer (not a second `role="status"` region, which broke 32 locators; A11Y-20). Under `page.clock` the new e2e specs use `focus()` instead of `click()` in the 320 px project (Playwright hang). Stubbed offline test aborts stub routes (setOffline does not affect routed stubs); the real tier uses setOffline. Membership changes (join/leave) and share-link changes do not move the list revision; the 30 s drawer poll covers them.
+
+Manual check (for human review): two devices side by side: add, check, rename, delete; network off and on.
 
 ## Assumptions
 

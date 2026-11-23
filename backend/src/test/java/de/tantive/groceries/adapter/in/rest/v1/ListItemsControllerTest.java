@@ -43,17 +43,73 @@ class ListItemsControllerTest {
 
     @Test
     void answers200WithTheItemsInOrder() {
-        when(useCase.listItems(any())).thenReturn(List.of(new Item(ITEM_ID, ItemText.of("Milch"), true, AT, 2)));
+        when(useCase.listItems(any()))
+                .thenReturn(ItemsSnapshot.changed(5, List.of(new Item(ITEM_ID, ItemText.of("Milch"), true, AT, 2))));
 
         var result = mvc.get().uri(ITEMS).with(AppSessions.bob()).exchange();
 
         assertThat(result).hasStatusOk();
+        assertThat(result).headers().hasValue("ETag", "\"5\"");
         assertThat(result)
                 .bodyJson()
                 .isStrictlyEqualTo(
                         "{\"items\":[{\"id\":\"" + ITEM_ID
                                 + "\",\"text\":\"Milch\",\"done\":true,\"createdAt\":\"2026-11-23T10:00:00Z\",\"version\":2}]}");
         verify(useCase).listItems(new ListItemsQuery(People.bob(), LIST_ID));
+    }
+
+    @Test
+    void passesTheKnownRevisionAndAnswers304WithTheETagAndNoBody() {
+        when(useCase.listItems(any())).thenReturn(ItemsSnapshot.unchanged(5));
+
+        var result = mvc.get()
+                .uri(ITEMS)
+                .header("If-None-Match", "\"5\"")
+                .with(AppSessions.bob())
+                .exchange();
+
+        assertThat(result).hasStatus(304);
+        assertThat(result).headers().hasValue("ETag", "\"5\"");
+        assertThat(result).body().isEmpty();
+        verify(useCase).listItems(new ListItemsQuery(People.bob(), LIST_ID, 5L));
+    }
+
+    @Test
+    void acceptsAWeakValidatorAndTreatsAnUnreadableOneAsNoValidator() {
+        when(useCase.listItems(any())).thenReturn(ItemsSnapshot.changed(5, List.of()));
+
+        mvc.get()
+                .uri(ITEMS)
+                .header("If-None-Match", "W/\"4\"")
+                .with(AppSessions.bob())
+                .exchange();
+        mvc.get()
+                .uri(ITEMS)
+                .header("If-None-Match", "\"abc\"")
+                .with(AppSessions.bob())
+                .exchange();
+        mvc.get()
+                .uri(ITEMS)
+                .header("If-None-Match", "*")
+                .with(AppSessions.bob())
+                .exchange();
+
+        verify(useCase).listItems(new ListItemsQuery(People.bob(), LIST_ID, 4L));
+        verify(useCase, org.mockito.Mockito.times(2)).listItems(new ListItemsQuery(People.bob(), LIST_ID, null));
+    }
+
+    @Test
+    void answers404WithoutAnETagForANonMemberWhoSendsAValidator() {
+        when(useCase.listItems(any())).thenThrow(new ListNotFoundException());
+
+        var result = mvc.get()
+                .uri(ITEMS)
+                .header("If-None-Match", "\"5\"")
+                .with(AppSessions.bob())
+                .exchange();
+
+        assertThat(result).hasStatus(404);
+        assertThat(result.getResponse().getHeader("ETag")).isNull();
     }
 
     @Test

@@ -1,5 +1,5 @@
-import type { Item } from '../../domain/item';
+import type { ItemsLoad, LoadItemsOptions } from '../../domain/items-load';
 
 export interface LoadItemsPort {
-  loadItems(listId: string, signal?: AbortSignal): Promise<readonly Item[]>;
+  loadItems(listId: string, options?: LoadItemsOptions): Promise<ItemsLoad>;
 }

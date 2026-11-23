@@ -7,6 +7,7 @@ import { LoadingIndicator } from '@shared/ui/loading/loading-indicator';
 
 import { ListActions } from './list-actions';
 import { ListsStore } from './lists-store';
+import { ConnectionMonitor } from './sync/connection-monitor';
 
 /**
  * Start page without lists (FR-NAV-03 AC2, FR-FB-01 AC1). With lists the start guard has already redirected.
@@ -22,8 +23,11 @@ import { ListsStore } from './lists-store';
 export class ListsEmptyPage {
   protected readonly store = inject(ListsStore);
   private readonly actions = inject(ListActions);
+  /** FR-FB-06 AC2: creating needs the server. */
+  protected readonly offline = inject(ConnectionMonitor).offline;
 
   protected create(event: Event): void {
+    if (this.offline()) return;
     const opener = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
     void this.actions.create(() => opener ?? document.querySelector<HTMLElement>('h1'));
   }

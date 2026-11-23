@@ -16,7 +16,14 @@
       [heading]="'shell.empty.lists.title' | transloco"
       [text]="'shell.empty.lists.text' | transloco"
     >
-      <button matButton="filled" empty-action type="button" (click)="create($event)">
+      <button
+        matButton="filled"
+        empty-action
+        type="button"
+        disabledInteractive
+        [disabled]="offline()"
+        (click)="create($event)"
+      >
         <app-icon name="add" />
         {{ 'shell.empty.lists.action' | transloco }}
       </button>

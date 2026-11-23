@@ -14,7 +14,7 @@
         default: 'platform.error.generic' | transloco,
       }"
     />
-    <button matButton="filled" type="submit" class="add-button">
+    <button matButton="filled" type="submit" class="add-button" disabledInteractive [disabled]="offline()">
       <app-icon name="add" />
       <span class="add-label">{{ 'shell.items.add.submit' | transloco }}</span>
     </button>
@@ -43,13 +43,21 @@
           <ul class="rows">
             @for (item of store.open(); track item.id) {
               <li class="row" [attr.data-item-id]="item.id">
-                <mat-checkbox class="check" [checked]="false" (change)="check(item, $event.checked)">
+                <mat-checkbox
+                  class="check"
+                  [checked]="false"
+                  disabledInteractive
+                  [disabled]="offline()"
+                  (change)="check(item, $event.checked)"
+                >
                   <span class="text">{{ item.text }}</span>
                 </mat-checkbox>
                 <button
                   matIconButton
                   type="button"
                   class="edit"
+                  disabledInteractive
+                  [disabled]="offline()"
                   [attr.aria-label]="'shell.items.edit' | transloco: { text: item.text }"
                   (click)="edit(item)"
                 >
@@ -74,14 +82,27 @@
           <ul class="rows">
             @for (item of store.checked(); track item.id) {
               <li class="row" [attr.data-item-id]="item.id">
-                <mat-checkbox class="check" [checked]="true" (change)="check(item, $event.checked)">
+                <mat-checkbox
+                  class="check"
+                  [checked]="true"
+                  disabledInteractive
+                  [disabled]="offline()"
+                  (change)="check(item, $event.checked)"
+                >
                   <span class="text struck">{{ item.text }}</span>
                 </mat-checkbox>
               </li>
             }
           </ul>
           <div class="cart-actions">
-            <button matButton type="button" class="clear" (click)="clearChecked()">
+            <button
+              matButton
+              type="button"
+              class="clear"
+              disabledInteractive
+              [disabled]="offline()"
+              (click)="clearChecked()"
+            >
               <app-icon name="delete" />
               {{ 'shell.items.cart.clear' | transloco }}
             </button>

@@ -30,3 +30,7 @@ Simple, scales for the stated sizes (< 100 items, < 10 members). Query count ass
 ## Implementation note (M3)
 
 Every item write moves `lists.revision` in the same transaction (`ItemPersistenceAdapter.touchList`: add, update, delete, and clear-checked when at least one row was removed). `GET /lists/{id}/items` is one bounded statement (`LIMIT 500`); the open count of the drawer is a sub-select in the existing summary statement. The ETag/304 snapshot read follows with M5. The decision above is unchanged.
+
+## Implementation note (M5)
+
+`ListItemsUseCase` returns an `ItemsSnapshot(revision, items?)`; the query carries the revision the client holds (`If-None-Match`, one strong or weak `"<digits>"` validator, otherwise ignored). Membership and revision come from the existing single-row `findForMember` read; on a match the use case answers not-modified and never touches `ItemPort` (test: the 304 path issues exactly one statement less than the 200 path). The items are read after the revision, so the ETag is never newer than the data. The 304 answer repeats the ETag and has no body; non-members and gone lists answer the uniform 404 before any comparison, so a guessed revision tells a stranger nothing. Spring Security's `Cache-Control: no-store` stays; the client sends `If-None-Match` itself. Join, leave and share-link changes do not move the revision (they change neither list content nor items; the 30 s drawer poll shows them). The decision above is unchanged.

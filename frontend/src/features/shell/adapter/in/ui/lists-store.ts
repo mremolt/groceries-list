@@ -70,20 +70,51 @@ export const ListsStore = signalStore(
       let listsLoad: AbortController | undefined;
       let currentLoad: AbortController | undefined;
 
-      /** A new load supersedes the previous one (NG-STATE-18, TS-ARCH-21). */
-      async function reload(): Promise<void> {
+      /** The lists the person deleted or left here: the next "gone" answer for them is no news (FR-SYNC-05). */
+      const departed = new Set<string>();
+
+      /** The same list object when nothing differs, so the drawer keeps its rows (FR-SYNC-01 AC5). */
+      function reusing(old: ShoppingList | undefined, fresh: ShoppingList): ShoppingList {
+        return old?.name === fresh.name && old.openCount === fresh.openCount && old.revision === fresh.revision
+          ? old
+          : fresh;
+      }
+
+      /**
+       * A new load supersedes the previous one (NG-STATE-18, TS-ARCH-21). A background load (`refresh`) keeps what is
+       * shown when it fails: the connection banner says so, the drawer does not turn into an error (FR-FB-06).
+       */
+      async function fetchLists(background: boolean): Promise<'ok' | 'failed' | 'superseded'> {
         listsLoad?.abort();
         const control = new AbortController();
         listsLoad = control;
-        if (store.status() !== 'ready') patchState(store, { status: 'loading' });
+        if (!background && store.status() !== 'ready') patchState(store, { status: 'loading' });
         try {
-          const lists = await loadMyLists.execute(control.signal);
-          if (!control.signal.aborted) patchState(store, { lists, status: 'ready' });
+          const loaded = await loadMyLists.execute(control.signal);
+          if (control.signal.aborted) return 'superseded';
+          const known = new Map(store.lists().map((list) => [list.id, list]));
+          const lists = loaded.map((list) => reusing(known.get(list.id), list));
+          const current = store.current();
+          const open = current.status === 'found' ? lists.find((list) => list.id === current.list.id) : undefined;
+          patchState(store, {
+            lists,
+            status: 'ready',
+            // the open list follows its row: a rename by another member reaches the heading (FR-SYNC-03 AC1)
+            ...(current.status === 'found' && open && open !== current.list
+              ? { current: { status: 'found' as const, list: reusing(current.list, open) } }
+              : {}),
+          });
+          return 'ok';
         } catch (error) {
-          if (control.signal.aborted) return;
+          if (control.signal.aborted) return 'superseded';
           if (!(error instanceof TechnicalError)) throw error;
-          patchState(store, { status: 'failed' });
+          if (!(background && store.status() === 'ready')) patchState(store, { status: 'failed' });
+          return 'failed';
         }
+      }
+
+      async function reload(): Promise<void> {
+        await fetchLists(false);
       }
 
       async function command(run: () => Promise<ShoppingList | null>): Promise<ListCommandResult> {
@@ -111,6 +142,12 @@ export const ListsStore = signalStore(
 
       return {
         reload,
+
+        /** FR-SYNC-03: the drawer's numbers and names from the server, silent when it fails. */
+        refresh: (): Promise<'ok' | 'failed' | 'superseded'> => fetchLists(true),
+
+        /** True for a list this person deleted or left here; the sync shows nothing about it (FR-SYNC-05). */
+        isDeparted: (id: string): boolean => departed.has(id),
 
         /** Loads the lists once; later calls wait for nothing (the drawer shows what is there). */
         async ensureLoaded(): Promise<void> {
@@ -177,12 +214,14 @@ export const ListsStore = signalStore(
         delete: (id: string): Promise<ListCommandResult> =>
           command(async () => {
             await deleteList.execute(id);
+            departed.add(id);
             return null;
           }),
 
         leave: (id: string): Promise<ListCommandResult> =>
           command(async () => {
             await leaveList.execute(id);
+            departed.add(id);
             return null;
           }),
       };
